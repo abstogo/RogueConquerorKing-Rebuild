@@ -1,0 +1,59 @@
+{
+  "TerrainTypes": [
+    {
+      "Name": "Plains",
+      "RegionMapSymbol": ".",
+      "OverlandTravelMultiplier": 1.0,
+      "EncounterProbability": 6,
+      "EncounterTable": "Encounter_ClearGrassScrub.csv",
+      "Generator": "None",
+      "Prefabs": [
+        "o_plains2.txt"
+      ]
+    },
+    {
+      "Name": "Forest",
+      "RegionMapSymbol": "*",
+      "OverlandTravelMultiplier": 0.66,
+      "EncounterProbability": 5,
+      "EncounterTable": "Encounter_Woods.csv",
+      "Generator": "None",
+      "Prefabs": [
+        "o_forest1.txt"
+      ]
+    },
+    {
+      "Name": "Hills",
+      "RegionMapSymbol": "~",
+      "OverlandTravelMultiplier": 0.66,
+      "EncounterProbability": 5,
+      "EncounterTable": "Encounter_MountainsHills.csv",
+      "Generator": "None",
+      "Prefabs": [
+        "o_hills1.txt"
+      ]
+    },
+    {
+      "Name": "Mountain",
+      "RegionMapSymbol": "^",
+      "OverlandTravelMultiplier": 0.5,
+      "EncounterProbability": 4,
+      "EncounterTable": "Encounter_MountainsHills.csv",
+      "Generator": "None",
+      "Prefabs": [
+        "o_mountain1.txt"
+      ]
+    },
+    {
+      "Name": "Swamp",
+      "RegionMapSymbol": "S",
+      "OverlandTravelMultiplier": 0.5,
+      "EncounterProbability": 4,
+      "EncounterTable": "Encounter_Swamp.csv",
+      "Generator": "None",
+      "Prefabs": [
+        "o_plains1.txt"
+      ]
+    }
+  ]
+}

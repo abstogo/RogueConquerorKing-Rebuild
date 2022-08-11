@@ -7,7 +7,7 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 project(
-    libtcod-vcpkg-template  # Project name, change this as needed.
+    RogueConquerorKing  # Project name, change this as needed.
     LANGUAGES C CXX
 )
 
@@ -17,8 +17,16 @@ file(
     GLOB_RECURSE SOURCE_FILES
     CONFIGURE_DEPENDS  # Automatically reconfigure if source files are added/removed.
     ${PROJECT_SOURCE_DIR}/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/RCK/src/*.cpp
+    
 )
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+target_include_directories(
+  ${PROJECT_NAME}
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/RCK/include
+  ${PROJECT_SOURCE_DIR}/externals/jsoncons/include
+)
 
 # Ensure the C++17 standard is available.
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
