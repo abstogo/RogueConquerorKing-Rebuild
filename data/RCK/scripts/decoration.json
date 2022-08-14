@@ -1,0 +1,106 @@
+{
+  "Decorations": [
+    {
+      "Tag": "inlaid",
+      "Text": "It is inlaid with %s",
+      "ValueBase": 500,
+      "MaterialTypes": [
+        {
+          "Name": "gold",
+          "Chance": 2,
+          "ValueMultiplier": 1.8
+        },
+        {
+          "Name": "silver",
+          "Chance": 4,
+          "ValueMultiplier": 1.1
+        }
+      ]
+    },
+
+    {
+      "Tag": "embed",
+      "Text": "It has %s embedded within it",
+      "ValueBase": 1000,
+      "MaterialTypes": [
+        {
+          "Name": "rubies",
+          "Chance": 2,
+          "ValueMultiplier": 3.5
+        },
+        {
+          "Name": "diamonds",
+          "Chance": 1,
+          "ValueMultiplier": 10.0
+        }
+      ]
+    },
+
+    {
+      "Tag": "inscribed",
+      "Text": "It has been inscribed with %s",
+      "ValueBase": 500,
+      "MaterialTypes": [
+        {
+          "Name": "runes",
+          "Chance": 12,
+          "ValueMultiplier": 1.1
+        },
+        {
+          "Name": "abstract art",
+          "Chance": 5,
+          "ValueMultiplier": 1.2
+        },
+        {
+          "Name": "complex patterns",
+          "Chance": 5,
+          "ValueMultiplier": 1.0
+        }
+      ]
+    },
+
+    {
+      "Tag": "ornate",
+      "Text": "It is ornately crafted",
+      "ValueBase": 200,
+      "MaterialTypes": [
+      ]
+    },
+
+    {
+      "Tag": "decorated",
+      "Text": "It is decorated with %s",
+      "ValueBase": 400,
+      "MaterialTypes": [
+        {
+          "Name": "fine fittings",
+          "Chance": 2,
+          "ValueMultiplier": 1.6
+        },
+        {
+          "Name": "gold edging",
+          "Chance": 1,
+          "ValueMultiplier": 4.0
+        }
+      ]
+    },
+
+    {
+      "Tag": "painted",
+      "Text": "It is painted %s",
+      "ValueBase": 1,
+      "MaterialTypes": [
+        {
+          "Name": "red",
+          "Chance": 2,
+          "ValueMultiplier": 1.0
+        },
+        {
+          "Name": "green",
+          "Chance": 1,
+          "ValueMultiplier": 1.0
+        }
+      ]
+    }
+  ]
+}

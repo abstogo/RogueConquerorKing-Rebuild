@@ -1,0 +1,81 @@
+{
+  "CreatureTemplates": [
+    {
+      "Name": "Goblin",
+      "Visual": "g",
+      "HitDie": 1,
+      "HitDieModifier": -1,
+      "LairProbability": 0.80,
+      "ArmourClass": 3,
+      "SaveAs": "NM",
+      "Morale": -1,
+      "Movement": 60,
+      "Alignment": "Chaotic",
+      "XP": 5,
+      "Attacks": [
+        {
+          "Name": "Weapon",
+          "DamageDie": 6,
+          "DamageBonus": 0
+        }
+      ],
+      "AttackSequences": [
+        [ "Weapon" ],
+        [ "Weapon", "Weapon" ]
+      ],
+      "Abilities": [
+
+      ],
+      "Behaviours": [
+        "SeekEnemy"
+      ],
+      "EquipmentSelection": {
+        "Always": [],
+        "OneOf": [
+          [ "Sword", "Shield" ]
+        ]
+      }
+    },
+    {
+      "Name": "Mule",
+      "Visual": "m",
+      "HitDie": 2,
+      "HitDieModifier": 0,
+      "LairProbability": 0.00,
+      "ArmourClass": 2,
+      "SaveAs": "NM",
+      "Morale": 0,
+      "Movement": 120,
+      "Alignment": "Neutral",
+      "XP": 20,
+      "Attacks": [
+        {
+          "Name": "Kick",
+          "DamageDie": 4,
+          "DamageBonus": 0
+        },
+        {
+          "Name": "Bite",
+          "DamageDie": 3,
+          "DamageBonus": 0
+        }
+      ],
+      "AttackSequences": [
+        [ "Kick" ],
+        [ "Bite" ]
+      ],
+      "Abilities": [
+        "Portage",
+        "NoDungeon"
+      ],
+      "Behaviours": [
+        "Idle",
+        "Follow"
+      ],
+      "EquipmentSelection": {
+        "Always": [],
+        "OneOf": []
+      }
+    }
+  ]
+}

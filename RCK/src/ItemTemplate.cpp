@@ -9,7 +9,7 @@ ItemManager* ItemManager::LoadItemTemplates()
 
 	gLog->Log("Item Loader", "Started");
 
-	std::string itemRangeFilename = "RCK/scripts/ranges.csv";
+	auto itemRangeFilename = get_data_dir() / "RCK/scripts/ranges.csv";
 	
 	std::ifstream rs(itemRangeFilename);
 
@@ -18,7 +18,7 @@ ItemManager* ItemManager::LoadItemTemplates()
 
 	jsoncons::ojson j = jsoncons::csv::decode_csv<jsoncons::ojson>(rs, options);
 
-	gLog->Log("Item Loader", "Decoded " + itemRangeFilename);
+	gLog->Log("Item Loader", "Decoded " + itemRangeFilename.string());
 
 	std::map<std::string, std::vector<int>> rangeSet;
 
@@ -51,16 +51,16 @@ ItemManager* ItemManager::LoadItemTemplates()
 
 	rs.close();
 
-	std::string equipmentFilename = "RCK/scripts/equipment.json";
-	std::string decorationFilename = "RCK/scripts/decoration.json";
+	auto equipmentFilename = get_data_dir() / "RCK/scripts/equipment.json";
+    auto decorationFilename = get_data_dir() / "RCK/scripts/decoration.json";
 	
 	std::ifstream is(equipmentFilename);
 	std::ifstream ds(decorationFilename);
 
 	ItemManager* output = new ItemManager(jsoncons::decode_json<TemplateSet>(is), jsoncons::decode_json<DecorationSet>(ds),rangeSet,rangePenalties);
 
-	gLog->Log("Item Loader", "Decoded " + equipmentFilename);
-	gLog->Log("Item Loader", "Decoded " + decorationFilename);
+	gLog->Log("Item Loader", "Decoded " + equipmentFilename.string());
+    gLog->Log("Item Loader", "Decoded " + decorationFilename.string());
 	
 	is.close();
 	ds.close();

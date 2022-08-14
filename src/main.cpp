@@ -8,22 +8,19 @@
 #include <iostream>
 #include <libtcod.hpp>
 
+#include <vector>
+#include <list>
+#include <queue>
+#include "Maps.h"
+#include "Character.h"
+#include "Class.h"
+#include "Game.h"
+#include "OutputLog.h"
+
 #if defined(_MSC_VER)
 #pragma warning(disable : 4297)  // Allow "throw" in main().  Letting the compiler handle termination.
 #endif
 
-/// Return the data directory.
-auto get_data_dir() -> std::filesystem::path {
-  static auto root_directory = std::filesystem::path{"."};  // Begin at the working directory.
-  while (!std::filesystem::exists(root_directory / "data")) {
-    // If the current working directory is missing the data dir then it will assume it exists in any parent directory.
-    root_directory /= "..";
-    if (!std::filesystem::exists(root_directory)) {
-      throw std::runtime_error("Could not find the data directory.");
-    }
-  }
-  return root_directory / "data";
-};
 
 static tcod::Console g_console;  // The global console object.
 static tcod::ContextPtr g_context;  // The global libtcod context.
@@ -70,13 +67,28 @@ int main(int argc, char** argv) {
 
     g_context = tcod::new_context(params);
 
+    gGame = new Game();
+    
+
+//#ifdef __EMSCRIPTEN__
+//    emscripten_set_main_loop(main_loop, 0, 0);
+//#else
+//    while (true) main_loop();
+//#endif
+
+    gLog = new OutputLog();
+    gGame->StartGame();
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(main_loop, 0, 0);
+    emscripten_set_main_loop(gGame->MainLoop, 0, 0);
 #else
-    while (true) main_loop();
+    gGame->MainLoop();
 #endif
+    
+    
   } catch (const std::exception& exc) {
     std::cerr << exc.what() << "\n";
     throw;
   }
+
+  tcod::
 }

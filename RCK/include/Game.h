@@ -9,6 +9,9 @@
 #include "Party.h"
 #include "Bases.h"
 
+/// Return the data directory.
+std::filesystem::path get_data_dir();
+
 /*
  * The Game class exists to contain the various managers etc for the game and coordinate the game's functions
  *

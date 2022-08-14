@@ -1,0 +1,14 @@
+0,Catechist,1,0
+1500,Acolyte,2,0
+3000,Priest,3,0
+6000,Curate,4,0
+12000,Vicar,5,0
+24000,Rector,6,0
+50000,Prelate,7,0
+100000,Bishop,8,0
+200000,Patriarch,9,0
+300000,Patriarch,9,2
+400000,Patriarch,9,4
+500000,Patriarch,9,6
+600000,Patriarch,9,8
+700000,Theocrat,9,10

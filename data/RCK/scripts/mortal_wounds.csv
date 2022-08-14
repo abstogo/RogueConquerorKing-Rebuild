@@ -1,0 +1,8 @@
+-255,-6,Dead,0,0,GhastlyWound,MangledBones,BadWayToGo,BloodyMess,RedStain,Vultures
+-5,0,Dead,0,0,IntactCorpse,GhastlyWound,MangledBones,BadWayToGo,BloodyMess,RedStain
+1,5,Wounded,Round,28,TongueSevered,Blinded,LegsDestroyed,ArmsDestroyed,SpineDestroyed,NeckBroken
+6,10,Wounded,Turn,14,EarDestroyed,EyeDestroyed,LegDestroyed,ArmDestroyed,DoubleLamed,BrainTrauma
+11,15,Wounded,Day,7,TeethLost,EyeDamaged,KneeDamaged,HandDamaged,Lamed,HeartLungDamage
+16,20,Recover,1,7,GhostlyVisions,MinorScarring,BackDamaged,NotableScarring,DamagedGenitals,GruesomeScarring
+21,25,Recover,0,1,AfterlifeVision,GhostlyVisions,MinorScarring,LostFingers,NotableScarring,Stiffened
+26,255,Recover,0,0,Choosers,AfterlifeVision,GhostlyVisions,MinorScarring,LostToes,AchingWounds
