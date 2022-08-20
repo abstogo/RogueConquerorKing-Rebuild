@@ -21,70 +21,77 @@ CharacterManager* CharacterManager::LoadCharacteristics()
 		const Statistic& ssn = ss[i];
 		cm->StatisticLookup[ssn.name()] = i;
 	}
-	
-	// filter our tags into a map for referencing
-	std::vector<Statistic>& stats = (std::vector<Statistic>&)cm->cd.statistics();
-	for(int i=0;i<stats.size();i++)
-	{
-		const std::vector<std::string>& tags = stats[i].bonusTo();
-		for(std::vector<std::string>::const_iterator tag = tags.begin(); tag != tags.end(); tag++)
-		{
-			cm->CharacteristicTags[*tag] = i;
-		}
-	}
 
-	is.close();
+    is.close();
     
 	gLog->Log("Characteristic Loader", "Decoded " + statsFilename.string());
+
+    // default CSV filenames
+	cm->abilityBonusFilename = "RCK/scripts/ability_bonus.csv";
+	cm->abilityRequisiteFilename = "RCK/scripts/ability_prime_req.csv";
 	
-	// read the characteristic bonuses from ability_bonus.csv
-
-	auto abilityBonusFilename = get_data_dir() / "RCK/scripts/ability_bonus.csv";
-
-	std::ifstream cs(abilityBonusFilename);
-	
-	jsoncons::csv::csv_options options;
-	options.assume_header(true);
-
-	jsoncons::ojson j = jsoncons::csv::decode_csv<jsoncons::ojson>(cs, options);
-
-	cm->AbilityBonuses.resize(19);
-	
-	for (const auto& row : j.array_range())
-	{
-		int dice = row["dice"].as<int>();
-		int bonus = row["bonus"].as<int>();
-
-		cm->AbilityBonuses[dice] = bonus;
-	}
-
-	cs.close();
-
-	gLog->Log("Characteristic Loader", "Decoded " + abilityBonusFilename.string());
-
-	auto abilityRequisiteFilename = get_data_dir() / "RCK/scripts/ability_prime_req.csv";
-	
-	std::ifstream prs(abilityRequisiteFilename);
-
-	jsoncons::ojson jprs = jsoncons::csv::decode_csv<jsoncons::ojson>(prs, options);
-
-	cm->PrimeReqMultiplier.resize(19);
-
-	for(const auto& row : jprs.array_range())
-	{
-		int score = row["score"].as<int>();
-		float multiplier = row["multiplier"].as<float>();
-
-		cm->PrimeReqMultiplier[score] = multiplier;
-	}
-
-	prs.close();
-
-	gLog->Log("Characteristic Loader", "Decoded " + abilityRequisiteFilename.string());
-
 	gLog->Log("Characteristic Loader", "Completed");
 
 	return cm;
+}
+
+void CharacterManager::Initialise()
+{
+    // filter our tags into a map for referencing
+    std::vector<Statistic>& stats = (std::vector<Statistic>&)cd.statistics();
+    for (int i = 0; i < stats.size(); i++) {
+        const std::vector<std::string>& tags = stats[i].bonusTo();
+        for (std::vector<std::string>::const_iterator tag = tags.begin(); tag != tags.end(); tag++) {
+            CharacteristicTags[*tag] = i;
+        }
+    }
+
+    // load the ability bonus CSV
+
+    auto pb = get_data_dir() / abilityBonusFilename;
+
+    std::ifstream cs(pb);
+
+    jsoncons::csv::csv_options options;
+    options.assume_header(true);
+
+    jsoncons::ojson j = jsoncons::csv::decode_csv<jsoncons::ojson>(cs, options);
+
+    AbilityBonuses.resize(19);
+
+    for (const auto& row : j.array_range()) {
+        int dice = row["dice"].as<int>();
+        int bonus = row["bonus"].as<int>();
+
+        AbilityBonuses[dice] = bonus;
+    }
+
+    cs.close();
+
+    gLog->Log("Characteristic Loader", "Decoded " + abilityBonusFilename);
+
+    // load the ability requisite CSV
+
+    auto pr = get_data_dir() / abilityRequisiteFilename;
+
+    std::ifstream prs(pr);
+
+    jsoncons::ojson jprs = jsoncons::csv::decode_csv<jsoncons::ojson>(prs, options);
+
+    PrimeReqMultiplier.resize(19);
+
+    for (const auto& row : jprs.array_range()) {
+        int score = row["score"].as<int>();
+        float multiplier = row["multiplier"].as<float>();
+
+        PrimeReqMultiplier[score] = multiplier;
+    }
+
+    prs.close();
+
+    gLog->Log("Characteristic Loader", "Decoded " + abilityRequisiteFilename);
+
+    gLog->Log("Characteristic Loader", "Initialised");
 }
 
 bool CharacterManager::TurnHandler(int entityID, double time)

@@ -159,6 +159,9 @@ class CharacterManager
 	std::vector<int> AbilityBonuses;
 	std::vector<float> PrimeReqMultiplier; // the multiplier on bonus XP for prime requisites
 	std::map<std::string, int> StatisticLookup;
+
+    std::string abilityBonusFilename;
+    std::string abilityRequisiteFilename;
 	
 	/***/
 
@@ -231,6 +234,9 @@ public:
 	
 	// factory
 	static CharacterManager* LoadCharacteristics();
+
+    // base data manipulators
+    void Initialise();
 
 	// accessors
 	std::string getCharacterName(int id) { return pcName[id]; }
