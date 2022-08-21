@@ -2,6 +2,9 @@
 
 Game* gGame;
 
+tcod::Console g_console;  // The global console object.
+tcod::ContextPtr g_context;  // The global libtcod context.
+
 auto get_data_dir() -> std::filesystem::path {
     static auto root_directory = std::filesystem::path{"."};  // Begin at the working directory.
     while (!std::filesystem::exists(root_directory / "data")) {
@@ -87,6 +90,7 @@ void Game::CreateTestGame()
 {
 	DebugLog("Creating Test Game");
 
+    // Load data, including selected options
     DataLoad();
 
 	// starting character to make numbers match (0 = false, 0 = no character on map)
@@ -2072,6 +2076,27 @@ void Game::RenderOffscreenUI(bool inventory, bool character)
 
 }
 
+// return true if we're done and the menu should close
+bool Game::MenuHandler(std::string menuName, int returnCode)
+{
+    if (menuName == "MainGameMenu")
+    {
+        switch (returnCode)
+        {
+            case 0:
+                // New Game
+                StartGame();
+                return true;
+                break;
+
+            case 1:
+                // Quit
+                QuitGame();
+                return true;
+                break;
+        }
+    }   
+}
 
 void Game::DebugLog(std::string message)
 {

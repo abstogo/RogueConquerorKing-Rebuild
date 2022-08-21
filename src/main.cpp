@@ -21,10 +21,6 @@
 #pragma warning(disable : 4297)  // Allow "throw" in main().  Letting the compiler handle termination.
 #endif
 
-
-static tcod::Console g_console;  // The global console object.
-static tcod::ContextPtr g_context;  // The global libtcod context.
-
 /// Game loop.
 void main_loop() {
 	// Rendering.

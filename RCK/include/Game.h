@@ -8,9 +8,14 @@
 #include "ItemTemplate.h"
 #include "Party.h"
 #include "Bases.h"
+#include "Menus.h"
+#include <libtcod.hpp>
 
 /// Return the data directory.
 std::filesystem::path get_data_dir();
+
+extern tcod::Console g_console;  // The global console object.
+extern tcod::ContextPtr g_context;  // The global libtcod context.
 
 /*
  * The Game class exists to contain the various managers etc for the game and coordinate the game's functions
@@ -27,6 +32,7 @@ class ConditionManager;
 class MortalWoundManager;
 class PartyManager;
 class BaseManager;
+class MenuManager;
 
 enum ManagerType
 {
@@ -39,6 +45,7 @@ enum ManagerType
 	MANAGER_MORTAL,
 	MANAGER_PARTY,
 	MANAGER_BASE,
+    MANAGER_MENU,
 	MANAGER_MAX
 };
 
@@ -84,6 +91,7 @@ class Game
 	int currentBaseID;
 
 	int mode;
+    int oldMode;
 	
 	Map* currentMap;
 
@@ -201,6 +209,8 @@ public:
 	void RecalculateFOV() { recomputeFov = true; }
 
 	void CharacterDeath(int characterID); // used when another manager declares a character dead
+
+    bool MenuHandler(std::string menuName, int returnCode);
 	
 	// publicly accessible managers
 	CharacterManager* mCharacterManager;
