@@ -108,108 +108,6 @@ int Map::removeMob(int mobID)
 
 void MapManager::GeneratePrefabs()
 {
-	
-	/**
-	terrain_prefabs.resize(TERRAIN_MAX);
-
-	terrain_prefabs[TERRAIN_PLAINS] = {
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . # . . . T . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . . . . T . . . . ",
-		" . . . . . . . # . . . . . . . . T . T T . . .",
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . T . . . . . . . . . . # . . . . T . . ",
-		" . . . . . . . . . . . . . T T . . . . . . . .",
-	};
-
-	terrain_prefabs[TERRAIN_MOUNTAIN] = {
-		". . . . . . . . . . # # # . . . . . . . . . . ",
-		" . . . # . . . . . . . . # # . . . . . . . . .",
-		". . # # . . . . . # . . . . . # . . . . . . . ",
-		" . # . . . . . . # # . . . . # . . . . . # # .",
-		". . # . . . . . # # . . . . . # . . . . # # . ",
-		" . . # . . . . # # . . . . . # . . . . # # . .",
-		". . . # . . . # # . . . . . . # . . . . # . . ",
-		" . . # . . . # . . . . . . . . . . . . . . . .",
-		". . # . . # # # . . . . . . . # . . . . . . . ",
-		" . . # . . # # # . . . . . # # . . . . . . . .",
-	};
-
-	terrain_prefabs[TERRAIN_HILLS] = {
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . # # # . . . . . . . . . . . . . . . ",
-		" . . . # # T # # # . . . . . . . . . . . . . .",
-		". . . # # T T T T # # . . . . . . . . . . . . ",
-		" . . . . . . . . . . # . . . . . . . . . . . .",
-		". . . . . . . . . . # # . . . . . . . . . . . ",
-		" . . . . . . . . . . # . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-	};
-
-	terrain_prefabs[TERRAIN_FOREST] = {
-		"T T T . T T T T T T . T T . T T T T . T T . T ",
-		" . . . . T . T T T T T . . T T T T T . T T . T",
-		"T T . # # . T . T T T . . T T T T . T T T . T ",
-		" . T T T . T T T T . . T T # # T T . . . T . T",
-		"T T . T . . T . . . . T T T # T T . . . . T T ",
-		" T T T T T T T T . . . . T T T T . . . . T T T",
-		"T T T T T . T T . . . . . T T T T . . . . T . ",
-		" T T T T T T T . . . . . T . . T . . . . . T T",
-		". T T T . T T . . . . . T . . . T . . . . . T ",
-		" . T . T T T T T T . . T . . . . T . . T . . T",
-	};
-
-	/** terrain_prefabs[TERRAIN_JUNGLE] = {
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . # . . . T . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . . . . T . . . . ",
-		" . . . . . . . # . . . . . . . . T . T T . . .",
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . T . . . . . . . . . . # . . . . T . . ",
-		" . . . . . . . . . . . . . T T . . . . . . . .",
-	};
-	
-
-	terrain_prefabs[TERRAIN_JUNGLE] = terrain_prefabs[TERRAIN_FOREST];
-
-	/**terrain_prefabs[TERRAIN_SWAMP] = {
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . # . . . T . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . . . . T . . . . ",
-		" . . . . . . . # . . . . . . . . T . T T . . .",
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . T . . . . . . . . . . # . . . . T . . ",
-		" . . . . . . . . . . . . . T T . . . . . . . .",
-	};
-	
-
-	terrain_prefabs[TERRAIN_SWAMP] = terrain_prefabs[TERRAIN_PLAINS];
-
-	terrain_prefabs[TERRAIN_DESERT] = {
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . # . . . .",
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . # . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . # . .",
-	};
-	*/
-
 	for (TerrainType t : terrainTypes.TerrainTypes())
 	{
 		gLog->Log("MapManager", "Loading Prefabs for Terrain Type:" + t.Name());
@@ -241,8 +139,15 @@ void MapManager::GeneratePrefabs()
 
 MapManager::MapManager(TerrainTypeSet& tts) : terrainTypes(tts)
 {
-	//GeneratePrefabs();
 	mapStore.push_back(NULL);
+
+    // feed terrain types into dictionary
+    for (int i = 0; i < terrainTypes.TerrainTypes().size();i++)
+    {
+        TerrainType t = terrainTypes.TerrainTypes()[i];
+        terrainTypeMap[t.Name()] = i;
+    }
+    
 }
 
 MapManager::~MapManager()
@@ -464,7 +369,7 @@ void MapManager::BuildRegionMapFromText(std::vector<std::string> hmap_terrain)
 	int map_width = SAMPLE_SCREEN_WIDTH;
 	int map_height = (SAMPLE_SCREEN_HEIGHT / 2);
 
-	buildEmptyRegionMap(map_width, map_height, TERRAIN_PLAINS);
+	buildEmptyRegionMap(map_width, map_height, terrainTypeMap["Plains"]);
 
 	for (int y = 0; y < map_height; y++)
 	{
@@ -714,13 +619,12 @@ Map* MapManager::mapFromText(std::vector<std::string> hmap, bool outdoor)
 	return mapStore[index];
 }
 
-void MapManager::renderRegionMap(TCODConsole* sampleConsole, int centroid_x, int centroid_y)
+void MapManager::renderRegionMap(int centroid_x, int centroid_y)
 {
-	
 	int map_width = OUTDOOR_MAP_WIDTH;
 	int map_height = OUTDOOR_MAP_HEIGHT;
 
-	TCODColor baseColor = TCODColor::lighterGrey;
+	TCOD_ColorRGB baseColor = TCOD_light_grey;
 
 	// draw the hex map
 	for (int y = 0; y < map_height; y++)
@@ -733,63 +637,41 @@ void MapManager::renderRegionMap(TCODConsole* sampleConsole, int centroid_x, int
 			render_x += (stepped) ? 1 : 0;
 
 			int terrain = regionMap->getTerrain(x, y);
-			
-			if (terrain == TERRAIN_PLAINS)
-			{
-				//sampleConsole.setCharBackground(render_x, y, lightWall, TCOD_BKGND_SET);
-				sampleConsole->putChar(render_x, render_y, '.', TCOD_BKGND_NONE);
-			}
-			else if (terrain == TERRAIN_MOUNTAIN)
-			{
-				//sampleConsole.setCharBackground(render_x, y, lightTree, TCOD_BKGND_SET);
-				sampleConsole->putChar(render_x, render_y, '^', TCOD_BKGND_NONE);
-			}
-			else if (terrain == TERRAIN_HILLS)
-			{
-				sampleConsole->putChar(render_x, render_y, '~', TCOD_BKGND_NONE);
-			}
-			else if (terrain == TERRAIN_FOREST)
-			{
-				sampleConsole->putChar(render_x, render_y, '*', TCOD_BKGND_NONE);
-			}
-			else if (terrain == TERRAIN_JUNGLE)
-			{
-				sampleConsole->putChar(render_x, render_y, '&', TCOD_BKGND_NONE);
-			}
-			else if (terrain == TERRAIN_SWAMP)
-			{
-				sampleConsole->putChar(render_x, render_y, 's', TCOD_BKGND_NONE);
-			}
-			else if (terrain == TERRAIN_DESERT)
-			{
-				sampleConsole->putChar(render_x, render_y, '_', TCOD_BKGND_NONE);
-			}
-			else
-			{
-				//sampleConsole.setCharBackground(render_x, y, lightGround, TCOD_BKGND_SET);
-				sampleConsole->putChar(render_x, render_y, ' ', TCOD_BKGND_NONE);
-			}
+            TerrainType tt = terrainTypes.TerrainTypes()[terrain];
 
+            tcod::print(g_console, {render_x, render_y}, tt.RegionMapSymbol(), baseColor, TCOD_black,TCOD_LEFT,TCOD_BKGND_SET);
+            
 			int base = regionMap->getBase(x, y);
 
 			if(base != -1)
 			{
 				// we should only show bases if they are not also a Site (we will overwrite it)
 				// IDEA: flip between indicators if eg a Camp is in the same hex as a Dungeon
-				sampleConsole->putChar(render_x, render_y, TCOD_CHAR_RADIO_SET, TCOD_BKGND_NONE);
-			}
 
-			int site = regionMap->getSite(x, y);
+                TCOD_ConsoleTile& ref = g_console.at({render_x, render_y});
 
-			if (site == SITE_DUNGEON)
-			{
-				sampleConsole->putChar(render_x, render_y, TCOD_CHAR_DCROSS, TCOD_BKGND_NONE);
-			}
+                ref.ch = TCOD_CHAR_RADIO_SET;
+                ref.fg = baseColor;
+                ref.bg = TCOD_ColorRGBA({0, 0, 0, 0});
+            }
+            else
+            {
+                int site = regionMap->getSite(x, y);
+
+                if (site == SITE_DUNGEON)
+                {
+                    TCOD_ConsoleTile& ref = g_console.at({render_x, render_y});
+
+                    ref.ch = TCOD_CHAR_DCROSS;
+                    ref.fg = baseColor;
+                    ref.bg = TCOD_ColorRGBA({0, 0, 0, 0});
+                }
+            }
 		}
 	}
 }
 
-void MapManager::renderMap(TCODConsole* sampleConsole, int index, int centroid_x, int centroid_y)
+void MapManager::renderMap(int index, int centroid_x, int centroid_y)
 {
 	Map* map = mapStore[index];
 	bool outdoor = map->outdoor;
@@ -855,40 +737,37 @@ void MapManager::renderMap(TCODConsole* sampleConsole, int index, int centroid_x
 					int itemID = items->top();
 					std::string s = gGame->mItemManager->getVisual(itemID);
 					int c = s[0];
-					sampleConsole->putChar(render_x, render_y, c, TCOD_BKGND_NONE);
+                    g_console.at({render_x, render_y}).ch = c;
 				}
 				else
 				{
 					if (content == CONTENT_ROCKS)
 					{
-						//sampleConsole.setCharBackground(render_x, y, lightWall, TCOD_BKGND_SET);
-						sampleConsole->putChar(render_x, render_y, 'X', TCOD_BKGND_NONE);
+						g_console.at({render_x, render_y}).ch = 'X';
 					}
 					else if (content == CONTENT_TREE)
 					{
-						//sampleConsole.setCharBackground(render_x, y, lightTree, TCOD_BKGND_SET);
-						sampleConsole->putChar(render_x, render_y, TCOD_CHAR_ARROW_N, TCOD_BKGND_NONE);
+                        g_console.at({render_x, render_y}).ch = TCOD_CHAR_ARROW_N;
 					}
 					else if (content == CONTENT_WALL)
 					{
-						sampleConsole->putChar(render_x, render_y, '#', TCOD_BKGND_NONE);
+                        g_console.at({render_x, render_y}).ch = '#';
 					}
 					else if (content == CONTENT_TRANSITION_STAIRS)
 					{
-						sampleConsole->putChar(render_x, render_y, '>', TCOD_BKGND_NONE);
+                        g_console.at({render_x, render_y}).ch = '>';
 					}
 					else if (content == CONTENT_TRANSITION_DOOR)
-					{
-						sampleConsole->putChar(render_x, render_y, 'I', TCOD_BKGND_NONE);
+                    {
+                        g_console.at({render_x, render_y}).ch = 'I';
 					}
 					else if (content == CONTENT_TRANSITION_ZONE)
 					{
-						sampleConsole->putChar(render_x, render_y, '%', TCOD_BKGND_NONE);
+						g_console.at({ render_x, render_y }).ch = '%';
 					}
 					else
 					{
-						//sampleConsole.setCharBackground(render_x, y, lightGround, TCOD_BKGND_SET);
-						sampleConsole->putChar(render_x, render_y, '.', TCOD_BKGND_NONE);
+						g_console.at({ render_x, render_y }).ch = '.';
 					}
 				}
 			}
@@ -898,18 +777,19 @@ void MapManager::renderMap(TCODConsole* sampleConsole, int index, int centroid_x
 	// now render the mobs
 	for(int mob: map->mobs)
 	{
-		TCODColor baseColor = TCODColor::lighterGrey;
+		TCOD_ColorRGB baseColor = TCOD_lighter_grey;
 		Creature& c = gGame->mMobManager->GetMonster(mob);
 		std::string s = c.GetVisual();
 		int cs = s[0];
-		if (c.HasCondition("Unconscious")) baseColor = baseColor * TCODColor::grey;
+        if (c.HasCondition("Unconscious")) baseColor = TCOD_dark_grey;
+      
 
-		renderAtPosition(sampleConsole, index, centroid_x, centroid_y, gGame->mMobManager->GetMobX(mob), gGame->mMobManager->GetMobY(mob), cs, baseColor);
+		renderAtPosition(index, centroid_x, centroid_y, gGame->mMobManager->GetMobX(mob), gGame->mMobManager->GetMobY(mob), cs, baseColor);
 	}
 }
 
 
-void MapManager::renderAtPosition(TCODConsole* sampleConsole, int mapIndex, int centroid_x, int centroid_y, int x, int y, char c, TCODColor foreground)
+void MapManager::renderAtPosition(int mapIndex, int centroid_x, int centroid_y, int x, int y, char c, TCOD_ColorRGB foreground)
 {
 	bool outdoor = true;
 	int full_map_height, full_map_width;
@@ -967,7 +847,8 @@ void MapManager::renderAtPosition(TCODConsole* sampleConsole, int mapIndex, int 
 	int render_y = outdoor ? (y - screen_map_y0) * 2 : (y - screen_map_y0);
 	render_x += (outdoor && stepped) ? 1 : 0;
 
-	sampleConsole->putCharEx(render_x, render_y, c, foreground, TCODColor::black);
+	g_console.at(render_x, render_y).ch = c;
+	g_console.at(render_x, render_y).fg = foreground;
 }
 
 bool MapManager::TurnHandler(int entityID, double time)

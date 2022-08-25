@@ -27,8 +27,8 @@ void Game::StartGame() {
     // DataLoad(); // delayed until after new game is selected so we can account for game options
 
     CreateMenu();
-
-    mode = GM_MENU;
+    
+    mMenuManager->OpenMenu(mainMenuID);
 }
 
 void Game::DataLoad()
@@ -77,13 +77,10 @@ void Game::QuitGame()
 
 void Game::CreateMenu()
 {
-	menuText.push_back("Start Test Game");
-	menuFunctions.push_back(std::bind(&Game::CreateTestGame, this));
+    mainMenuID = mMenuManager->BuildMenu(MANAGER_GAME, "Rogue, Conqueror, King");
 
-	menuText.push_back("Quit");
-	menuFunctions.push_back(std::bind(&Game::QuitGame, this));
-
-	menuSelected = 0;
+    mMenuManager->AddMenuEntry(mainMenuID, MenuEntryTypes::MT_SELECT, "Start Test Game");
+    mMenuManager->AddMenuEntry(mainMenuID, MenuEntryTypes::MT_SELECT, "Quit");
 }
 
 void Game::CreateTestGame()
@@ -264,23 +261,15 @@ bool Game::MenuGameHandleKeyboard(TCOD_key_t* key)
 
 	if (key->vk == TCODK_UP)
 	{
-		menuSelected--;
-		if (menuSelected < 0)
-		{
-			menuSelected = menuText.size() - 1;
-		}
+        mMenuManager->ControlMoveUp();
 	}
 	else if (key->vk == TCODK_DOWN)
 	{
-		menuSelected++;
-		if (menuSelected == menuText.size())
-		{
-			menuSelected = 0;
-		}
+        mMenuManager->ControlMoveDown();
 	}
 	else if (key->vk == TCODK_ENTER)
 	{
-		menuFunctions[menuSelected]();
+        mMenuManager->Select();
 	}
 
 	return true;
@@ -1555,10 +1544,10 @@ void Game::MainLoop()
 
 		TCODConsole::root->clear();
 
-		if(mode == GM_MENU)
+		if(mMenuManager->MenuOpen())
 		{
 			MenuGameHandleKeyboard(&key);
-			RenderMenu();
+            mMenuManager->RenderCurrentMenu();
 		}
 		else
 		{
@@ -1601,18 +1590,11 @@ void Game::MainLoop()
 			RenderActionLog();
 		}
 
-		// blit the sample console on the root console
-		TCODConsole::blit(gGame->sampleConsole, 0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, // the source console & zone to blit
-			TCODConsole::root, SAMPLE_SCREEN_X, SAMPLE_SCREEN_Y // the destination console & position
-		);
-		// erase the renderer in debug mode (needed because the root console is not cleared each frame)
-		TCODConsole::root->print(1, 1, "        ");
-
-		TCODConsole::root->setDefaultForeground(TCODColor::lighterGrey);
-		TCODConsole::root->setDefaultBackground(TCODColor::black);
-
 		// update the game screen
-		TCODConsole::flush();
+        
+        TCODConsole::flush();
+
+        g_context->present(g_console);
 
 		// did the user hit a key ?
 		TCODSystem::checkForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE), &key, &mouse);
@@ -1651,10 +1633,7 @@ void Game::RenderMap()
 		player_x = mCharacterManager->GetPlayerX(currentCharacterID);
 		player_y = mCharacterManager->GetPlayerY(currentCharacterID);
 	}
-	sampleConsole->clear();
-
-	sampleConsole->setDefaultForeground(TCODColor::lighterGrey);
-	//sampleConsole.print(1, 0, "89UOJK : move around\nT : light walls %s\n+-: ", light_walls ? "on " : "off");
+    g_console.clear();
 
 	if (recomputeFov) {
 		// calculate the field of view from the player position
@@ -1669,8 +1648,8 @@ void Game::RenderMap()
 
 	if (currentMapID == -1)
 	{
-		mMapManager->renderRegionMap(sampleConsole,player_x,player_y);
-		mMapManager->renderAtPosition(sampleConsole, -1, player_x, player_y, player_x, player_y, '@', TCODColor::white);
+		mMapManager->renderRegionMap(player_x,player_y);
+            mMapManager->renderAtPosition(-1, player_x, player_y, player_x, player_y, '@', TCOD_white);
 	}
 	else
 	{
@@ -1981,31 +1960,6 @@ void Game::RenderCharacterSheet()
 	characterScreen->printEx(2, 10, TCOD_BKGND_NONE, TCOD_LEFT, enc.c_str());
 }
 
-void Game::RenderMenu()
-{
-	sampleConsole->clear();
-
-	sampleConsole->setDefaultForeground(TCODColor::white);
-
-	sampleConsole->printFrame(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, false, TCOD_BKGND_SET, "Rogue Conqueror King");
-
-	int start_ypos = 4;
-	int ypos = start_ypos;
-	
-	for (std::string s : menuText)
-	{
-		sampleConsole->printEx(8, ypos, TCOD_BKGND_NONE, TCOD_LEFT, s.c_str());
-		ypos++;
-	}
-
-	int select_y = start_ypos + menuSelected;
-	for (int x = 0; x < SAMPLE_SCREEN_WIDTH; x++)
-	{
-		sampleConsole->setCharBackground(x, select_y, TCODColor::white, TCOD_BKGND_SET);
-		sampleConsole->setCharForeground(x, select_y, TCODColor::black);
-	}
-}
-
 
 void Game::RenderInventory()
 {
@@ -2064,14 +2018,34 @@ void Game::RenderOffscreenUI(bool inventory, bool character)
 
 	if (character)
 	{
-		TCODConsole::blit(characterScreen, 0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT,
-			sampleConsole, x, y, 1.0f, 0.75f);
+        tcod::blit(
+                g_console,
+                *characterScreen,
+                {x, y},
+                {
+                    0,
+                    0,
+                    SAMPLE_SCREEN_WIDTH,
+                    SAMPLE_SCREEN_HEIGHT,
+                },
+                1.0f,
+                0.75f);
 	}
 
 	if (inventory)
 	{
-		TCODConsole::blit(inventoryScreen, 0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT,
-			sampleConsole, x, y, 1.0f, 0.75f);
+        tcod::blit(
+                g_console,
+                *inventoryScreen,
+                {x, y},
+                {
+                    0,
+                    0,
+                    SAMPLE_SCREEN_WIDTH,
+                    SAMPLE_SCREEN_HEIGHT,
+                },
+                1.0f,
+                0.75f);
 	}
 
 }
@@ -2079,8 +2053,9 @@ void Game::RenderOffscreenUI(bool inventory, bool character)
 // return true if we're done and the menu should close
 bool Game::MenuHandler(std::string menuName, int returnCode)
 {
-    if (menuName == "MainGameMenu")
+    if (menuName == "Rogue, Conqueror, King")
     {
+        // main menu
         switch (returnCode)
         {
             case 0:

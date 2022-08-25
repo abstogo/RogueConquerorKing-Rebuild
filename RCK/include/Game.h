@@ -106,12 +106,12 @@ class Game
 	bool light_walls;
 
 	std::string playLogString;
-
-	int menuPosition[GM_MAX];
 	
 	int inventoryPosition = 0;
 	int abilityPosition = 0;
 
+    int mainMenuID;
+    
 	// target mode data
 	int targetCursorX, targetCursorY; // target cursor for rendering purposes
 	int targetIndex;
@@ -129,10 +129,6 @@ class Game
 	int remainingCleaves = -1;
 
 	bool hostilifying = false;
-
-	std::vector<std::string> menuText;
-	std::vector<std::function<void()>> menuFunctions;
-	int menuSelected;
 	
 	void MoveCharacter(int new_x, int new_y);
 
@@ -146,7 +142,6 @@ class Game
 public:
 	Game()
 	{
-		sampleConsole = new TCODConsole(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
 	}
 
     void DataLoad();
@@ -175,8 +170,6 @@ public:
 	void RenderInventory();
 
 	void RenderTargets();
-
-	void RenderMenu();
 	
 	// We have to split the keyboard handling between hex and ortho modes.
 	// Since our players shouldn't need to shift between modes just to use menu/selector etc controls, we also separate those controls as well as moves
@@ -223,14 +216,13 @@ public:
 	MortalWoundManager* mMortalManager;
 	PartyManager* mPartyManager;
 	BaseManager* mBaseManager;
+    MenuManager* mMenuManager;
 	
-	TCODConsole* sampleConsole;
+	TCOD_Console* characterScreen = nullptr;
+	TCOD_Console* inventoryScreen = nullptr;
 
-	TCODConsole* characterScreen = nullptr;
-	TCODConsole* inventoryScreen = nullptr;
-
-	TCODConsole* characterShot = nullptr;
-	TCODConsole* inventoryShot = nullptr;
+	TCOD_Console* characterShot = nullptr;
+	TCOD_Console* inventoryShot = nullptr;
 
 	TCODRandom* randomiser = TCODRandom::getInstance();
 };
