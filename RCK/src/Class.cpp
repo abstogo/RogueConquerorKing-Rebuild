@@ -32,7 +32,7 @@ ClassManager* ClassManager::LoadClasses()
 		std::string csv_name = "RCK/scripts/" + cl->Name() + "_chart.csv";
 		std::transform(csv_name.begin(), csv_name.end(), csv_name.begin(), ::tolower);
         auto fn = get_data_dir() / csv_name;
-		std::ifstream csv(csv_name);
+		std::ifstream csv(fn);
 
 		jsoncons::csv::csv_options options;
 		options.assume_header(false);
@@ -122,8 +122,10 @@ void AdvancementStore::LoadAdvancementSets()
 	std::vector<std::vector<int>> columnValues;
 	
 	std::string csv_name = "RCK/scripts/advancement.csv";
-	std::ifstream csv(csv_name);
-
+	std::transform(csv_name.begin(), csv_name.end(), csv_name.begin(), ::tolower);
+	auto fn = get_data_dir() / csv_name;
+	std::ifstream csv(fn);
+	
 	jsoncons::csv::csv_options options;
 	options.assume_header(false); // we have a header - but we want to read it
 
@@ -178,7 +180,8 @@ void AdvancementStore::LoadAdvancementSets()
 		{
 			std::string adv_csv_name = "RCK/scripts/" + name + "_advancement.csv";
 			std::transform(adv_csv_name.begin(), adv_csv_name.end(), adv_csv_name.begin(), ::tolower);
-			std::ifstream adv_csv(adv_csv_name);
+			auto adv_fn = get_data_dir() / adv_csv_name;
+			std::ifstream adv_csv(adv_fn);
 
 			jsoncons::csv::csv_options options;
 			options.assume_header(true);

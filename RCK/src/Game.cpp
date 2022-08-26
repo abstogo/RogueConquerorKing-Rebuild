@@ -24,6 +24,8 @@ void Game::StartGame() {
 
     DebugLog("Starting Game");
 
+	mMenuManager = MenuManager::CreateMenuManager();
+
     // DataLoad(); // delayed until after new game is selected so we can account for game options
 
     CreateMenu();
@@ -1592,7 +1594,7 @@ void Game::MainLoop()
 
 		// update the game screen
         
-        TCODConsole::flush();
+        // TCODConsole::flush();
 
         g_context->present(g_console);
 
@@ -2073,7 +2075,7 @@ bool Game::MenuHandler(std::string menuName, int returnCode)
         {
             case 0:
                 // New Game
-                StartGame();
+				CreateTestGame();
                 return true;
                 break;
 

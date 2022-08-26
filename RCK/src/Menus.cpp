@@ -9,7 +9,7 @@ MenuManager* MenuManager::CreateMenuManager()
 
 int MenuManager::BuildMenu(int originManager, std::string name)
 {
-    int newID = currentMenuID++;
+    int newID = nextMenuID++;
 
     menuNames.push_back(name);
     menuManagers.push_back((ManagerType)originManager);
@@ -76,9 +76,11 @@ int MenuManager::ControlMoveDown()
 
 int MenuManager::Select()
 {
-    ManagerType pos = (ManagerType)menuPositions[currentMenuID];
+    ManagerType man = (ManagerType)menuManagers[currentMenuID];
 
-    switch(pos)
+    int pos = menuPositions[currentMenuID];
+
+    switch(man)
     {
             case MANAGER_GAME:
                 if (gGame->MenuHandler(menuNames[currentMenuID], pos))
@@ -101,6 +103,8 @@ bool MenuManager::MenuOpen()
 
 void MenuManager::RenderCurrentMenu()
 {
+    if (!MenuOpen()) return;
+
     g_console.clear();
 
     tcod::print_frame(
@@ -123,14 +127,14 @@ void MenuManager::RenderCurrentMenu()
     for (int i = 0; i < menuTexts[currentMenuID].size(); i++)
     {
         std::string s = menuTexts[currentMenuID][i];
-        TCOD_ColorRGB backg = TCOD_white;
-        TCOD_ColorRGB foreg = TCOD_black;
+        TCOD_ColorRGB backg = TCOD_black;
+        TCOD_ColorRGB foreg = TCOD_white;
         if (i == selected)
         {
-            TCOD_ColorRGB backg = TCOD_black;
-            TCOD_ColorRGB foreg = TCOD_white;
+            backg = TCOD_white;
+            foreg = TCOD_black;
         }
 
-        tcod::print(g_console, {8, ypos+i}, s, foreg, backg, TCOD_LEFT, TCOD_BKGND_NONE);
+        tcod::print(g_console, {8, ypos+i}, s, foreg, backg, TCOD_LEFT, TCOD_BKGND_SET);
     }
 }

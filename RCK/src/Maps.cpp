@@ -353,8 +353,8 @@ int MapManager::buildEmptyMap(int width, int height, int type)
 	newMap->transition.resize(width * height);
 	newMap->items.resize(width * height);
 
-	newMap->mobs.resize(width * height);
-	newMap->characters.resize(width * height);
+	//newMap->mobs.resize(width * height);
+	//newMap->characters.resize(width * height);
 	
 	newMap->map = new TCODMap(width, height);
     newMap->map->clear(true, true);
@@ -534,7 +534,7 @@ float MapManager::getWalkCost(int xFrom, int yFrom, int xTo, int yTo, void* user
 		if (mapStore[mapID]->outdoor)
 		{
 			// if the value is in the hex move map, we can move there, otherwise we can't
-			bool odd = !yFrom & 0x1;
+			bool odd = ~yFrom & 0x1;
 			bool found = false;
 			for (int i = 0; i < 6; i++)
 			{
@@ -782,7 +782,6 @@ void MapManager::renderMap(int index, int centroid_x, int centroid_y)
 		std::string s = c.GetVisual();
 		int cs = s[0];
         if (c.HasCondition("Unconscious")) baseColor = TCOD_dark_grey;
-      
 
 		renderAtPosition(index, centroid_x, centroid_y, gGame->mMobManager->GetMobX(mob), gGame->mMobManager->GetMobY(mob), cs, baseColor);
 	}
