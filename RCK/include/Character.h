@@ -203,9 +203,7 @@ class CharacterManager
 	std::vector<std::vector<std::pair<int, int>>> pcConditions;
 	std::vector<std::vector<MortalEffect*>> pcMortalWounds;
 
-	// LOADED DATA from Jsons
-
-	CharacteristicData cd;
+	
 
 	int EquipWeapon(int characterID, int itemID);
 	int EquipShield(int characterID, int itemID);
@@ -234,6 +232,10 @@ public:
 	
 	// factory
 	static CharacterManager* LoadCharacteristics();
+
+	// LOADED DATA from Jsons is kept public
+	CharacteristicData cd;
+    
 
     // base data manipulators
     void Initialise();
