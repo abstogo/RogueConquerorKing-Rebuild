@@ -1,6 +1,7 @@
 #include "Character.h"
 #include "Class.h"
 #include "Game.h"
+#include <cmath>
 
 CharacterManager* CharacterManager::LoadCharacteristics()
 {
@@ -277,10 +278,7 @@ void CharacterManager::BaseGenerate()
 	// basic capabilities
 	pcCapabilityFlags.push_back(GenerateBaseCapabilityFlags());
 
-	// empty inventory and equipment
-	std::list<int> a;
-	pcInventory.push_back(a);
-
+	// equipment slots
 	std::vector<int> e;
 	e.resize(EQUIP_MAX, -1);
 	pcEquipped.push_back(e);
@@ -343,7 +341,11 @@ int CharacterManager::GenerateNormalMan(std::string name)
 	// level 0
 	pcLevel.push_back(0);
 	
+	// Inventory
 	BaseGenerate();
+
+	int inv = gGame->mInventoryManager->RegisterInventory(MANAGER_CHARACTER, output);
+	pcInventoryID.push_back(inv);
 
 	// and build the caches
 	UpdateProficiencyCache(output);
@@ -391,6 +393,10 @@ int CharacterManager::GenerateTestCharacter(std::string name, const std::string 
 	pcCurrentHitPoints.push_back(hitDie);
 	
 	BaseGenerate();
+
+    // Inventory
+	int inv = gGame->mInventoryManager->RegisterInventory(MANAGER_CHARACTER, output);
+	pcInventoryID.push_back(inv);
 	
 	// and build the caches
 	UpdateProficiencyCache(output);
@@ -746,66 +752,64 @@ int CharacterManager::EquipWeapon(int characterID, int itemID)
 	return output;
 }
 
-int CharacterManager::GetItemIndex(int characterID, int inventoryID)
+void CharacterManager::UnequipSlot(int characterID, int slotID)
 {
-	if (pcInventory[characterID].size() == 0)
-		return -1;
-
-	std::list<int>& inv = pcInventory[characterID];
-
-	std::list<int>::iterator inv_it = inv.begin();
-	std::advance(inv_it, inventoryID);
-
-	return *inv_it;
-
+	int itemID = pcEquipped[characterID][slotID];
+	pcEquipped[characterID][slotID] = -1;
+	std::string item_name = gGame->mItemManager->getName(itemID);
+	DebugLog(getCharacterName(characterID) + " unequips " + item_name);
 }
 
 void CharacterManager::UnequipItem(int characterID, int inventoryID)
 {
-	int itemID = GetItemIndex(characterID, inventoryID);
+	int itemID = gGame->mInventoryManager->GetInventory(GetInventory(characterID))[inventoryID].first;
 
 	for(int i=0;i<pcEquipped[characterID].size();i++)
 	{
 		if(itemID == pcEquipped[characterID][i])
 		{
-			pcEquipped[characterID][i] = -1;
+			UnequipSlot(characterID, i);
 		}
 	}
-	std::string item_name = gGame->mItemManager->getName(itemID);
-	DebugLog(getCharacterName(characterID) + " unequips " + item_name);
 }
 
 int CharacterManager::EquipItem(int characterID, int inventoryID)
 {
-	if (pcInventory[characterID].size() == 0)
-		return -1;
+	auto inv = gGame->mInventoryManager->GetInventory(pcInventoryID[characterID]);
 	
-	std::list<int>& inv = pcInventory[characterID];
+	if (inv.size() == 0)
+		return -1;
 
-	std::list<int>::iterator inv_it = inv.begin();
+	auto inv_it = inv.begin();
 	std::advance(inv_it, inventoryID);
 
-	int itemID = *inv_it;
+	int itemID = (*inv_it).first;
 
 	int output = -1;
 
+	// Equip the item into a relevant slot.
 	if (CanUseItem(characterID, itemID))
 	{
 		if (gGame->mItemManager->hasTag(itemID, "Weapon"))
 		{
+			// If the item is a weapon, it will be equipped into a relevant hand slot and the attack value updated accordingly
 			output = EquipWeapon(characterID, itemID);
 			UpdateCurrentAttackValue(characterID, gGame->mItemManager->hasTag(itemID, "Missile"));
 		}
 
 		if (gGame->mItemManager->hasTag(itemID, "Shield"))
 		{
+			// If the item is a shield, it will be put into an offhand slot and the AC updated
 			output = EquipShield(characterID, itemID);
 		}
 
 		if (gGame->mItemManager->hasTag(itemID, "Armour"))
 		{
+            // If the item is armour, it will be put into the Armour slot and the AC updated
 			output = EquipArmour(characterID, itemID);
 		}
+
+		// TODO: Other slots (HELM, BOOTS, BRACERS, AMULET, RING1, RING2
 	}
 	return output;
 }
@@ -868,27 +872,14 @@ bool CharacterManager::CanUseItem(int characterID, int itemID)
 }
 
 
-int CharacterManager::AddInventoryItem(int characterID, int itemID)
+int CharacterManager::AddInventoryItem(int characterID, int itemID, int count)
 {
-	int newIndex = pcInventory[characterID].size();
-	pcInventory[characterID].push_back(itemID);
-	return newIndex;
+	return gGame->mInventoryManager->AddItemToInventory(pcInventoryID[characterID], itemID, count);
 }
 
-int CharacterManager::RemoveInventoryItem(int characterID, int inventoryID)
+void CharacterManager::RemoveInventoryItem(int characterID, int itemID, int count)
 {
-	auto list = pcInventory[characterID];
-
-	if (list.size() == 0)
-		return -1;
-	auto iter = list.begin();
-	std::advance(iter, inventoryID);
-
-	int output = *iter;
-
-	list.erase(iter);
-	
-	return output;
+	gGame->mInventoryManager->RemoveItemFromInventory(pcInventoryID[characterID], itemID, count);
 }
 
 void CharacterManager::UpdateTagCache(int characterID)
@@ -1008,8 +999,24 @@ int CharacterManager::UpdateCurrentSaveValue(int characterID, std::string save)
 
 double CharacterManager::GetCurrentEncumbrance(int characterID)
 {
-	auto inv = GetInventory(characterID);
-	return gGame->mItemManager->getWeight(inv);
+    // weights are expressed as fractions. Because we'll get irritating inaccuracies if we use decimal representations.
+    // (Why? Because Alex decided to have an "item" weigh 1/6th of a stone, not something cleanly divisible ;)
+	int inv = GetInventory(characterID);
+
+	double totalWeight = 0.0;
+    
+	for (auto p : gGame->mInventoryManager->GetInventory(inv))
+	{
+		int itemID = p.first;
+		int itemCount = p.second;
+        
+        // all the items with the same ID have the same template and therefore the same weight fractions
+
+		int totalNum = gGame->mItemManager->getWeightNum(itemID) * itemCount;
+		totalWeight += (double)totalNum / (double)gGame->mItemManager->getWeightDen(itemID);
+	}
+    
+	return totalWeight;
 }
 
 int CharacterManager::GetCurrentSpeed(int characterID)
@@ -1141,9 +1148,11 @@ int CharacterManager::GetCurrentAC(int characterID)
 
 int CharacterManager::GetEquipSlotForInventoryItem(int characterID, int inventoryID)
 {
-	auto p = pcInventory[characterID].begin();
+	auto p = gGame->mInventoryManager->GetInventory(pcInventoryID[characterID]).begin();
+
 	std::advance(p, inventoryID);
-	int itemID = *p;
+	int itemID = (*p).first;
+    
 	for (int j = 0; j < EQUIP_MAX; j++)
 	{
 		if (GetItemInEquipSlot(characterID, j) == itemID)

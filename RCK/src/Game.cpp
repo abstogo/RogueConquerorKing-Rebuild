@@ -39,7 +39,8 @@ void Game::DataLoad()
 
     // The core data files, stored in data/RCK/scripts are loaded here.
     // Each primary manager is spawned from one or more core data files.
-
+    
+	mInventoryManager = InventoryManager::CreateInventoryManager();
 	mCharacterManager = CharacterManager::LoadCharacteristics();
 	mClassManager = ClassManager::LoadClasses();
 	mMapManager = MapManager::LoadMaps();
@@ -563,6 +564,9 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 		
 		case GM_INVENTORY:
 		{
+            // operate whatever inventory menu is currently open
+            
+			/**
 			if (key->vk == TCODK_UP)
 			{
 				inventoryPosition--;
@@ -591,6 +595,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 					mCharacterManager->EquipItem(currentCharacterID, inventoryPosition);
 				}
 			}
+            */
 		}
 		break;
 
