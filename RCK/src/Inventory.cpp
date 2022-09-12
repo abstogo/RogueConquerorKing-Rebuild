@@ -208,18 +208,27 @@ int InventoryManager::Select()
     return 0;
 }
 
-std::string InventoryManager::ItemToText(int inventoryID, int itemID)
+std::string InventoryManager::InvToText(int inventoryID, int slot)
+{
+    std::string output;
+    
+    int itemID = itemIDs[inventoryID][slot];
+    int count = itemCounts[inventoryID][slot];
+    
+    return ItemToText(itemID, count);
+}
+
+std::string InventoryManager::ItemToText(int itemID, int count)
 {
     std::string output;
 
     std::string itemName = gGame->mItemManager->getName(itemID);
-
-    int index = std::find(itemIDs[inventoryID].begin(), itemIDs[inventoryID].end(), itemID) - itemIDs[inventoryID].begin();
-    int count = itemCounts[inventoryID][index];
-
-    if(count>1)
-        output = std::to_string(count) + "x " + itemName;
     
+    if (count > 1)
+        output = std::to_string(count) + "x ";
+    
+    output = output + itemName;
+
     return output;
 }
 
@@ -281,7 +290,7 @@ void InventoryManager::RenderInventory()
                 selected = sourceMenuPosition;
             }
 
-            std::string s = ItemToText(sourceMenuInventoryID,itemIDs[sourceMenuInventoryID][i]);
+            std::string s = InvToText(sourceMenuInventoryID,i);
             TCOD_ColorRGB backg = TCOD_black;
             TCOD_ColorRGB foreg = TCOD_white;
             if (i == selected)
@@ -304,7 +313,7 @@ void InventoryManager::RenderInventory()
                 selected = targetMenuPosition;
             }
 
-            std::string s = ItemToText(targetMenuInventoryID, itemIDs[targetMenuInventoryID][i]);
+            std::string s = InvToText(targetMenuInventoryID, i);
             TCOD_ColorRGB backg = TCOD_black;
             TCOD_ColorRGB foreg = TCOD_white;
             if (i == selected)
