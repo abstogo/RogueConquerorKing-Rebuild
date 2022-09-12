@@ -762,7 +762,8 @@ void CharacterManager::UnequipSlot(int characterID, int slotID)
 
 void CharacterManager::UnequipItem(int characterID, int inventoryID)
 {
-	int itemID = gGame->mInventoryManager->GetInventory(GetInventory(characterID))[inventoryID].first;
+	auto n = gGame->mInventoryManager->GetInventory(GetInventory(characterID));
+	int itemID = n.at(inventoryID).first;
 
 	for(int i=0;i<pcEquipped[characterID].size();i++)
 	{
@@ -1005,6 +1006,8 @@ double CharacterManager::GetCurrentEncumbrance(int characterID)
 
 	double totalWeight = 0.0;
     
+    
+    
 	for (auto p : gGame->mInventoryManager->GetInventory(inv))
 	{
 		int itemID = p.first;
@@ -1148,8 +1151,10 @@ int CharacterManager::GetCurrentAC(int characterID)
 
 int CharacterManager::GetEquipSlotForInventoryItem(int characterID, int inventoryID)
 {
-	auto p = gGame->mInventoryManager->GetInventory(pcInventoryID[characterID]).begin();
+	std::vector<std::pair<int, int>> inventory = gGame->mInventoryManager->GetInventory(pcInventoryID[characterID]);
 
+	auto p = inventory.begin();
+    
 	std::advance(p, inventoryID);
 	int itemID = (*p).first;
     
