@@ -48,13 +48,13 @@ std::vector<std::pair<int, int>> InventoryManager::RemoveItemFromInventory(int i
     std::vector<std::pair<int, int>> removedItems;
 
     auto vec = itemEntries[inventoryID];
-    auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.second == itemID; });
+    auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.first == itemID; });
 
     if (loc != vec.end())
     {
         // we already have this item, so decrease the count
         int index = loc - vec.begin();
-        if (itemEntries[inventoryID][index].second >= count)
+        if (itemEntries[inventoryID][index].second > count)
         {
             itemEntries[inventoryID][index].second -= count;
             removedItems.push_back(std::make_pair(itemID, count));
@@ -62,7 +62,7 @@ std::vector<std::pair<int, int>> InventoryManager::RemoveItemFromInventory(int i
         else
         {
             // we no longer have any of these items
-            removedItems.push_back(std::make_pair(itemID, count - itemEntries[inventoryID][index].second));
+            removedItems.push_back(std::make_pair(itemID, itemEntries[inventoryID][index].second));
             // delete item from all vectors
             itemEntries[inventoryID].erase(itemEntries[inventoryID].begin() + index);
         }
@@ -234,15 +234,19 @@ int InventoryManager::SelectPrimary()
         // we're in the inventory exchange screen, so transfer the selected stack of items
         if (sourcePane)
         {
-            auto item = RemoveItemFromInventory(sourceMenuInventoryID, sourceMenuPosition, itemEntries[sourceMenuInventoryID][sourceMenuPosition].second);
-            AddItemToInventory(targetMenuInventoryID, item[0].first, item[0].second);
+            int itemID = itemEntries[sourceMenuInventoryID][sourceMenuPosition].first;
+            int count = itemEntries[sourceMenuInventoryID][sourceMenuPosition].second;
+            auto items = RemoveItemFromInventory(sourceMenuInventoryID, itemID, count);
 
+            AddItemToInventory(targetMenuInventoryID, items[0].first, items[0].second);
         }
         else
         {
-            auto item = RemoveItemFromInventory(targetMenuInventoryID, targetMenuPosition, itemEntries[targetMenuInventoryID][targetMenuPosition].second);
-            AddItemToInventory(sourceMenuInventoryID, item[0].first, item[0].second);
-
+            int itemID = itemEntries[targetMenuInventoryID][targetMenuPosition].first;
+            int count = itemEntries[targetMenuInventoryID][targetMenuPosition].second;
+            auto items = RemoveItemFromInventory(targetMenuInventoryID, itemID, count);
+            
+            AddItemToInventory(sourceMenuInventoryID, items[0].first, items[0].second);
         }
     }
     
@@ -263,7 +267,22 @@ int InventoryManager::SelectSecondary()
 
         if (ownerManagers[sourceMenuInventoryID] == MANAGER_CHARACTER)
         {
-            // output = gGame->mCharacterManager->EquipItem(ownerEntities[sourceMenuInventoryID], sourceMenuPosition);
+            // this only works on the local maps
+            int mapID = gGame->mCharacterManager->GetPlayerMap(ownerEntities[sourceMenuInventoryID]);
+            if (mapID != -1)
+            {
+                int x = gGame->mCharacterManager->GetPlayerX(ownerEntities[sourceMenuInventoryID]);
+                int y = gGame->mCharacterManager->GetPlayerY(ownerEntities[sourceMenuInventoryID]);
+                Map* map = gGame->mMapManager->getMap(mapID);
+                int itemID = itemEntries[sourceMenuInventoryID][sourceMenuPosition].first;
+                int count = itemEntries[sourceMenuInventoryID][sourceMenuPosition].second;
+                auto items = RemoveItemFromInventory(sourceMenuInventoryID, itemID, count);
+                for(std::pair<int,int> g : items)
+                {
+                    for (int i = 0; i < g.second; i++)
+                        map->addItem(x, y, g.first);
+                }
+            }
         }
     }
     else
