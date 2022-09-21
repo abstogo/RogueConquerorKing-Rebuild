@@ -587,7 +587,11 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 			}
 			else if (key->vk == TCODK_ENTER)
 			{
-				gGame->mInventoryManager->Select();
+				gGame->mInventoryManager->SelectPrimary();
+			}
+			else if (key->vk == TCODK_SPACE)
+			{
+				gGame->mInventoryManager->SelectSecondary();
 			}
 		}
 		break;
