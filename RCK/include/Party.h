@@ -35,7 +35,6 @@ class PartyManager
 	// Instead, animals and "porter" henches are subsumed into a Party Inventory and items can be switched between that and the player inventories.
 	// When the party enters a Settlement, items are sold directly from the Party Inventory.
 
-	// std::vector<std::vector<std::pair<int, int>>> partyInventory; // inventory is set up as pairs of IDs and counts (eg we have 25 flasks of military oil)
 	std::vector<int> partyInventoryIDs;
 	
 	std::vector<int> totalCarryCapacity; // in stone. Total of all porters and animals (which includes carts etc). We assume the non-porter Henches and the PCs do not carry items between dungeons.
