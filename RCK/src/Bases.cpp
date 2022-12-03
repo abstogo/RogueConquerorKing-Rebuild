@@ -123,6 +123,21 @@ int BaseManager::getVisitingCharacterCount(int partyID)
 	return size;
 }
 
+int BaseManager::getBasePartyInventoryCount(int baseID)
+{
+	int basePartyInvID = GetInventoryID(baseID);
+	auto partyInv = gGame->mInventoryManager->GetInventory(basePartyInvID);
+
+	return partyInv.size();
+}
+
+int BaseManager::getVisitingInventoryCount(int partyID)
+{
+	int visitingPartyInvID = gGame->mPartyManager->GetInventoryID(gGame->GetSelectedPartyID());
+	auto visitorInv = gGame->mInventoryManager->GetInventory(visitingPartyInvID);
+
+	return visitorInv.size();
+}
 
 void BaseManager::RemoveCharacter(int entityID, int baseID)
 {
@@ -319,7 +334,6 @@ bool BaseManager::ControlCommand(TCOD_key_t* key,int baseID)
 	}
 	else
 	{
-
 		if (key->vk == TCODK_LEFT || key->vk == TCODK_RIGHT)
 		{
 			// switch between "base party" and virtual "out party"
@@ -337,7 +351,7 @@ bool BaseManager::ControlCommand(TCOD_key_t* key,int baseID)
 				if (controlPane == PANE_PARTY_CHARACTERS)
 				{
 					int baseCount = getBasePartyCharacterCount(baseID);
-					if(baseCount > 0)
+					if (baseCount > 0)
 					{
 						controlPane = PANE_BASE_CHARACTERS;
 						if (menuPosition > baseCount - 1) menuPosition = baseCount - 1;
@@ -345,18 +359,43 @@ bool BaseManager::ControlCommand(TCOD_key_t* key,int baseID)
 				}
 			}
 
-			// switch between "base store" and party inventory
-			/**
 			if (controlPane == PANE_PARTY_INVENTORY)
 			{
-				controlPane = PANE_BASE_INVENTORY;
-			}
-			else
+					controlPane = PANE_BASE_INVENTORY;
+                    if (menuPosition > getBasePartyInventoryCount(baseID) - 1) menuPosition = getBasePartyInventoryCount(baseID) - 1;
+				
+			} 
+			else if (controlPane == PANE_BASE_INVENTORY)
 			{
-				if (controlPane == PANE_BASE_INVENTORY) controlPane = PANE_PARTY_INVENTORY;
+				controlPane = PANE_PARTY_INVENTORY;
+				if (menuPosition > getVisitingInventoryCount(baseID) - 1) menuPosition = getVisitingInventoryCount(baseID) - 1;
 			}
-			*/
+		}
 
+		if (key->vk == TCODK_TAB)
+		{
+            // switch between characters and inventory
+			
+			if (controlPane == PANE_PARTY_CHARACTERS)
+			{
+				controlPane = PANE_PARTY_INVENTORY;
+				menuPosition = 0;
+			} 
+			else if (controlPane == PANE_PARTY_INVENTORY)
+            {
+                controlPane = PANE_PARTY_CHARACTERS;
+                menuPosition = 0;
+            }
+            else if (controlPane == PANE_BASE_CHARACTERS)
+            {
+                controlPane = PANE_BASE_INVENTORY;
+                menuPosition = 0;
+            }
+            else if (controlPane == PANE_BASE_INVENTORY)
+            {
+                controlPane = PANE_BASE_CHARACTERS;
+                menuPosition = 0;
+            }
 		}
 
 		if (key->vk == TCODK_UP)
@@ -667,7 +706,9 @@ void BaseManager::RenderBaseMenu(int baseID)
 
 					std::vector<BaseTag> bt_list = GetCharacterActionList(baseID, charID);
 
-                    /*
+					TCOD_ColorRGB backg_col = TCOD_black;
+					TCOD_ColorRGB foreg_col = TCOD_white;
+                    
 					for (int i = 0; i < bt_list.size(); i++)
 					{
 						BaseTag t = bt_list[i];
@@ -675,10 +716,12 @@ void BaseManager::RenderBaseMenu(int baseID)
 						std::string outp = std::to_string(i + 1) + " : " + t.MenuText();
 						if (t.Indicator() != "")
 							outp += " (" + t.Indicator() + ")";
-						TCOD_bkgnd_flag_t backg = TCOD_BKGND_NONE;
-						gGame->sampleConsole->printEx(3, y, backg, TCOD_LEFT, outp.c_str());
+						
+						tcod::print(g_console, { 3, y }, outp, foreg_col, backg_col);
+						// TCOD_bkgnd_flag_t backg = TCOD_BKGND_NONE;
+						// gGame->sampleConsole->printEx(3, y, backg, TCOD_LEFT, outp.c_str());
 					}
-                    */
+                    
 
 					// UI for selected character
 
@@ -701,6 +744,60 @@ void BaseManager::RenderBaseMenu(int baseID)
 				// Top Left: Party Inventory
 				// Top Right: Base Inventory
 				// Bottom: Purchasable Items
+
+				int visitingPartyInvID = gGame->mPartyManager->GetInventoryID(gGame->GetSelectedPartyID());
+				int basePartyInvID = GetInventoryID(baseID);
+
+				auto& visitorInv = gGame->mInventoryManager->GetInventory(visitingPartyInvID);
+				auto& partyInv = gGame->mInventoryManager->GetInventory(basePartyInvID);
+
+				// add overall frame with title
+				tcod::print_frame(
+					g_console,
+					{ 0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT },
+					"Inventory Control",
+					& TCOD_white,
+					& TCOD_black,
+					TCOD_BKGND_SET,
+					false);
+
+                // base inventory
+                for (int i=0;i<partyInv.size();i++)
+                {
+					auto n = partyInv[i];
+                    std::string name = gGame->mItemManager->getName(n.first);
+                    std::string count = std::to_string(n.second);
+                    std::string itemLine = count + " x " + name;
+                    
+					TCOD_ColorRGB backg_col = TCOD_black;
+					TCOD_ColorRGB foreg_col = TCOD_white;
+                    if (menuPosition == i && controlPane == PANE_BASE_INVENTORY)
+                    {
+                        backg_col = TCOD_white;
+                        foreg_col = TCOD_black;
+                    }
+					
+					tcod::print(g_console, { 2, 2+i }, itemLine, foreg_col, backg_col);
+                }
+
+                // visitor inventory
+				for (int i = 0; i < visitorInv.size(); i++)
+				{
+					auto n = visitorInv[i];
+					std::string name = gGame->mItemManager->getName(n.first);
+					std::string count = std::to_string(n.second);
+					std::string itemLine = count + " x " + name;
+
+                    TCOD_ColorRGB backg_col = TCOD_black;
+                    TCOD_ColorRGB foreg_col = TCOD_white;
+                    if (menuPosition == i && controlPane == PANE_PARTY_INVENTORY)
+                    {
+                        backg_col = TCOD_white;
+                        foreg_col = TCOD_black;
+                    }
+                    
+                    tcod::print(g_console, { 2 + SAMPLE_SCREEN_WIDTH / 2, 2 + i }, itemLine, foreg_col, backg_col);
+				}
 			}
 		}
 	}
