@@ -170,6 +170,9 @@ void Game::CreateTestGame()
 	int newItemID = mCharacterManager->AddInventoryItem(currentCharacterID, bowItem);
 	//mCharacterManager->EquipItem(currentCharacterID, newItemID);
 
+    int treasureItem = mItemManager->GenerateItemFromTemplate("Fur Pelt");
+    int treasureItemID = mCharacterManager->AddInventoryItem(currentCharacterID, treasureItem,1);
+
 	// drop some items in test map
 	mMapManager->AddItem(outdoorMapID, 2, 2, "Chainmail");
 	mMapManager->AddItem(outdoorMapID, 2, 3, "Shield");
@@ -304,11 +307,19 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 	// Currently these are Inventory, Character, Ability and Spells
 	if(key->c == 'v')
 	{
-		if (mode != GM_INVENTORY)
+        if (mode != GM_INVENTORY)
 		{
 			mode = GM_INVENTORY;
-            // we're in the single-character mode so open inv for that character
-			gGame->mInventoryManager->OpenInventoryMenu(mCharacterManager->GetInventory(currentCharacterID));
+			if (currentMapID == -1)
+			{
+				// we're in the overworld, so we open the party inventory interface
+				gGame->mInventoryManager->OpenInventoryMenu(mPartyManager->GetInventoryID(currentPartyID), mCharacterManager->GetInventory(currentCharacterID),"Inventory");
+			}
+			else
+			{
+				// we're in the local map or dungeon, so open the inventory interface for the currently selected character
+				gGame->mInventoryManager->OpenInventoryMenu(mCharacterManager->GetInventory(currentCharacterID), -1, "Inventory");
+			}
 		}
 		else
 		{
@@ -386,7 +397,6 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 	{
 		case GM_MAIN:
 		{
-
 			if (currentMapID == -1)
 			{
 				// '>' is 'go in'. I use only one button to go up/down etc. The other button is used for region transition

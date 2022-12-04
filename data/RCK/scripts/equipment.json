@@ -199,6 +199,40 @@
       "Value": 1000,
       "WeightNum": 1,
       "WeightDen": 1
+    },
+
+    {
+      "Name": "Fur Pelt",
+      "Visual": "£",
+      "EquipmentTags": ["Treasure"],
+      "MaterialTypes": [
+        {
+          "Name": "Ermine",
+          "Chance": 1.0,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        },
+        {
+          "Name": "Mink",
+          "Chance": 1.0,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        },
+        {
+          "Name": "Sable",
+          "Chance": 1.0,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        }
+      ],
+      "DecorationTypes": [
+      ],
+      "Value": 50000,
+      "WeightNum": 5,
+      "WeightDen": 1
     }
   ]
 }

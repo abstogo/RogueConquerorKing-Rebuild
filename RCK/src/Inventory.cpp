@@ -112,11 +112,13 @@ std::vector<std::pair<int, int>>& InventoryManager::GetInventory(int inventoryID
 }
 
 
-void InventoryManager::OpenInventoryMenu(int sourceID, int destinationID)
+void InventoryManager::OpenInventoryMenu(int sourceID, int destinationID, std::string title)
 {
     // if there is no destination, we pressed the inventory key, 
     // otherwise we're doing inventory transfer
 
+    menuTitle = title;
+    
     sourceMenuInventoryID = sourceID;
     targetMenuInventoryID = destinationID;
     
@@ -318,6 +320,39 @@ std::string InventoryManager::ItemToText(int itemID, int count)
     return output;
 }
 
+std::string InventoryManager::GetInventoryEntityName(int inventoryID)
+{
+    std::string output;
+
+    if (ownerManagers[inventoryID] == MANAGER_CHARACTER)
+    {
+        output = gGame->mCharacterManager->getCharacterName(ownerEntities[inventoryID]);
+    }
+    else if (ownerManagers[inventoryID] == MANAGER_MAP)
+    {
+        // "map" inventories are for containers (including piles of items on the ground)
+        // output = gGame->mMapManager->getMapName(ownerEntities[inventoryID]);
+    }
+    else if (ownerManagers[inventoryID] == MANAGER_MOB)
+    {
+        output = gGame->mMobManager->GetMonster(ownerEntities[inventoryID]).GetName();
+    }
+    else if (ownerManagers[inventoryID] == MANAGER_ITEM)
+    {
+        output = gGame->mItemManager->getName(ownerEntities[inventoryID]);
+    }
+    else if (ownerManagers[inventoryID] == MANAGER_PARTY)
+    {
+        output = "Party";
+    }
+    else if (ownerManagers[inventoryID] == MANAGER_BASE)
+    {
+        output = gGame->mBaseManager->GetBaseType(ownerEntities[inventoryID]);
+    }
+
+    return output;
+}
+
 void InventoryManager::RenderInventory()
 {
     g_console.clear();
@@ -328,35 +363,59 @@ void InventoryManager::RenderInventory()
         tcod::print_frame(
             g_console,
             {
-                0, 0, SAMPLE_SCREEN_WIDTH / 2, SAMPLE_SCREEN_HEIGHT
+                0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT
             },
-            "",
+            menuTitle,
+            &TCOD_white,
+            &TCOD_black,
+            TCOD_BKGND_SET,
+            true);
+        
+        tcod::print_frame(
+            g_console,
+            {
+                0, 1, SAMPLE_SCREEN_WIDTH / 2, SAMPLE_SCREEN_HEIGHT
+            },
+            GetInventoryEntityName(sourceMenuInventoryID),
             &TCOD_white,
             &TCOD_black,
             TCOD_BKGND_SET,
             true);
 
-        
         tcod::print_frame(
             g_console,
             {
-                0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT
+                SAMPLE_SCREEN_WIDTH / 2, 1, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT
             },
-            "Inventory",
+            GetInventoryEntityName(targetMenuInventoryID),
             &TCOD_white,
             &TCOD_black,
             TCOD_BKGND_SET,
             true);
+        
     }
     else
     {
+        
+
         // single window setup
         tcod::print_frame(
             g_console,
             {
                 0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT
             },
-            "Inventory",
+            menuTitle,
+            &TCOD_white,
+            &TCOD_black,
+            TCOD_BKGND_SET,
+            true);
+        
+        tcod::print_frame(
+            g_console,
+            {
+                0, 1, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT
+            },
+            GetInventoryEntityName(sourceMenuInventoryID),
             &TCOD_white,
             &TCOD_black,
             TCOD_BKGND_SET,
