@@ -141,6 +141,8 @@ class Game
 
 	void SpawnLevel(int mapID, int spawnPointX, int spawnPointY);
 	void QuitGame();
+
+	void GoToRegionMap();
 	
 public:
 	Game()

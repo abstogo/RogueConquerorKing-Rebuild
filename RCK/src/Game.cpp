@@ -548,10 +548,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 
 						// TODO: Check for active enemies, don't allow zooming out if there are any (thank you Skyrim)
 
-						currentMapID = -1;
-						currentMap = NULL;
-						mTimeManager->DeregisterEntities();
-						AddActionLogText("", true); // clear the action log
+						GoToRegionMap();
 					}
 
 					return true;
@@ -752,6 +749,35 @@ void Game::TriggerTargeting(int targetingMode, int returnManager, int returnCode
 		targetCursorY = mCharacterManager->GetPlayerY(currentCharacterID);
 	}
 	
+}
+
+void Game::GoToRegionMap()
+{
+    // shift to "no map"
+	currentMapID = -1;
+	currentMap = NULL;
+    
+	// deregister all entities from the time manager to avoid ticking local entities
+	mTimeManager->DeregisterEntities();
+
+	// clear the action log
+	AddActionLogText("", true);
+    
+    // move all "Treasure" tagged items from character inventories into the party inventory
+	int partyInventoryID = gGame->mPartyManager->GetInventoryID(currentPartyID);
+	for (auto& pc : gGame->mPartyManager->getPlayerCharacters(currentPartyID))
+	{
+        int pcInventoryID = gGame->mCharacterManager->GetInventory(pc);
+        for (auto& item : gGame->mInventoryManager->GetInventory(pc))
+        {
+			auto& tags = gGame->mItemManager->getTags(item.first);
+            if (std::find(tags.begin(), tags.end(), "Treasure") != tags.end())
+            {
+                gGame->mInventoryManager->RemoveItemFromInventory(pcInventoryID, item.first, item.second);
+                gGame->mInventoryManager->AddItemToInventory(partyInventoryID, item.first, item.second);
+            }
+        }      
+	}
 }
 
 
