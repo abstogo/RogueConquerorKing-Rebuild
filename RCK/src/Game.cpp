@@ -768,7 +768,7 @@ void Game::GoToRegionMap()
 	for (auto& pc : gGame->mPartyManager->getPlayerCharacters(currentPartyID))
 	{
         int pcInventoryID = gGame->mCharacterManager->GetInventory(pc);
-        for (auto& item : gGame->mInventoryManager->GetInventory(pc))
+        for (auto& item : gGame->mInventoryManager->GetInventory(pcInventoryID))
         {
 			auto& tags = gGame->mItemManager->getTags(item.first);
             if (std::find(tags.begin(), tags.end(), "Treasure") != tags.end())
