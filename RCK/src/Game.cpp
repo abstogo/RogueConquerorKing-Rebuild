@@ -763,15 +763,14 @@ void Game::GoToRegionMap()
 	// clear the action log
 	AddActionLogText("", true);
     
-    // move all "Treasure" tagged items from character inventories into the party inventory
+    // move all "Goods" tagged items from character inventories into the party inventory
 	int partyInventoryID = gGame->mPartyManager->GetInventoryID(currentPartyID);
 	for (auto& pc : gGame->mPartyManager->getPlayerCharacters(currentPartyID))
 	{
         int pcInventoryID = gGame->mCharacterManager->GetInventory(pc);
         for (auto& item : gGame->mInventoryManager->GetInventory(pcInventoryID))
         {
-			auto& tags = gGame->mItemManager->getTags(item.first);
-            if (std::find(tags.begin(), tags.end(), "Treasure") != tags.end())
+            if (gGame->mItemManager->hasTag(item.first, "Goods"))
             {
                 gGame->mInventoryManager->RemoveItemFromInventory(pcInventoryID, item.first, item.second);
                 gGame->mInventoryManager->AddItemToInventory(partyInventoryID, item.first, item.second);
