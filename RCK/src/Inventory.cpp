@@ -215,11 +215,18 @@ int InventoryManager::SelectPrimary()
 
     if(targetMenuInventoryID == -1)
     {
-        // we're in the character inventory, so wield the item
+        // we're in the character inventory, so wield/unwield the item
         
         if (ownerManagers[sourceMenuInventoryID] == MANAGER_CHARACTER)
         {
-            output = gGame->mCharacterManager->EquipItem(ownerEntities[sourceMenuInventoryID], sourceMenuPosition);
+            if (gGame->mCharacterManager->GetEquipSlotForInventoryItem(ownerEntities[sourceMenuInventoryID], sourceMenuPosition) != -1)
+            {
+                gGame->mCharacterManager->UnequipItem(ownerEntities[sourceMenuInventoryID], sourceMenuPosition);
+            }
+            else
+            {
+                gGame->mCharacterManager->EquipItem(ownerEntities[sourceMenuInventoryID], sourceMenuPosition);
+            }
         }
     }
     else
