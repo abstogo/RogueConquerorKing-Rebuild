@@ -1,0 +1,14 @@
+0,Man-at-Arms,1,0,1
+2000,Warrior,2,0,1
+4000,Swordmaster,3,0,2
+8000,Hero,4,0,2
+16000,Exemplar,5,0,2
+32000,Myrmidon,6,0,3
+65000,Champion,7,0,3
+130000,Epic Hero,8,0,3
+250000,Warlord,9,0,4
+370000,Warlord,9,2,4
+490000,Warlord,9,4,4
+610000,Warlord,9,6,5
+730000,Warlord,9,8,5
+850000,Overlord,9,10,5

@@ -1,0 +1,401 @@
+{
+  "Classes": [
+    {
+      "Name": "Fighter",
+      "LevelChart": "fighter_chart.csv",
+      "PrimeRequisites": [
+        "Strength"
+      ],
+      "HitDie": 8,
+      "AttackProgression": "Fighter",
+      "SaveProgression": "Fighter",
+      "SpellType": "None",
+      "SpellProgression": "None",
+      "ArmourProficiencies": [
+        "Any"
+      ],
+      "WeaponProficiencies": [
+        "Any"
+      ],
+      "FightingStyles": [
+        "Paired Weapon",
+        "Weapon And Shield",
+        "Two-Handed Weapon"
+      ],
+      "LevelledChartColumns": [
+        {
+          "Name": "Damage:Melee",
+          "Column": 4
+        },
+        {
+          "Name": "Damage:Missile",
+          "Column": 4
+        }
+      ],
+      "LevelledAbilities": [
+        {
+          "Level": 5,
+          "Name": "Battlefield Prowess",
+          "Type": "Morale:Hireling",
+          "Value": 1
+        }
+      ]
+    },
+    {
+      "Name": "Cleric",
+      "LevelChart": "cleric_chart.csv",
+      "PrimeRequisites": [
+        "Wisdom"
+      ],
+      "HitDie": 6,
+      "AttackProgression": "Cleric",
+      "SaveProgression": "Cleric",
+      "SpellType": "Divine",
+      "SpellProgression": "Cleric",
+      "ArmourProficiencies": [
+        "Any"
+      ],
+      "WeaponProficiencies": [
+        "Warhammers",
+        "Maces",
+        "Clubs",
+        "Quarterstaffs",
+        "Slings"
+      ],
+      "FightingStyles": [
+        "Weapon And Shield",
+        "Two-Handed Weapon"
+      ],
+      "LevelledChartColumns": [
+      ],
+      "LevelledAbilities": [
+        {
+          "Level": 1,
+          "Name": "Use Divine Scrolls",
+          "Type": "Capability:UseScroll:Divine",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Turn Undead",
+          "Type": "Capability:TurnUndead",
+          "Value": 1
+        },
+        {
+          "Level": 2,
+          "Name": "Use Divine Magic",
+          "Type": "Capability:Magic:Divine",
+          "Value": 1
+        },
+        {
+          "Level": 5,
+          "Name": "Scribe Scroll",
+          "Type": "Capability:MagicCraft:Scroll",
+          "Value": 1
+        },
+        {
+          "Level": 5,
+          "Name": "Brew Potion",
+          "Type": "Capability:MagicCraft:Potion",
+          "Value": 1
+        },
+        {
+          "Level": 5,
+          "Name": "Spell Research",
+          "Type": "Capability:Magic:Research",
+          "Value": 1
+        },
+        {
+          "Level": 9,
+          "Name": "Forge Magic Weapons",
+          "Type": "Capability:MagicCraft:Weapon",
+          "Value": 1
+        },
+        {
+          "Level": 9,
+          "Name": "Forge Magic Armour",
+          "Type": "Capability:MagicCraft:Armour",
+          "Value": 1
+        },
+        {
+          "Level": 9,
+          "Name": "Forge Ring",
+          "Type": "Capability:MagicCraft:Ring",
+          "Value": 1
+        },
+        {
+          "Level": 9,
+          "Name": "Craft Staff",
+          "Type": "Capability:MagicCraft:Staff",
+          "Value": 1
+        },
+        {
+          "Level": 11,
+          "Name": "Cast Ritual Magic",
+          "Type": "Capability:Magic:Ritual",
+          "Value": 1
+        },
+        {
+          "Level": 11,
+          "Name": "Craft Construct",
+          "Type": "Capability:MagicCraft:Construct",
+          "Value": 1
+        },
+        {
+          "Level": 11,
+          "Name": "Create Undead",
+          "Type": "Capability:MagicCraft:Undead",
+          "Value": 1
+        }
+      ]
+    },
+    {
+      "Name": "Mage",
+      "LevelChart": "mage_chart.csv",
+      "PrimeRequisites": [
+        "Intelligence"
+      ],
+      "HitDie": 4,
+      "AttackProgression": "Mage",
+      "SaveProgression": "Mage",
+      "SpellType": "Arcane",
+      "SpellProgression": "Mage",
+      "ArmourProficiencies": [
+      ],
+      "WeaponProficiencies": [
+        "Quarterstaffs",
+        "Clubs",
+        "Daggers",
+        "Darts"
+      ],
+      "FightingStyles": [
+        "Two-Handed Weapon"
+      ],
+      "LevelledChartColumns": [
+      ],
+      "LevelledAbilities": [
+        {
+          "Level": 1,
+          "Name": "Use Arcane Magic",
+          "Type": "Capability:Magic:Arcane",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Use Arcane Scrolls",
+          "Type": "Capability:UseScroll:Arcane",
+          "Value": 1
+        },
+        {
+          "Level": 5,
+          "Name": "Scribe Scroll",
+          "Type": "Capability:MagicCraft:Scroll",
+          "Value": 1
+        },
+        {
+          "Level": 5,
+          "Name": "Brew Potion",
+          "Type": "Capability:MagicCraft:Potion",
+          "Value": 1
+        },
+        {
+          "Level": 5,
+          "Name": "Spell Research",
+          "Type": "Capability:Magic:Research",
+          "Value": 1
+        },
+        {
+          "Level": 9,
+          "Name": "Forge Magic Weapons",
+          "Type": "Capability:MagicCraft:Weapon",
+          "Value": 1
+        },
+        {
+          "Level": 9,
+          "Name": "Forge Magic Armour",
+          "Type": "Capability:MagicCraft:Armour",
+          "Value": 1
+        },
+        {
+          "Level": 9,
+          "Name": "Forge Ring",
+          "Type": "Capability:MagicCraft:Ring",
+          "Value": 1
+        },
+        {
+          "Level": 9,
+          "Name": "Craft Staff",
+          "Type": "Capability:MagicCraft:Staff",
+          "Value": 1
+        },
+        {
+          "Level": 11,
+          "Name": "Cast Ritual Magic",
+          "Type": "Capability:Magic:Ritual",
+          "Value": 1
+        },
+        {
+          "Level": 11,
+          "Name": "Craft Construct",
+          "Type": "Capability:MagicCraft:Construct",
+          "Value": 1
+        },
+        {
+          "Level": 11,
+          "Name": "Create Crossbreed",
+          "Type": "Capability:MagicCraft:Crossbreed",
+          "Value": 1
+        },
+        {
+          "Level": 11,
+          "Name": "Create Undead",
+          "Type": "Capability:MagicCraft:Undead",
+          "Value": 1
+        }
+      ]
+    },
+    {
+      "Name": "Thief",
+      "LevelChart": "thief_chart.csv",
+      "PrimeRequisites": [
+        "Dexterity"
+      ],
+      "HitDie": 4,
+      "AttackProgression": "Thief",
+      "SaveProgression": "Thief",
+      "SpellType": "None",
+      "SpellProgression": "None",
+      "ArmourProficiencies": [
+        "Hide",
+        "Leather"
+      ],
+      "WeaponProficiencies": [
+        "Missile",
+        "One-Handed"
+      ],
+      "FightingStyles": [
+        "Paired Weapon"
+      ],
+      "LevelledChartColumns": [
+        {
+          "Name": "Action:OpenLock",
+          "Column": 4
+        },
+        {
+          "Name": "Action:DetectTrap",
+          "Column": 5
+        },
+        {
+          "Name": "Action:RemoveTrap",
+          "Column": 5
+        },
+        {
+          "Name": "Action:PickPockets",
+          "Column": 6
+        },
+        {
+          "Name": "Action:MoveSilently",
+          "Column": 7
+        },
+        {
+          "Name": "Action:ClimbWalls",
+          "Column": 8
+        },
+        {
+          "Name": "Action:HideInShadows",
+          "Column": 9
+        },
+        {
+          "Name": "Action:HearNoise",
+          "Column": 10
+        }
+      ],
+      "LevelledAbilities": [
+        {
+          "Level": 1,
+          "Name": "Hide In Shadows",
+          "Type": "Capability:HideInShadows",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Climb Walls",
+          "Type": "Capability:Climb",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Move Silently",
+          "Type": "Capability:MoveSilently",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Pick Pockets",
+          "Type": "Capability:PickPockets",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Remove Traps",
+          "Type": "Capability:RemoveTrap",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Find Traps",
+          "Type": "Capability:DetectTrap",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Open Lock",
+          "Type": "Capability:OpenLock",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Backstab",
+          "Type": "Capability:Backstab",
+          "Value": 1
+        },
+        {
+          "Level": 1,
+          "Name": "Backstab Multiplier",
+          "Type": "Damage:Backstab:Multiplier",
+          "Value": 2
+        },
+        {
+          "Level": 4,
+          "Name": "Read Languages",
+          "Type": "Action:ReadLanguage",
+          "Value": 5
+        },
+        {
+          "Level": 5,
+          "Name": "Enhanced Backstab",
+          "Type": "Damage:Backstab:Multiplier",
+          "Value": 3
+        },
+        {
+          "Level": 9,
+          "Name": "Mighty Backstab",
+          "Type": "Damage:Backstab:Multiplier",
+          "Value": 4
+        },
+        {
+          "Level": 10,
+          "Name": "Use Arcane Scrolls",
+          "Type": "Capability:UseScroll:Arcane",
+          "Value": 3
+        },
+        {
+          "Level": 13,
+          "Name": "Epic Backstab",
+          "Type": "Damage:Backstab:Multiplier",
+          "Value": 5
+        }
+      ]
+    }
+  ]
+}
