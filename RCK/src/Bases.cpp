@@ -512,11 +512,11 @@ void BaseManager::RenderBaseMenu(int baseID)
 	if (baseID == -1)
 	{
 		// no base here
-		gGame->sampleConsole->printFrame(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, true, TCOD_BKGND_SET, "");
+        tcod::print_frame(g_console, {0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT}, "", &TCOD_white, &TCOD_black);
 
-		gGame->sampleConsole->printf(2, 2, "There is no camp or settlement here.");
-		gGame->sampleConsole->printf(2, 4, "Press A to have your party");
-		gGame->sampleConsole->printf(2, 5, "build a camp here.");
+        tcod::print(g_console, {2, 2}, "There is no camp or settlement here.", TCOD_white, TCOD_black);
+        tcod::print(g_console, {2, 4}, "Press A to have your party", TCOD_white, TCOD_black);
+        tcod::print(g_console, {2, 5}, "build a camp here.", TCOD_white, TCOD_black);
 	}
 	else
 	{
@@ -524,15 +524,35 @@ void BaseManager::RenderBaseMenu(int baseID)
 		if (baseOwner != gGame->GetSelectedPartyID())
 		{
 			// another party's base!
-			gGame->sampleConsole->printFrame(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, true, TCOD_BKGND_SET, "");
+            tcod::print_frame(g_console, {0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT}, "", &TCOD_white, &TCOD_black);
 			std::string message = "There is a camp here belonging to another party.";
-			gGame->sampleConsole->printf(2, 2, message.c_str());
+            tcod::print(g_console, {2, 2}, message, TCOD_white, TCOD_black);
 		}
 		else
 		{
-			gGame->sampleConsole->printFrame(0, 0, SAMPLE_SCREEN_WIDTH / 2, SAMPLE_SCREEN_HEIGHT / 2, true, TCOD_BKGND_SET, "");
-			gGame->sampleConsole->printFrame(SAMPLE_SCREEN_WIDTH / 2, 0, SAMPLE_SCREEN_WIDTH / 2, SAMPLE_SCREEN_HEIGHT / 2, true, TCOD_BKGND_SET, "");
-			gGame->sampleConsole->printFrame(0, SAMPLE_SCREEN_HEIGHT / 2, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, true, TCOD_BKGND_SET, "");
+            // this cell has our base in it, so let's display the base control menu
+
+            // outer frame
+            tcod::print_frame(
+                g_console,
+                {0, 0, SAMPLE_SCREEN_WIDTH / 2, SAMPLE_SCREEN_HEIGHT / 2},
+                "",
+                &TCOD_white,
+                &TCOD_black);
+
+            tcod::print_frame(
+                g_console,
+                {SAMPLE_SCREEN_WIDTH / 2, 0, SAMPLE_SCREEN_WIDTH / 2, SAMPLE_SCREEN_HEIGHT / 2},
+                "",
+                &TCOD_white,
+                &TCOD_black);
+
+            tcod::print_frame(
+                g_console,
+                {0, SAMPLE_SCREEN_HEIGHT / 2, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT},
+                "",
+                &TCOD_white,
+                &TCOD_black);
 
 			int bT = baseType[baseID];
 			int partyID = basePartyID[baseID];
@@ -550,7 +570,14 @@ void BaseManager::RenderBaseMenu(int baseID)
 				getVisitingPartyCharacters(out_cs, gGame->GetSelectedPartyID());
 
 				// add overall frame with title
-				gGame->sampleConsole->printFrame(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, false, TCOD_BKGND_SET, "Party Management");
+                tcod::print_frame(
+                    g_console,
+                    {0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT},
+                    "Party Management",
+                    &TCOD_white,
+                    &TCOD_black,
+                    TCOD_BKGND_SET,
+                    false);
 
 				// output base characters
 				for (int i = 0; i < base_cs.size(); i++)
@@ -579,8 +606,19 @@ void BaseManager::RenderBaseMenu(int baseID)
 					if (status != "") name += " " + status;
 					
 					TCOD_bkgnd_flag_t backg = TCOD_BKGND_NONE;
+                    TCOD_ColorRGB backg_col = TCOD_black;
+                    TCOD_ColorRGB foreg_col = TCOD_white;
 					int y_pos = 3 + i;
-					gGame->sampleConsole->printEx(2, y_pos, backg, TCOD_LEFT, name.c_str());
+
+                    int select_y = menuPosition + 3;
+                    if (i == menuPosition && (controlPane == PANE_BASE_CHARACTERS))
+                    {
+                        backg = TCOD_BKGND_SET;
+                        backg_col = TCOD_white;
+                        foreg_col = TCOD_black;
+                    }
+
+                    tcod::print(g_console, {2, y_pos}, name, foreg_col, backg_col);
 				}
 
 				// output party characters
@@ -603,17 +641,16 @@ void BaseManager::RenderBaseMenu(int baseID)
 					}
 
 					TCOD_bkgnd_flag_t backg = TCOD_BKGND_NONE;
+                    TCOD_ColorRGB backg_col = TCOD_black;
+                    TCOD_ColorRGB foreg_col = TCOD_white;
 					int y_pos = 3 + i;
-					gGame->sampleConsole->printEx(2 + SAMPLE_SCREEN_WIDTH / 2, y_pos, backg, TCOD_LEFT, name.c_str());
-				}
 
-				// highlight selected character
-				int select_y = menuPosition + 3;
-				int base_x = (controlPane == PANE_BASE_CHARACTERS) ? 0 : SAMPLE_SCREEN_WIDTH / 2;
-				for (int x = base_x; x < (base_x + SAMPLE_SCREEN_WIDTH / 2); x++)
-				{
-					gGame->sampleConsole->setCharBackground(x, select_y, TCODColor::white, TCOD_BKGND_SET);
-					gGame->sampleConsole->setCharForeground(x, select_y, TCODColor::black);
+                    if (i == menuPosition && (controlPane == PANE_PARTY_CHARACTERS)) {
+                        backg = TCOD_BKGND_SET;
+                        backg_col = TCOD_white;
+                        foreg_col = TCOD_black;
+                    }
+                    tcod::print(g_console, {2 + SAMPLE_SCREEN_WIDTH / 2, y_pos}, name, foreg_col, backg_col);
 				}
 
 				// selected character ID
@@ -625,6 +662,7 @@ void BaseManager::RenderBaseMenu(int baseID)
 
 					std::vector<BaseTag> bt_list = GetCharacterActionList(baseID, charID);
 
+                    /*
 					for (int i = 0; i < bt_list.size(); i++)
 					{
 						BaseTag t = bt_list[i];
@@ -635,6 +673,7 @@ void BaseManager::RenderBaseMenu(int baseID)
 						TCOD_bkgnd_flag_t backg = TCOD_BKGND_NONE;
 						gGame->sampleConsole->printEx(3, y, backg, TCOD_LEFT, outp.c_str());
 					}
+                    */
 
 					// UI for selected character
 
@@ -643,7 +682,13 @@ void BaseManager::RenderBaseMenu(int baseID)
 
 				// timeskip controls
 				std::string time_control = "X to skip 1 day \n F to take all and exit \n D to leave";
-				gGame->sampleConsole->printEx(SAMPLE_SCREEN_WIDTH - 2, SAMPLE_SCREEN_HEIGHT - 4, TCOD_BKGND_NONE, TCOD_RIGHT, time_control.c_str());
+                tcod::print(
+                    g_console,
+                    {SAMPLE_SCREEN_WIDTH - 2, SAMPLE_SCREEN_HEIGHT - 4},
+                    time_control,
+                    TCOD_white,
+                    TCOD_black,
+                    TCOD_RIGHT);
 			}
 			else
 			{

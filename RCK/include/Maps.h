@@ -26,22 +26,6 @@
 #define INDOOR_MAP_WIDTH SAMPLE_SCREEN_WIDTH
 #define INDOOR_MAP_HEIGHT SAMPLE_SCREEN_HEIGHT
 
-// regional cell data is split into two elements - terrain type and content
-// terrain is used for movement rate and also for local map generation
-enum RegionTerrainTypes
-{
-	TERRAIN_PLAINS = 0,
-	TERRAIN_MOUNTAIN,
-	TERRAIN_HILLS,
-	TERRAIN_FOREST,
-	TERRAIN_JUNGLE,
-	TERRAIN_SWAMP,
-	TERRAIN_DESERT,
-	// TERRAIN_SEA_COAST, // probably doing nothing with ocean travel for... quite some time
-	// TERRAN_SEA_DEEP
-	TERRAIN_MAX
-};
-
 // content covers local structures
 // note this does not include flows such as rivers and roads
 enum RegionSiteTypes
@@ -305,6 +289,7 @@ class MapManager : public ITCODPathCallback
 
 	std::vector<std::vector<std::vector<std::string>>> terrain_prefabs;
 	TerrainTypeSet terrainTypes;
+    std::map<std::string, int> terrainTypeMap;
 
 	void GeneratePrefabs();
 	
@@ -339,11 +324,11 @@ public:
 	
 	// this manager handles the main rendering, since it controls the map status & context (hex/square, lighting etc)
 	// if the index is -1, show the region map, if >=0 then show a local map
-	void renderMap(TCODConsole* sampleConsole, int index, int centroid_x, int centroid_y);
-	void renderRegionMap(TCODConsole* sampleConsole, int centroid_x, int centroid_y);
+	void renderMap(int index, int centroid_x, int centroid_y);
+	void renderRegionMap(int centroid_x, int centroid_y);
 
 	// mobile element (player, monster) are rendered through here too
-    void renderAtPosition(TCODConsole* sampleConsole, int mapIndex, int centroid_x, int centroid_y, int x, int y, char c, TCODColor foreground = TCODColor::lighterGrey);
+    void renderAtPosition(int mapIndex, int centroid_x, int centroid_y, int x, int y, char c, TCOD_ColorRGB foreground = TCOD_lighter_grey);
 
 	// connects one local map to another at the specified point
 	void connectMaps(int map1, int map2, int x1, int y1, int x2, int y2);
