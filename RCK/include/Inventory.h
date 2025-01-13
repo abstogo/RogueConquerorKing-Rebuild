@@ -24,8 +24,6 @@ class InventoryManager
     
     std::vector<std::vector<std::pair<int, int>>> itemEntries;
 
-    //std::vector<std::vector<int>> itemIDs;
-    //std::vector<std::vector<int>> itemCounts;
     std::vector<int> ownerManagers;
     std::vector<int> ownerEntities;
     
@@ -66,7 +64,8 @@ public:
     int ControlMoveDown();
     int ControlMoveLeft();
     int ControlMoveRight();
-    int Select();
+    int SelectPrimary();
+    int SelectSecondary();
 
     // Rendering
 	void RenderInventory();

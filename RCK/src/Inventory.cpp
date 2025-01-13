@@ -205,9 +205,67 @@ int InventoryManager::ControlMoveRight()
     return targetMenuPosition;
 }
 
-int InventoryManager::Select()
+int InventoryManager::SelectPrimary()
 {
+    // Usually enter.
+    // In the standard character inventory, this wields the selected item if possible.
+    // In the inventory exchange screen, this transfers all of the selected items between invs
+    
+    int output = -1;
+
+    if(targetMenuInventoryID == -1)
+    {
+        // we're in the character inventory, so wield the item
+        
+        if (ownerManagers[sourceMenuInventoryID] == MANAGER_CHARACTER)
+        {
+            output = gGame->mCharacterManager->EquipItem(ownerEntities[sourceMenuInventoryID], sourceMenuPosition);
+        }
+    }
+    else
+    {
+        // we're in the inventory exchange screen, so transfer the selected stack of items
+        if (sourcePane)
+        {
+            auto item = RemoveItemFromInventory(sourceMenuInventoryID, sourceMenuPosition, itemEntries[sourceMenuInventoryID][sourceMenuPosition].second);
+            AddItemToInventory(targetMenuInventoryID, item[0].first, item[0].second);
+
+        }
+        else
+        {
+            auto item = RemoveItemFromInventory(targetMenuInventoryID, targetMenuPosition, itemEntries[targetMenuInventoryID][targetMenuPosition].second);
+            AddItemToInventory(sourceMenuInventoryID, item[0].first, item[0].second);
+
+        }
+    }
+    
     return 0;
+}
+
+int InventoryManager::SelectSecondary()
+{
+    // Usually "D".
+    // In the standard character inventory, this drops the item onto the map.
+    // In the inventory exchange screen, this transfers all of one inventory to another.
+    
+    int output = -1;
+
+    if (targetMenuInventoryID == -1)
+    {
+        // we're in the character inventory, so drop the item on the ground
+
+        if (ownerManagers[sourceMenuInventoryID] == MANAGER_CHARACTER)
+        {
+            // output = gGame->mCharacterManager->EquipItem(ownerEntities[sourceMenuInventoryID], sourceMenuPosition);
+        }
+    }
+    else
+    {
+        // we're in the inventory exchange screen, so transfer all of the items
+        TransferInventory(sourceMenuInventoryID, targetMenuInventoryID);
+    }
+    
+    return output;
 }
 
 std::string InventoryManager::InvToText(int inventoryID, int slot)
