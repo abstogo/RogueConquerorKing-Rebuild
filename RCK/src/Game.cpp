@@ -307,10 +307,13 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 		if (mode != GM_INVENTORY)
 		{
 			mode = GM_INVENTORY;
+            // we're in the single-character mode so open inv for that character
+			gGame->mInventoryManager->OpenInventoryMenu(mCharacterManager->GetInventory(currentCharacterID));
 		}
 		else
 		{
 			mode = GM_MAIN;
+			gGame->mInventoryManager->CloseMenu();
 		}
 	}
 
@@ -565,37 +568,27 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 		case GM_INVENTORY:
 		{
             // operate whatever inventory menu is currently open
-            
-			/**
+			
 			if (key->vk == TCODK_UP)
 			{
-				inventoryPosition--;
-				if (inventoryPosition < 0)
-				{
-					inventoryPosition = mCharacterManager->GetInventory(currentCharacterID).size() - 1;
-				}
+				gGame->mInventoryManager->ControlMoveUp();
 			}
 			else if (key->vk == TCODK_DOWN)
 			{
-				inventoryPosition++;
-				if (inventoryPosition == mCharacterManager->GetInventory(currentCharacterID).size())
-				{
-					inventoryPosition = 0;
-				}
+				gGame->mInventoryManager->ControlMoveDown();
+			}
+			else if (key->vk == TCODK_LEFT)
+			{
+				gGame->mInventoryManager->ControlMoveDown();
+			}
+			else if (key->vk == TCODK_RIGHT)
+			{
+				gGame->mInventoryManager->ControlMoveDown();
 			}
 			else if (key->vk == TCODK_ENTER)
 			{
-				// enter is used to equip and unequip
-				if (mCharacterManager->GetEquipSlotForInventoryItem(currentCharacterID, inventoryPosition) != -1)
-				{
-					mCharacterManager->UnequipItem(currentCharacterID, inventoryPosition);
-				}
-				else
-				{
-					mCharacterManager->EquipItem(currentCharacterID, inventoryPosition);
-				}
+				gGame->mInventoryManager->Select();
 			}
-            */
 		}
 		break;
 
@@ -2032,6 +2025,8 @@ void Game::RenderInventory()
 		inventoryScreen->setCharForeground(x, select_y, TCODColor::black);
 	}
 	*/
+
+	gGame->mInventoryManager->RenderInventory();
 }
 
 void Game::RenderOffscreenUI(bool inventory, bool character)

@@ -68,5 +68,6 @@ public:
 
     // Rendering
 	void RenderInventory();
-    std::string ItemToText(int inventoryID, int itemID);
+    std::string InvToText(int inventoryID, int slot);
+    std::string ItemToText(int itemID, int count);
 };
