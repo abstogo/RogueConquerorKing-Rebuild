@@ -33,6 +33,8 @@ class InventoryManager
     int targetMenuInventoryID = -1;
     int targetMenuPosition;
 
+    std::string menuTitle;
+
     bool sourcePane = true;
     
 public:
@@ -55,8 +57,10 @@ public:
     int GetInventorySize(int inventoryID);
     std::vector<std::pair<int, int>>& GetInventory(int inventoryID);
 
+    std::string GetInventoryEntityName(int inventoryID);
+
     // Inventory Menu   
-    void OpenInventoryMenu(int sourceID, int destinationID=-1);
+    void OpenInventoryMenu(int sourceID, int destinationID=-1, std::string title="");
     void CloseMenu();
 
     // Inventory Controls

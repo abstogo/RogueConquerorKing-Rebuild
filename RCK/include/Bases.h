@@ -97,9 +97,7 @@ enum BaseMenuPanes
 	PANE_BASE_CHARACTERS = 0,	   // base party 
 	PANE_PARTY_CHARACTERS = 1,     // virtual "party" which will form active party on leaving
 	PANE_CHARACTER_OPTIONS = 2,
-	PANE_PARTY_INVENTORY = 3,	   // base party inventory
-	PANE_BASE_INVENTORY = 4,       // base "store"
-	PANE_PURCHASES = 5
+	PANE_BASE_INVENTORY = 3,       // base inventory manager screens
 };
 
 class BaseManager

@@ -358,34 +358,17 @@ bool BaseManager::ControlCommand(TCOD_key_t* key,int baseID)
 					}
 				}
 			}
-
-			if (controlPane == PANE_PARTY_INVENTORY)
-			{
-					controlPane = PANE_BASE_INVENTORY;
-                    if (menuPosition > getBasePartyInventoryCount(baseID) - 1) menuPosition = getBasePartyInventoryCount(baseID) - 1;
-				
-			} 
-			else if (controlPane == PANE_BASE_INVENTORY)
-			{
-				controlPane = PANE_PARTY_INVENTORY;
-				if (menuPosition > getVisitingInventoryCount(baseID) - 1) menuPosition = getVisitingInventoryCount(baseID) - 1;
-			}
 		}
-
+        
 		if (key->vk == TCODK_TAB)
 		{
             // switch between characters and inventory
 			
 			if (controlPane == PANE_PARTY_CHARACTERS)
 			{
-				controlPane = PANE_PARTY_INVENTORY;
+				controlPane = PANE_BASE_INVENTORY;
 				menuPosition = 0;
 			} 
-			else if (controlPane == PANE_PARTY_INVENTORY)
-            {
-                controlPane = PANE_PARTY_CHARACTERS;
-                menuPosition = 0;
-            }
             else if (controlPane == PANE_BASE_CHARACTERS)
             {
                 controlPane = PANE_BASE_INVENTORY;
@@ -398,153 +381,183 @@ bool BaseManager::ControlCommand(TCOD_key_t* key,int baseID)
             }
 		}
 
-		if (key->vk == TCODK_UP)
+		if (controlPane == PANE_BASE_INVENTORY)
 		{
-			menuPosition--;
-			// this is entirely dependent on what's inside the pane we're controlling
-
-			if (controlPane == PANE_BASE_CHARACTERS)
+			if (key->vk == TCODK_UP)
 			{
-				if (menuPosition < 0)
-				{
-					// move to end
-					int total = getBasePartyCharacterCount(baseID);
-
-					menuPosition = total - 1;
-				}
+				gGame->mInventoryManager->ControlMoveUp();
 			}
-
-			if (controlPane == PANE_PARTY_CHARACTERS)
-			{
-				if (menuPosition < 0)
-				{
-					// move to end
-					int total = getVisitingCharacterCount(gGame->GetSelectedPartyID());
-					menuPosition = total - 1;
-				}
-			}
-
+			else if (key->vk == TCODK_DOWN)
+            {
+				gGame->mInventoryManager->ControlMoveDown();
+            }
+            else if (key->vk == TCODK_LEFT)
+            {
+				gGame->mInventoryManager->ControlMoveLeft();
+            }
+            else if (key->vk == TCODK_RIGHT)
+            {
+				gGame->mInventoryManager->ControlMoveRight();
+            }
+            else if (key->vk == TCODK_ENTER)
+            {
+				gGame->mInventoryManager->SelectPrimary();
+            }
+            else if (key->vk == TCODK_SPACE)
+            {
+				gGame->mInventoryManager->SelectSecondary();
+            }
 		}
-		else if (key->vk == TCODK_DOWN)
+		else
 		{
-			menuPosition++;
-			if (controlPane == PANE_BASE_CHARACTERS)
+			if (key->vk == TCODK_UP)
 			{
-				if (menuPosition > getBasePartyCharacterCount(baseID) - 1)
-				{
-					menuPosition = 0;
-				}
-			}
+				menuPosition--;
+				// this is entirely dependent on what's inside the pane we're controlling
 
-			if (controlPane == PANE_PARTY_CHARACTERS)
-			{
-				if (menuPosition > getVisitingCharacterCount(gGame->GetSelectedPartyID()) - 1)
+				if (controlPane == PANE_BASE_CHARACTERS)
 				{
-					menuPosition = 0;
-				}
-			}
-			
-		}
-		else if (key->vk == TCODK_ENTER)
-		{
-			int focus = controlPane;
-			int charID = GetSelectedCharacter(baseID);
-			int partyID = basePartyID[baseID];
-			int visitingPartyID = gGame->GetSelectedPartyID();
-			// enter moves characters and equipment between "base" and "party"
-			if (focus == PANE_BASE_CHARACTERS)
-			{
-				// move character from base party to visiting party
-
-				bool hench = IsAHenchman(charID, baseID);
-				RemoveCharacter(charID,baseID);
-				hench ? gGame->mPartyManager->AddHenchman(visitingPartyID,charID) : gGame->mPartyManager->AddPlayerCharacter(visitingPartyID, charID);
-
-				if (getBasePartyCharacterCount(baseID) == 0)
-				{
-					// all characters moved to other screen, so switch focus
-					controlPane = PANE_PARTY_CHARACTERS;
-					menuPosition = 0;
-				}
-				else
-				{
-					menuPosition -= 1;
-					if (menuPosition < 0) menuPosition = 0;
-				}
-			}
-			else if (focus == PANE_PARTY_CHARACTERS)
-			{
-				// move character from visiting party to base party
-
-				bool hench = gGame->mPartyManager->IsAHenchman(visitingPartyID,charID);
-				gGame->mPartyManager->RemoveCharacter(visitingPartyID, charID);
-				hench ? AddHenchman(charID, baseID) : AddPlayerCharacter(charID, baseID);
-
-				if (getVisitingCharacterCount(gGame->GetSelectedPartyID()) == 0)
-				{
-					// all characters moved to other screen, so switch focus
-					controlPane = PANE_BASE_CHARACTERS;
-					menuPosition = 0;
-				}
-				else
-				{
-					menuPosition -= 1;
-					if (menuPosition < 0) menuPosition = 0;
-				}
-			}
-
-			//if (mCharacterManager->GetEquipSlotForInventoryItem(currentCharacterID, menuPosition[mode]) != -1)
-			//{
-			//	mCharacterManager->UnequipItem(currentCharacterID, menuPosition[mode]);
-			//}
-			//else
-			//{
-			//	mCharacterManager->EquipItem(currentCharacterID, menuPosition[mode]);
-			//}
-		}
-		else if (key->c >= '1' && key->c <= '9')
-		{
-			// character option selected
-			int charID = GetSelectedCharacter(baseID);
-			std::vector<BaseTag> bts = GetCharacterActionList(baseID, charID);
-			// set character to perform action
-			int idx = key->c - '1';
-			if (idx >= 0 && idx < bts.size())
-			{
-				BaseTag& bt = bts[idx];
-				if (bt.Type() == "CharacterAction")
-					gGame->mCharacterManager->setCharacterDomainAction(charID, bts[idx].Tag());
-
-				if (bt.Type() == "TravelMode")
-				{
-					std::vector<std::string> excludes = bts[idx].Excludes();
-					for (std::string exc : excludes)
+					if (menuPosition < 0)
 					{
-						if (gGame->mCharacterManager->getCharacterDomainAction(charID) == exc)
-						{
-							// this travel mode deactivates the domain action
-							gGame->mCharacterManager->setCharacterDomainAction(charID, "");
-						}
+						// move to end
+						int total = getBasePartyCharacterCount(baseID);
 
-						if (gGame->mCharacterManager->getCharacterTravelModeSet(charID, exc))
-						{
-							gGame->mCharacterManager->unsetCharacterTravelMode(charID, exc);
-						}
+						menuPosition = total - 1;
 					}
-					gGame->mCharacterManager->toggleCharacterTravelMode(charID, bts[idx].Tag());
+				}
+
+				if (controlPane == PANE_PARTY_CHARACTERS)
+				{
+					if (menuPosition < 0)
+					{
+						// move to end
+						int total = getVisitingCharacterCount(gGame->GetSelectedPartyID());
+						menuPosition = total - 1;
+					}
+				}
+
+			}
+			else if (key->vk == TCODK_DOWN)
+			{
+				menuPosition++;
+				if (controlPane == PANE_BASE_CHARACTERS)
+				{
+					if (menuPosition > getBasePartyCharacterCount(baseID) - 1)
+					{
+						menuPosition = 0;
+					}
+				}
+
+				if (controlPane == PANE_PARTY_CHARACTERS)
+				{
+					if (menuPosition > getVisitingCharacterCount(gGame->GetSelectedPartyID()) - 1)
+					{
+						menuPosition = 0;
+					}
+				}
+
+			}
+			else if (key->vk == TCODK_ENTER)
+			{
+				int focus = controlPane;
+				int charID = GetSelectedCharacter(baseID);
+				int partyID = basePartyID[baseID];
+				int visitingPartyID = gGame->GetSelectedPartyID();
+				// enter moves characters and equipment between "base" and "party"
+				if (focus == PANE_BASE_CHARACTERS)
+				{
+					// move character from base party to visiting party
+
+					bool hench = IsAHenchman(charID, baseID);
+					RemoveCharacter(charID, baseID);
+					hench ? gGame->mPartyManager->AddHenchman(visitingPartyID, charID) : gGame->mPartyManager->AddPlayerCharacter(visitingPartyID, charID);
+
+					if (getBasePartyCharacterCount(baseID) == 0)
+					{
+						// all characters moved to other screen, so switch focus
+						controlPane = PANE_PARTY_CHARACTERS;
+						menuPosition = 0;
+					}
+					else
+					{
+						menuPosition -= 1;
+						if (menuPosition < 0) menuPosition = 0;
+					}
+				}
+				else if (focus == PANE_PARTY_CHARACTERS)
+				{
+					// move character from visiting party to base party
+
+					bool hench = gGame->mPartyManager->IsAHenchman(visitingPartyID, charID);
+					gGame->mPartyManager->RemoveCharacter(visitingPartyID, charID);
+					hench ? AddHenchman(charID, baseID) : AddPlayerCharacter(charID, baseID);
+
+					if (getVisitingCharacterCount(gGame->GetSelectedPartyID()) == 0)
+					{
+						// all characters moved to other screen, so switch focus
+						controlPane = PANE_BASE_CHARACTERS;
+						menuPosition = 0;
+					}
+					else
+					{
+						menuPosition -= 1;
+						if (menuPosition < 0) menuPosition = 0;
+					}
+				}
+
+				//if (mCharacterManager->GetEquipSlotForInventoryItem(currentCharacterID, menuPosition[mode]) != -1)
+				//{
+				//	mCharacterManager->UnequipItem(currentCharacterID, menuPosition[mode]);
+				//}
+				//else
+				//{
+				//	mCharacterManager->EquipItem(currentCharacterID, menuPosition[mode]);
+				//}
+			}
+			else if (key->c >= '1' && key->c <= '9')
+			{
+				// character option selected
+				int charID = GetSelectedCharacter(baseID);
+				std::vector<BaseTag> bts = GetCharacterActionList(baseID, charID);
+				// set character to perform action
+				int idx = key->c - '1';
+				if (idx >= 0 && idx < bts.size())
+				{
+					BaseTag& bt = bts[idx];
+					if (bt.Type() == "CharacterAction")
+						gGame->mCharacterManager->setCharacterDomainAction(charID, bts[idx].Tag());
+
+					if (bt.Type() == "TravelMode")
+					{
+						std::vector<std::string> excludes = bts[idx].Excludes();
+						for (std::string exc : excludes)
+						{
+							if (gGame->mCharacterManager->getCharacterDomainAction(charID) == exc)
+							{
+								// this travel mode deactivates the domain action
+								gGame->mCharacterManager->setCharacterDomainAction(charID, "");
+							}
+
+							if (gGame->mCharacterManager->getCharacterTravelModeSet(charID, exc))
+							{
+								gGame->mCharacterManager->unsetCharacterTravelMode(charID, exc);
+							}
+						}
+						gGame->mCharacterManager->toggleCharacterTravelMode(charID, bts[idx].Tag());
+					}
 				}
 			}
-		}
-		else if (key->c == 'X' || key->c == 'x')
-		{
-			// advance time to next day boundary, triggering daily domain action turn
+			else if (key->c == 'X' || key->c == 'x')
+			{
+				// advance time to next day boundary, triggering daily domain action turn
 
-			long double day = TimeManager::GetTimePeriodInSeconds(TIME_DAY);
-			gGame->mTimeManager->AdvanceTimeBy(day - fmod(gGame->mTimeManager->GetRunningTime(), day));
-		}
-		else if (key->c == 'F' || key->c == 'f')
-		{
-			// move all non-Unconscious characters into out-party and leave Domain mode
+				long double day = TimeManager::GetTimePeriodInSeconds(TIME_DAY);
+				gGame->mTimeManager->AdvanceTimeBy(day - fmod(gGame->mTimeManager->GetRunningTime(), day));
+			}
+			else if (key->c == 'F' || key->c == 'f')
+			{
+				// move all non-Unconscious characters into out-party and leave Domain mode
+			}
 		}
 	}
 
@@ -601,7 +614,7 @@ void BaseManager::RenderBaseMenu(int baseID)
 			int bT = baseType[baseID];
 			int partyID = basePartyID[baseID];
 
-			if (controlPane < PANE_PARTY_INVENTORY)
+			if (controlPane < PANE_BASE_INVENTORY)
 			{
 				// Character Screen:
 				// Top Left: Characters in Base Party
@@ -740,64 +753,8 @@ void BaseManager::RenderBaseMenu(int baseID)
 			}
 			else
 			{
-				// Inventory Screen:
-				// Top Left: Party Inventory
-				// Top Right: Base Inventory
-				// Bottom: Purchasable Items
-
-				int visitingPartyInvID = gGame->mPartyManager->GetInventoryID(gGame->GetSelectedPartyID());
-				int basePartyInvID = GetInventoryID(baseID);
-
-				auto& visitorInv = gGame->mInventoryManager->GetInventory(visitingPartyInvID);
-				auto& partyInv = gGame->mInventoryManager->GetInventory(basePartyInvID);
-
-				// add overall frame with title
-				tcod::print_frame(
-					g_console,
-					{ 0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT },
-					"Inventory Control",
-					& TCOD_white,
-					& TCOD_black,
-					TCOD_BKGND_SET,
-					false);
-
-                // base inventory
-                for (int i=0;i<partyInv.size();i++)
-                {
-					auto n = partyInv[i];
-                    std::string name = gGame->mItemManager->getName(n.first);
-                    std::string count = std::to_string(n.second);
-                    std::string itemLine = count + " x " + name;
-                    
-					TCOD_ColorRGB backg_col = TCOD_black;
-					TCOD_ColorRGB foreg_col = TCOD_white;
-                    if (menuPosition == i && controlPane == PANE_BASE_INVENTORY)
-                    {
-                        backg_col = TCOD_white;
-                        foreg_col = TCOD_black;
-                    }
-					
-					tcod::print(g_console, { 2, 2+i }, itemLine, foreg_col, backg_col);
-                }
-
-                // visitor inventory
-				for (int i = 0; i < visitorInv.size(); i++)
-				{
-					auto n = visitorInv[i];
-					std::string name = gGame->mItemManager->getName(n.first);
-					std::string count = std::to_string(n.second);
-					std::string itemLine = count + " x " + name;
-
-                    TCOD_ColorRGB backg_col = TCOD_black;
-                    TCOD_ColorRGB foreg_col = TCOD_white;
-                    if (menuPosition == i && controlPane == PANE_PARTY_INVENTORY)
-                    {
-                        backg_col = TCOD_white;
-                        foreg_col = TCOD_black;
-                    }
-                    
-                    tcod::print(g_console, { 2 + SAMPLE_SCREEN_WIDTH / 2, 2 + i }, itemLine, foreg_col, backg_col);
-				}
+				// inventory screen is managed by InventoryManager
+				gGame->mInventoryManager->RenderInventory();
 			}
 		}
 	}
