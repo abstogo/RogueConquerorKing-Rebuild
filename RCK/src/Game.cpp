@@ -29,7 +29,7 @@ void Game::StartGame() {
     // DataLoad(); // delayed until after new game is selected so we can account for game options
 
     CreateMenu();
-    
+
     mMenuManager->OpenMenu(mainMenuID);
 }
 
@@ -39,7 +39,7 @@ void Game::DataLoad()
 
     // The core data files, stored in data/RCK/scripts are loaded here.
     // Each primary manager is spawned from one or more core data files.
-    
+
 	mInventoryManager = InventoryManager::CreateInventoryManager();
 	mCharacterManager = CharacterManager::LoadCharacteristics();
 	mClassManager = ClassManager::LoadClasses();
@@ -137,7 +137,7 @@ void Game::CreateTestGame()
 		" s s s . . . . . . . . . . * * . . . . . . . .",
 	};
 	mMapManager->BuildRegionMapFromText(regionMap);
-	
+
 	std::vector<std::string> outdoorMap = {
 		". . . . . . . . . . . . . . . . . . . . . . . ",
 		" . . . . . . . . . . . . . . . . . . . . . . .",
@@ -202,13 +202,13 @@ void Game::CreateTestGame()
 
 void Game::ClearGame()
 {
-	
+
 }
 
 void Game::SpawnLevel(int mapID, int spawnPointX, int spawnPointY)
 {
 	DebugLog("SPAWNING LEVEL #" + std::to_string(mapID));
-	
+
 	currentMapID = mapID;
 	currentMap = mMapManager->getMap(currentMapID);
 
@@ -230,7 +230,7 @@ void Game::SpawnLevel(int mapID, int spawnPointX, int spawnPointY)
 			mCharacterManager->SetPlayerY(currentCharacterID, spawnPointY);
 			mCharacterManager->SetPlayerMap(currentCharacterID, mapID);
 			currentMap->setCharacter(spawnPointX, spawnPointY, currentCharacterID);
-			
+
 			DebugLog("Spawning player onto position (" + std::to_string(spawnPointX) + "," + std::to_string(spawnPointY) + ")");
 		}
 		else
@@ -286,7 +286,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 	// returns true if anything has changed, false if it has not
 
 	int player_x, player_y;
-	
+
 	if (currentMapID != -1)
 	{
 		player_x = mCharacterManager->GetPlayerX(currentCharacterID);
@@ -297,7 +297,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 		player_x = mPartyManager->GetPartyX(currentPartyID);
 		player_y = mPartyManager->GetPartyY(currentPartyID);
 	}
-	
+
 	if(key->vk == TCODK_NONE)
 	{
 		return false;
@@ -387,8 +387,8 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 			}
 		}
 	}
-	
-	
+
+
 	// ACTION SYSTEM
 	// Basic idea is that there are a small number of controls (because the hex/ortho transition is complicated enough)
 	// Each control is largely contextual - so movement keys towards an enemy is an attack, toward a non-enemy is a discussion, etc.
@@ -571,11 +571,11 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 			}
 		}
 		break;
-		
+
 		case GM_INVENTORY:
 		{
             // operate whatever inventory menu is currently open
-			
+
 			if (key->vk == TCODK_UP)
 			{
 				gGame->mInventoryManager->ControlMoveUp();
@@ -619,7 +619,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 					return true;
 				}
 			}
-				
+
 			switch (targetMode)
 			{
 				case(TARGET_CREATURE):
@@ -704,7 +704,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 				}
 				break;
 			}
-				
+
 		}
 		break;
 
@@ -716,7 +716,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 
 		case(GM_CHARACTER):
 		{
-			
+
 		}
 		break;
 	}
@@ -724,7 +724,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 	return false;
 }
 
-void Game::TriggerTargeting(int targetingMode, int returnManager, int returnCode, int range, int size, bool allies, bool enemies, std::vector<int>& targets)
+void Game::TriggerTargeting(int targetingMode, int returnManager, int returnCode, int range, int size, bool allies, bool enemies, const std::vector<int>& targets)
 {
 	mode = GM_TARGET;
 	targetMode = targetingMode;
@@ -748,7 +748,7 @@ void Game::TriggerTargeting(int targetingMode, int returnManager, int returnCode
 		targetCursorX = mCharacterManager->GetPlayerX(currentCharacterID);
 		targetCursorY = mCharacterManager->GetPlayerY(currentCharacterID);
 	}
-	
+
 }
 
 void Game::GoToRegionMap()
@@ -756,13 +756,13 @@ void Game::GoToRegionMap()
     // shift to "no map"
 	currentMapID = -1;
 	currentMap = NULL;
-    
+
 	// deregister all entities from the time manager to avoid ticking local entities
 	mTimeManager->DeregisterEntities();
 
 	// clear the action log
 	AddActionLogText("", true);
-    
+
     // move all "Goods" tagged items from character inventories into the party inventory
 	int partyInventoryID = gGame->mPartyManager->GetInventoryID(currentPartyID);
 	for (auto& pc : gGame->mPartyManager->getPlayerCharacters(currentPartyID))
@@ -775,7 +775,7 @@ void Game::GoToRegionMap()
                 gGame->mInventoryManager->RemoveItemFromInventory(pcInventoryID, item.first, item.second);
                 gGame->mInventoryManager->AddItemToInventory(partyInventoryID, item.first, item.second);
             }
-        }      
+        }
 	}
 }
 
@@ -1002,7 +1002,7 @@ void Game::MoveCharacter(int new_x, int new_y)
 			{
 				mPartyManager->SetPartyX(currentPartyID, new_x);
 				mPartyManager->SetPartyY(currentPartyID, new_y);
-				
+
 				//UpdateLookText(new_x, new_y);
 				double time = mMapManager->getMovementTime(currentMapID, mCharacterManager->GetCurrentSpeed(currentCharacterID));
 				mTimeManager->AdvanceTimeBy(time);
@@ -1026,7 +1026,7 @@ void Game::MoveCharacter(int new_x, int new_y)
 					}
 				}
 
-				
+
 
 			}
 		}
@@ -1048,7 +1048,7 @@ bool Game::HexKeyboardMove(int move_value)
 		player_y = mPartyManager->GetPartyY(currentPartyID);
 	}
 	int new_x, new_y;
-	
+
 	mMapManager->shift(currentMapID, new_x, new_y, player_x, player_y, move_value);
 
 	MoveCharacter(new_x, new_y);
@@ -1128,7 +1128,7 @@ bool Game::HexKeyboardTarget(int move_value)
 			UpdateLookText(targetCursorX, targetCursorY);
 		}
 		break;
-		
+
 	}
 
 	return false;
@@ -1166,7 +1166,7 @@ bool Game::OrthoKeyboardTarget(int move_value)
 		}
 		break;
 	}
-	
+
 	return false;
 }
 
@@ -1247,7 +1247,7 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
 {
 	// can be used for different entity types (mob and character) using managers
 	// we'll use this for traps using the map manager later too
-	
+
 	// Many monsters have an attack sequence, and any creature can Cleave (up to certain limitations).
 	// Attack sequences always go off, and Cleaves go off if we fell an enemy with an attack.
 	// Finally, we can have a couple of different kind of magical and non-magical ranged attack, some of which have attack rolls and some don't
@@ -1256,7 +1256,7 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
 	// Essentially every creature gets a given number of Cleaves each turn, and they can be used on any given attack until they run out.
 
 	int attackerAttackBonus, attackerDamageDieType, attackerDamageDice, attackerDamageBonus, attackerCleaveCount;
-	
+
 	switch (attackerManager)
 	{
 		case MANAGER_CHARACTER:
@@ -1264,7 +1264,7 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
 				Creature& c = mMobManager->GetMonster(defenderID);
 				std::string attackText = gGame->mCharacterManager->getCharacterName(attackerID) + " attacks " + c.GetName() + ".";
 				gGame->AddActionLogText(attackText);
-				
+
 				// PCs/NPCs get only one attack each, barring things like "Haste".
 				attackerAttackBonus = mCharacterManager->UpdateCurrentAttackValue(attackerID, missile);
 
@@ -1296,7 +1296,7 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
 							attackerDamageDieType = 10;
 						}
 					}
-				
+
 
 					// range modifiers
 					if(missile)
@@ -1311,7 +1311,7 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
 						int rangePenalty = mItemManager->getRangePenalty(weaponID, dist);
 						attackerAttackBonus += rangePenalty;
 					}
-					
+
 					// bow weapons are an exception to the usual damage pattern.
 					if(mItemManager->hasTag(weaponID, "Bows") || mItemManager->hasTag(weaponID, "Crossbows"))
 					{
@@ -1334,7 +1334,7 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
 						if(missile)
 						{
 							int wieldedID = mCharacterManager->GetItemInEquipSlot(currentCharacterID, HAND_MAIN);
-							
+
 							// on-hand weapon is missile, so select a target
 							int range = mItemManager->getMaxRange(wieldedID);
 							int x = mCharacterManager->GetPlayerX(currentCharacterID);
@@ -1382,7 +1382,7 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
 							{
 								ResolveAttacks(attackerManager, attackerID, MANAGER_MOB, monstersInRange[0], missile);
 							}
-							
+
 							TriggerTargeting(TARGET_CREATURE, -1, 2, 1, 1, false, true, monstersInRange);
 							return false;
 						}
@@ -1397,16 +1397,16 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
 
 				std::string attackText = c.GetName() + " attacks " + gGame->mCharacterManager->getCharacterName(defenderID) + ".";
 				gGame->AddActionLogText(attackText);
-				
+
 				attackerCleaveCount = c.GetCleaveCount();
-				
+
 				AdvancementStore* as = mClassManager->GetAdvancementStore();
 				attackerAttackBonus = as->AttackBonusLookup["Monster"][c.GetHitDie()];
 
 				std::vector <std::vector<std::string>>& attackSequences = c.GetAttackSequences();
 				int sequence = randomiser->getInt(0, attackSequences.size()-1);
 				std::vector<std::string>& attackSequence = attackSequences[sequence];
-				
+
 				for(std::string attack : attackSequence)
 				{
 					AttackType at = c.GetAttack(attack);
@@ -1428,7 +1428,7 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
 			{
 			}
 			break;
-		
+
 	}
 	return true; // if we didn't go out any other way, we need to return to GM_MAIN
 }
@@ -1515,7 +1515,7 @@ bool Game::ResolveDamage(int damageDie, int damageBonus, int defenderMananger, i
 			gGame->AddActionLogText(c + " falls!");
 			mCharacterManager->SetCondition(defenderID,"Unconscious",-255);
 			mCharacterManager->SetCondition(defenderID, "Injured",-255);
-			mCharacterManager->SetBehaviour(defenderID, "Unconscious"); 
+			mCharacterManager->SetBehaviour(defenderID, "Unconscious");
 			// if the defender is the currently active character
 			if(defenderID == currentCharacterID)
 			{
@@ -1559,7 +1559,7 @@ bool Game::ResolveDamage(int damageDie, int damageBonus, int defenderMananger, i
 	}
 	break;
 	}
-	
+
 	return disabled;
 }
 
@@ -1577,10 +1577,10 @@ void Game::MainLoop()
 {
 	TCOD_key_t key = { TCODK_NONE,0 };
 	TCOD_mouse_t mouse;
-	
+
 	do {
 		// render current sample
-        
+
 		if(mMenuManager->MenuOpen())
 		{
 			MenuGameHandleKeyboard(&key);
@@ -1634,7 +1634,7 @@ void Game::MainLoop()
 		}
 
 		// update the game screen
-        
+
         // TCODConsole::flush();
 
         g_context->present(g_console);
@@ -1657,7 +1657,7 @@ void Game::MainLoop()
 				//TCODConsole::root->saveApf("samples.apf");
 			}
 			else {
-				// save screenshot 
+				// save screenshot
 				g_context->save_screenshot(NULL);
 			}
 		}
@@ -1686,9 +1686,9 @@ void Game::RenderMap()
 		currentMap->map->computeFov(player_x, player_y, 0, light_walls, FOV_BASIC);
 	}
 
-	// why did I remove the torch variation effect? 
-	// Because the wilderness is intended to be more "open-feeling" than the dungeon. If we keep the torch effect in the dungeons, 
-	// that adds to the sense of claustrophobia. But outdoors should feel airy and open, even in the dark. 
+	// why did I remove the torch variation effect?
+	// Because the wilderness is intended to be more "open-feeling" than the dungeon. If we keep the torch effect in the dungeons,
+	// that adds to the sense of claustrophobia. But outdoors should feel airy and open, even in the dark.
 
 	if (currentMapID == -1)
 	{
@@ -1752,8 +1752,8 @@ std::vector<int> Game::GetTargetedEntities()
 	// the ids need to lap around. So if we're selecting 3 from a set of {1,2,3,4,5}, and our targeting starts at 4, then we want 4,5,1
 	std::vector<int> output;
 
-	size_t i = targetIndex; 
-	
+	size_t i = targetIndex;
+
 	while(effect_size > 0)
 	{
 		output.push_back(targetIDs[i]);
@@ -1761,7 +1761,7 @@ std::vector<int> Game::GetTargetedEntities()
 		i++;
 		if (i > (targetIDs.size() - 1)) i = 0;
 	}
-	
+
 	return output;
 }
 
@@ -1774,7 +1774,7 @@ void Game::RenderTargets()
 	// 2: Range
 	// 3: Ally/Enemy flags (if any)
 	// 4: Effect Size (affected creatures, radius, width at cone end)
-	// 
+	//
 	switch (targetMode)
 	{
 	case(TARGET_CELL):
@@ -1791,7 +1791,7 @@ void Game::RenderTargets()
 			for (int beastie : targets)
 			{
 				//Creature& c = mMobManager->GetMonster(beastie);
-				
+
 				mMapManager->renderAtPosition(currentMapID, mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), 'X');
 			}
 		}
@@ -1871,7 +1871,7 @@ void Game::UpdateLookText(int x, int y)
 	}
 	else
 	{
-		// overland map 
+		// overland map
 		if (currentBaseID != -1)
 		{
 			if (mBaseManager->GetBaseOwner(currentBaseID) == currentPartyID)
@@ -1913,7 +1913,7 @@ void Game::RenderActionLog()
 	const int BOX_HEIGHT = 5;
 	std::string logText = playLogString;
 	int size = tcod::get_height_rect(SAMPLE_SCREEN_WIDTH, logText);
-	
+
 	// now truncate our text line by line until it fits.
 
 	while (size > BOX_HEIGHT)
@@ -1925,7 +1925,7 @@ void Game::RenderActionLog()
 
         size = tcod::get_height_rect(SAMPLE_SCREEN_WIDTH, logText);
 	}
-	
+
     tcod::print_rect(g_console, { 2, 25, SAMPLE_SCREEN_WIDTH, 5 }, logText, std::nullopt, std::nullopt);
 }
 
@@ -1945,25 +1945,25 @@ void Game::RenderCharacterSheet()
 
 	auto acks_class = mCharacterManager->getCharacterClass(currentCharacterID);
 	int level = mCharacterManager->getCharacterLevel(currentCharacterID);
-	
+
 	auto ranks = acks_class->LevelTitles;
 	std::string rank = ranks[level];
 	std::string name = mCharacterManager->getCharacterName(currentCharacterID);
 	std::string title = name + "," + rank;
-	
+
 	tcod::print_frame(*characterScreen, { 0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT }, title, &TCOD_white, &TCOD_black, TCOD_BKGND_NONE, false);
 
 	tcod::print(*characterScreen, { 25,2 }, "Attributes", TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 
 	std::vector<Statistic> stats = mCharacterManager->cd.statistics();
-	
+
 	for(int i=0;i<stats.size();i++)
 	{
 		Statistic s = stats[i];
 		tcod::print(*characterScreen, { 25,4+i }, stats[i].name(), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 		tcod::print(*characterScreen, { 40, 4 + i }, std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID, i)), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 	}
-	
+
 	std::string clas = "Class:" + acks_class->Name();
 	std::string lev = "Level:" + std::to_string(level);
 
@@ -1978,11 +1978,11 @@ void Game::RenderCharacterSheet()
 		nextp = std::to_string(maxps[level + 1]);
 	}
 	std::string exp = "Experience:" + std::to_string(xp) + "/" + nextp;
-	
+
 	tcod::print(*characterScreen, { 2,4 }, exp, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 
 	auto advancement = mClassManager->GetAdvancementStore();
-	
+
 	auto attack_bonuses = advancement->AttackBonusLookup[acks_class->AttackProgression()];
 	int attack_bonus = attack_bonuses[level];
 	std::string ab_melee = "Melee Attack:" + std::to_string(mCharacterManager->UpdateCurrentAttackValue(currentCharacterID, false));
@@ -1992,7 +1992,7 @@ void Game::RenderCharacterSheet()
 	tcod::print(*characterScreen, { 2,7 }, ab_missile, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 
 	tcod::print(*characterScreen, { 25,11 }, "Saves", TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-	
+
 	for(int i=0;i<5;i++)
 	{
 		std::string save_name = saveTypes[i];
@@ -2041,7 +2041,7 @@ void Game::RenderInventory()
 		// we're off the first page. calculate which page we're actually on
 		page = inventoryPosition % MAX_ITEMS;
 	}
-	
+
 	auto inv_iter = inv.begin();
 	std::advance(inv_iter, page* MAX_ITEMS);
 
@@ -2131,7 +2131,7 @@ bool Game::MenuHandler(std::string menuName, int returnCode)
                 return true;
                 break;
         }
-    }   
+    }
 }
 
 void Game::DebugLog(std::string message)

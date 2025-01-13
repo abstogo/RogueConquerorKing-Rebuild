@@ -21,7 +21,7 @@ extern tcod::ContextPtr g_context;  // The global libtcod context.
 /*
  * The Game class exists to contain the various managers etc for the game and coordinate the game's functions
  *
- * 
+ *
  */
 
 class CharacterManager;
@@ -95,7 +95,7 @@ class Game
 
 	int mode;
     int oldMode;
-	
+
 	Map* currentMap;
 
 	const float TORCH_RADIUS = 10;
@@ -103,18 +103,18 @@ class Game
 
 	const float SAMPLE_SCREEN_X = 2;
 	const float SAMPLE_SCREEN_Y = 2;
-	
+
 	bool recomputeFov ; // the player moved. must recompute fov
 
 	bool light_walls;
 
 	std::string playLogString;
-	
+
 	int inventoryPosition = 0;
 	int abilityPosition = 0;
 
     int mainMenuID;
-    
+
 	// target mode data
 	int targetCursorX, targetCursorY; // target cursor for rendering purposes
 	int targetIndex;
@@ -132,7 +132,7 @@ class Game
 	int remainingCleaves = -1;
 
 	bool hostilifying = false;
-	
+
 	void MoveCharacter(int new_x, int new_y);
 
 	void RenderOffscreenUI(bool inventory, bool character);
@@ -143,7 +143,7 @@ class Game
 	void QuitGame();
 
 	void GoToRegionMap();
-	
+
 public:
 	Game()
 	{
@@ -155,12 +155,12 @@ public:
 	void ClearGame();
 	void CreateMenu();
 	void CreateTestGame();
-	
+
 	bool TargetHandler(int entityID, int returnCode);
-	void TriggerTargeting(int targetingMode, int returnManager, int returnCode, int range = -1, int size = 1, bool allies = false, bool enemies = false , std::vector<int>& targets = std::vector<int>());
+	void TriggerTargeting(int targetingMode, int returnManager, int returnCode, int range = -1, int size = 1, bool allies = false, bool enemies = false, const std::vector<int>& targets = std::vector<int>());
 
 	void MainLoop();
-	
+
 	void RenderMap();
 	void RenderScreenFurniture();
 	void RenderUI(int selectedCharacterID);
@@ -175,7 +175,7 @@ public:
 	void RenderInventory();
 
 	void RenderTargets();
-	
+
 	// We have to split the keyboard handling between hex and ortho modes.
 	// Since our players shouldn't need to shift between modes just to use menu/selector etc controls, we also separate those controls as well as moves
 	bool MainGameHandleKeyboard(TCOD_key_t* key);
@@ -190,7 +190,7 @@ public:
 	bool OrthoKeyboardTarget(int move_value);
 
 	int HexToOrtho(int input);
-	
+
 	int& GetCurrentMap() { return currentMapID; }
 	int GetSelectedCharacterID() { return currentCharacterID; }
 	void SetSelectedCharacterID(int characterID) { currentCharacterID = characterID; }
@@ -209,7 +209,7 @@ public:
 	void CharacterDeath(int characterID); // used when another manager declares a character dead
 
     bool MenuHandler(std::string menuName, int returnCode);
-	
+
 	// publicly accessible managers
 	CharacterManager* mCharacterManager;
 	ClassManager* mClassManager;
@@ -223,7 +223,7 @@ public:
 	BaseManager* mBaseManager;
     MenuManager* mMenuManager;
 	InventoryManager* mInventoryManager;
-	
+
 	tcod::Console* characterScreen = nullptr;
 	tcod::Console* inventoryScreen = nullptr;
 
