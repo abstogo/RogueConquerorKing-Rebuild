@@ -45,6 +45,7 @@ public:
 
     int GetCurrentMenu();
     void OpenMenu(int menuID);
+    void CloseMenu() { currentMenuID = -1; }
     bool MenuOpen();
 
     int ControlMoveUp();
