@@ -32,6 +32,8 @@
 //
 // We load nearly all of the base information for this generation system from the equipment.json file, with decoration coming from the decoration.json file
 
+// This enum manages the equipment slots on a character
+// We can potentially move this data-side later to make it moddable?
 enum EQUIP_TYPES
 {
 	HAND_MAIN,

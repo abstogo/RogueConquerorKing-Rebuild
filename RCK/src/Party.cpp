@@ -10,6 +10,11 @@ PartyManager::~PartyManager()
 	
 }
 
+int PartyManager::GetInventoryID(int partyID)
+{
+	return partyInventoryIDs[partyID];
+}
+
 PartyManager* PartyManager::LoadPartyData()
 {
 	gLog->Log("Party Loader", "Started");
@@ -56,8 +61,8 @@ int PartyManager::shellGenerate()
 	henchmen.push_back(henchs);
 	std::vector<int> anims;
 	animals.push_back(anims);
-	std::vector<std::pair<int, int>> inv;
-	partyInventory.push_back(inv);
+	int inv = gGame->mInventoryManager->RegisterInventory(MANAGER_PARTY, output);
+	partyInventoryIDs.push_back(inv);
 	totalCarryCapacity.push_back(0);
 	totalSuppliesFood.push_back(0);
 	partyXPos.push_back(-1);
@@ -183,11 +188,7 @@ void PartyManager::TransferParty(int sourcePartyID, int destinationPartyID)
 	henchmen[sourcePartyID].clear();
 	animals[sourcePartyID].clear();
 
-	for (std::pair<int, int> item : partyInventory[sourcePartyID])
-	{
-		partyInventory[destinationPartyID].push_back(item);
-	}
-	partyInventory[sourcePartyID].clear();
+	gGame->mInventoryManager->TransferInventory(partyInventoryIDs[sourcePartyID], partyInventoryIDs[destinationPartyID]);
 }
 
 void PartyManager::MergeParty(int fromPartyID, int toPartyID)

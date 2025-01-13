@@ -9,6 +9,7 @@
 #include "Party.h"
 #include "Bases.h"
 #include "Menus.h"
+#include "Inventory.h"
 #include <libtcod.hpp>
 
 /// Return the data directory.
@@ -33,6 +34,7 @@ class MortalWoundManager;
 class PartyManager;
 class BaseManager;
 class MenuManager;
+class InventoryManager;
 
 enum ManagerType
 {
@@ -46,6 +48,7 @@ enum ManagerType
 	MANAGER_PARTY,
 	MANAGER_BASE,
     MANAGER_MENU,
+    MANAGER_INVENTORY,
 	MANAGER_MAX
 };
 
@@ -217,6 +220,7 @@ public:
 	PartyManager* mPartyManager;
 	BaseManager* mBaseManager;
     MenuManager* mMenuManager;
+	InventoryManager* mInventoryManager;
 	
 	tcod::Console* characterScreen = nullptr;
 	tcod::Console* inventoryScreen = nullptr;

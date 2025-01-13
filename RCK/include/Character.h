@@ -78,23 +78,6 @@ enum CharBehaviour
 
 const std::string CharBehaviourNames[] = { "Idle", "Wander", "Follow", "SeekEnemy", "SeekItem", "Range", "Flee", "Unconscious" };
 
-// conditions are not a bitfield, you can have more than one at a time.
-// These conditions are based on those in AXIOMS 6, although not all are relevant to the RL version
-// We'll expand this as we add more spells etc
-enum ConditionFlags
-{
-	CONDITION_SLUMBERING,
-	CONDITION_CONCENTRATING,
-	CONDITION_PRONE,
-	CONDITION_UNCONSCIOUS,
-	CONDITION_CHARGING,
-	CONDITION_ENGAGED,
-	CONDITION_STUNNED,
-	CONDITION_VULNERABLE,
-	CONDITION_HELPLESS,
-	CONDITION_MAX
-};
-
 // capabilities are a bitfield, because you'll usually have a bunch of them
 enum CapabilityFlags : unsigned long long
 {
@@ -184,7 +167,7 @@ class CharacterManager
 	std::vector<std::vector<std::string>> pcArmourProficiencies;
 	std::vector<std::vector<std::string>> pcFightingStyles;
 
-	std::vector<std::list<int>> pcInventory;
+	std::vector<int> pcInventoryID;
 	std::vector<std::vector<int>> pcEquipped;
 
 	std::vector<int> pcXPos;
@@ -203,13 +186,11 @@ class CharacterManager
 	std::vector<std::vector<std::pair<int, int>>> pcConditions;
 	std::vector<std::vector<MortalEffect*>> pcMortalWounds;
 
-	
-
 	int EquipWeapon(int characterID, int itemID);
 	int EquipShield(int characterID, int itemID);
 	int EquipArmour(int characterID, int itemID);
 
-	int GetItemIndex(int characterID, int inventoryID);
+	// int GetItemIndex(int characterID, int inventoryID);
 
 	void UpdateProficiencyCache(int characterID);
 	void UpdateCapabilities(int characterID);
@@ -235,7 +216,6 @@ public:
 
 	// LOADED DATA from Jsons is kept public
 	CharacteristicData cd;
-    
 
     // base data manipulators
     void Initialise();
@@ -299,7 +279,14 @@ public:
 	void DeactivateCharacter(int characterID);
 
 	// Item Handling
+    // The main character inventory is managed by InventoryManager
+	// The major issue here is equipped items. The slots for this are defined in Inventory.h
+    // We can assign and unassign appropriate items to these slots
+    // Note that since we can assign stacks to these slots, we need to use inventory indexes rather than itemIDs
+    
+	// we reference the equipment by the inventory slot, not the itemID
 	int EquipItem(int characterID, int inventoryID);
+	void UnequipSlot(int characterID, int slotID);
 	void UnequipItem(int characterID, int inventoryID);
 
 	int GetItemInEquipSlot(int characterID, int slot)
@@ -312,13 +299,11 @@ public:
 	bool CanUseItem(int characterID, int itemID);
 	bool CanUseStyle(int characterID, std::string style);
 
-	int AddInventoryItem(int characterID, int itemID);				// returns inventory index
-	int RemoveInventoryItem(int characterID, int inventoryID);		// returns item ID
-
-
-	std::list<int> GetInventory(int characterID)
+	int AddInventoryItem(int characterID, int itemID, int count = 1);
+	void RemoveInventoryItem(int characterID, int itemID, int count = 1);		// returns item ID
+	int GetInventory(int characterID)
 	{
-		return pcInventory[characterID];
+		return pcInventoryID[characterID];
 	}
 
 	int UpdateCurrentAttackValue(int characterID, bool missile);
