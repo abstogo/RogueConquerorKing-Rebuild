@@ -22,8 +22,10 @@ class InventoryManager
 
     int nextInventoryID = 0;
     
-    std::vector<std::vector<int>> itemIDs;
-    std::vector<std::vector<int>> itemCounts;
+    std::vector<std::vector<std::pair<int, int>>> itemEntries;
+
+    //std::vector<std::vector<int>> itemIDs;
+    //std::vector<std::vector<int>> itemCounts;
     std::vector<int> ownerManagers;
     std::vector<int> ownerEntities;
     
@@ -53,7 +55,7 @@ public:
     
     int GetItemCount(int inventoryID, int itemID);
     int GetInventorySize(int inventoryID);
-    std::vector<std::pair<int, int>> GetInventory(int inventoryID);
+    std::vector<std::pair<int, int>>& GetInventory(int inventoryID);
 
     // Inventory Menu   
     void OpenInventoryMenu(int sourceID, int destinationID=-1);

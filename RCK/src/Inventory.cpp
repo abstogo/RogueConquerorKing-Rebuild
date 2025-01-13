@@ -12,8 +12,8 @@ int InventoryManager::RegisterInventory(int ownerManager, int ownerEntity)
     // create a new Inventory owned by the specified Entity and return the ID
     int newID = nextInventoryID++;
     
-    itemIDs.push_back(std::vector<int>());
-    itemCounts.push_back(std::vector<int>());
+    itemEntries.push_back(std::vector<std::pair<int, int>>());
+    
     ownerManagers.push_back(ownerManager);
     ownerEntities.push_back(ownerEntity);
 
@@ -23,19 +23,22 @@ int InventoryManager::RegisterInventory(int ownerManager, int ownerEntity)
 int InventoryManager::AddItemToInventory(int inventoryID, int itemID, int count)
 {
     int output = -1;
-    if (std::find(itemIDs[inventoryID].begin(), itemIDs[inventoryID].end(), itemID) != itemIDs[inventoryID].end())
+
+    auto vec = itemEntries[inventoryID];
+    auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.second == itemID; });
+
+    if( loc != vec.end())
     {
         // we already have this item, so increase the count
-        int index = std::find(itemIDs[inventoryID].begin(), itemIDs[inventoryID].end(), itemID) - itemIDs[inventoryID].begin();
-        itemCounts[inventoryID][index] += count;
+        int index = loc - vec.begin();
+        itemEntries[inventoryID][index].second = count;
         output = index;
     }
     else
     {
         // we don't have this item, so add it to the inventory
-        output = itemIDs[inventoryID].size();
-        itemIDs[inventoryID].push_back(itemID);
-        itemCounts[inventoryID].push_back(count);
+        output = itemEntries[inventoryID].size();
+        itemEntries[inventoryID].push_back(std::make_pair(itemID, count));
     }
     return output;
 }
@@ -43,22 +46,25 @@ int InventoryManager::AddItemToInventory(int inventoryID, int itemID, int count)
 std::vector<std::pair<int, int>> InventoryManager::RemoveItemFromInventory(int inventoryID, int itemID, int count)
 {
     std::vector<std::pair<int, int>> removedItems;
-    if (std::find(itemIDs[inventoryID].begin(), itemIDs[inventoryID].end(), itemID) != itemIDs[inventoryID].end())
+
+    auto vec = itemEntries[inventoryID];
+    auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.second == itemID; });
+
+    if (loc != vec.end())
     {
         // we already have this item, so decrease the count
-        int index = std::find(itemIDs[inventoryID].begin(), itemIDs[inventoryID].end(), itemID) - itemIDs[inventoryID].begin();
-        if (itemCounts[inventoryID][index] >= count)
+        int index = loc - vec.begin();
+        if (itemEntries[inventoryID][index].second >= count)
         {
-            itemCounts[inventoryID][index] -= count;
+            itemEntries[inventoryID][index].second -= count;
             removedItems.push_back(std::make_pair(itemID, count));
         }
         else
         {
             // we no longer have any of these items
-            removedItems.push_back(std::make_pair(itemID, count - itemCounts[inventoryID][index]));
+            removedItems.push_back(std::make_pair(itemID, count - itemEntries[inventoryID][index].second));
             // delete item from all vectors
-            itemIDs[inventoryID].erase(itemIDs[inventoryID].begin() + index);
-            itemCounts[inventoryID].erase(itemCounts[inventoryID].begin() + index);
+            itemEntries[inventoryID].erase(itemEntries[inventoryID].begin() + index);
         }
     }
 
@@ -68,24 +74,26 @@ std::vector<std::pair<int, int>> InventoryManager::RemoveItemFromInventory(int i
 void InventoryManager::TransferInventory(int sourceinventoryID, int destinationInventoryID)
 {
     // transfer all items from source to destination
-    for (int i = 0; i < itemIDs[sourceinventoryID].size(); i++)
+    for (int i = 0; i < itemEntries[sourceinventoryID].size(); i++)
     {
-        AddItemToInventory(destinationInventoryID, itemIDs[sourceinventoryID][i], itemCounts[sourceinventoryID][i]);
+        AddItemToInventory(destinationInventoryID, itemEntries[sourceinventoryID][i].first, itemEntries[sourceinventoryID][i].second);
     }
     // delete source inventory
-    itemIDs.erase(itemIDs.begin() + sourceinventoryID);
-    itemCounts.erase(itemCounts.begin() + sourceinventoryID);
+    itemEntries.erase(itemEntries.begin() + sourceinventoryID);
     ownerManagers.erase(ownerManagers.begin() + sourceinventoryID);
     ownerEntities.erase(ownerEntities.begin() + sourceinventoryID);
 }
 
 int InventoryManager::GetItemCount(int inventoryID, int itemID)
 {
+    auto vec = itemEntries[inventoryID];
+    auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.second == itemID; });
+
     // find corresponding count for the item ID
-    if (std::find(itemIDs[inventoryID].begin(), itemIDs[inventoryID].end(), itemID) != itemIDs[inventoryID].end())
+    if (loc != vec.end())
     {
-        int index = std::find(itemIDs[inventoryID].begin(), itemIDs[inventoryID].end(), itemID) - itemIDs[inventoryID].begin();
-        return itemCounts[inventoryID][index];
+        int index = loc - vec.begin();
+        return itemEntries[inventoryID][index].second;
     }
     else
     {
@@ -95,18 +103,12 @@ int InventoryManager::GetItemCount(int inventoryID, int itemID)
 
 int InventoryManager::GetInventorySize(int inventoryID)
 {
-    return itemIDs[inventoryID].size();
+    return itemEntries[inventoryID].size();
 }
 
-std::vector<std::pair<int, int>> InventoryManager::GetInventory(int inventoryID)
+std::vector<std::pair<int, int>>& InventoryManager::GetInventory(int inventoryID)
 {
-    // combine itemIDs and itemCounts into a single vector
-    std::vector<std::pair<int, int>> output;
-    for (int i = 0; i < itemIDs[inventoryID].size(); i++)
-    {
-        output.push_back(std::make_pair(itemIDs[inventoryID][i], itemCounts[inventoryID][i]));
-    }
-    return output;
+    return itemEntries[inventoryID];
 }
 
 
@@ -140,7 +142,7 @@ int InventoryManager::ControlMoveUp()
         }
         else
         {
-            sourceMenuPosition = itemIDs[sourceMenuInventoryID].size() - 1;
+            sourceMenuPosition = itemEntries[sourceMenuInventoryID].size() - 1;
         }
         output = sourceMenuPosition;
     }
@@ -152,7 +154,7 @@ int InventoryManager::ControlMoveUp()
         }
         else
         {
-            targetMenuPosition = itemIDs[targetMenuInventoryID].size() - 1;
+            targetMenuPosition = itemEntries[targetMenuInventoryID].size() - 1;
         }
         output = targetMenuPosition;
     }
@@ -164,7 +166,7 @@ int InventoryManager::ControlMoveDown()
     int output = 0;
     if (sourcePane)
     {
-        if (sourceMenuPosition < itemIDs[sourceMenuInventoryID].size() - 1)
+        if (sourceMenuPosition < itemEntries[sourceMenuInventoryID].size() - 1)
         {
             sourceMenuPosition++;
         }
@@ -176,7 +178,7 @@ int InventoryManager::ControlMoveDown()
     }
     else
     {
-        if (targetMenuPosition < itemIDs[targetMenuInventoryID].size() - 1)
+        if (targetMenuPosition < itemEntries[targetMenuInventoryID].size() - 1)
         {
             targetMenuPosition++;
         }
@@ -212,8 +214,8 @@ std::string InventoryManager::InvToText(int inventoryID, int slot)
 {
     std::string output;
     
-    int itemID = itemIDs[inventoryID][slot];
-    int count = itemCounts[inventoryID][slot];
+    int itemID = itemEntries[inventoryID][slot].first;
+    int count = itemEntries[inventoryID][slot].second;
     
     return ItemToText(itemID, count);
 }
@@ -282,7 +284,7 @@ void InventoryManager::RenderInventory()
 
     if (sourceMenuInventoryID != -1)
     {
-        for (int i = 0; i < itemIDs[sourceMenuInventoryID].size(); i++)
+        for (int i = 0; i < itemEntries[sourceMenuInventoryID].size(); i++)
         {
             int selected = -1;
             if (sourcePane)
@@ -291,6 +293,28 @@ void InventoryManager::RenderInventory()
             }
 
             std::string s = InvToText(sourceMenuInventoryID,i);
+            
+            // The entity manager modifies the displayed elements
+            // The basic use for this is for equipment slots, but there are other possible uses
+            if (ownerManagers[sourceMenuInventoryID] == MANAGER_CHARACTER)
+            {
+                int slot = gGame->mCharacterManager->GetEquipSlotForInventoryItem(ownerEntities[sourceMenuInventoryID], i);
+                if(slot == HAND_MAIN)
+                { 
+                    s = s + " (in main hand)";
+                }
+                else if (slot == HAND_OFF)
+                {
+                    s = s + " (in off-hand)";
+                }
+                else if (slot > HAND_OFF)
+                {
+                    // this is a worn item such as armour or boots
+                    s = s + " (worn)";
+                }
+            }
+            
+            
             TCOD_ColorRGB backg = TCOD_black;
             TCOD_ColorRGB foreg = TCOD_white;
             if (i == selected)
@@ -305,7 +329,7 @@ void InventoryManager::RenderInventory()
     
     if (targetMenuInventoryID != -1)
     {
-        for (int i = 0; i < itemIDs[targetMenuInventoryID].size(); i++)
+        for (int i = 0; i < itemEntries[targetMenuInventoryID].size(); i++)
         {
             int selected = -1;
             if (!sourcePane)
