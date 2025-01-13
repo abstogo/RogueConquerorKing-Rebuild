@@ -1,0 +1,47 @@
+{
+  "statistics": [
+    {
+      "name": "Strength",
+      "bonusTo": [
+        "Attack:Melee",
+        "Damage:Melee"
+      ]
+    },
+    {
+      "name": "Dexterity",
+      "bonusTo": [
+        "Attack:Missile",
+        "Initiative",
+        "Defence:AC"
+      ]
+    },
+    {
+      "name": "Constitution",
+      "bonusTo": [
+        "HitsPerDie"
+      ]
+    },
+    {
+      "name": "Intelligence",
+      "bonusTo": [
+        "Proficiencies:General",
+        "Spells:Arcane:RepertoirePerLevel",
+        "LanguageCount"
+      ] 
+    },
+    {
+      "name": "Wisdom",
+      "bonusTo": [
+        "Saves:Spells"
+      ] 
+    },
+    {
+      "name": "Charisma",
+      "bonusTo": [
+        "Reaction:All",
+        "MaxHenchmen",
+        "Morale:Hireling"
+      ] 
+    }
+  ]
+}

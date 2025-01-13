@@ -10,14 +10,14 @@ ClassManager* ClassManager::LoadClasses()
 {
 	gLog->Log("Class Loader", "Started");
 
-	std::string classFilename = "RCK/scripts/classes.json";
+	auto classFilename = get_data_dir() / "RCK/scripts/classes.json";
 	std::ifstream is(classFilename);
 
 	ClassManager* output = new ClassManager(jsoncons::decode_json<ClassSet>(is));
 
 	is.close();
 
-	gLog->Log("Class Loader", "Decoded " + classFilename);
+	gLog->Log("Class Loader", "Decoded " + classFilename.string());
 	
 	// now for every defined class in the set, load the associated stats CSV
 
@@ -31,6 +31,7 @@ ClassManager* ClassManager::LoadClasses()
 
 		std::string csv_name = "RCK/scripts/" + cl->Name() + "_chart.csv";
 		std::transform(csv_name.begin(), csv_name.end(), csv_name.begin(), ::tolower);
+        auto fn = get_data_dir() / csv_name;
 		std::ifstream csv(csv_name);
 
 		jsoncons::csv::csv_options options;

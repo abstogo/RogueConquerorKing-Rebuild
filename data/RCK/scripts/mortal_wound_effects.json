@@ -1,0 +1,576 @@
+{
+  "MortalEffects": [
+    {
+      "Code": "GhastlyWound",
+      "PlayerText": "A ghastly wound reveals %1%'s demise!",
+      "MonsterText": "A ghastly wound reveals %1%'s demise!",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "Blinded",
+      "PlayerText": "%1% is blinded.",
+      "MonsterText": "The %1% has damaged eyes.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:Vision",
+          "Value": 0
+        }
+      ]
+    },
+    {
+      "Code": "MangledBones",
+      "PlayerText": "Mangled bones and broken flesh reveal %1%'s grisly end.",
+      "MonsterText": "Mangled bones and broken flesh reveal the %1%'s grisly end.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "BadWayToGo",
+      "PlayerText": "What's left of %1% isn't pretty. What a bad way to go.",
+      "MonsterText": "What's left of the %1% isn't pretty. What a bad way to go.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "BloodyMess",
+      "PlayerText": "The bloody mess that was once %1%'s body is barely recognisable.",
+      "MonsterText": "The bloody mess that was once the %1% is barely recognisable.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "RedStain",
+      "PlayerText": "A red stain and shards of bone are all that remain of %1%.",
+      "MonsterText": "A red stain and shards of bone are all that remain of the %1%.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "Vultures",
+      "PlayerText": "Not even the vultures could feed on what is left of %1%.",
+      "MonsterText": "Not even the vultures could feed on what is left of the %1%.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "IntactCorpse",
+      "PlayerText": "%1%'s corpse is largely intact and ready for a noble funeral.",
+      "MonsterText": "The %1% is dead, if largely intact.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "TongueSevered",
+      "PlayerText": "%1%'s lips and tongue are horribly damaged.",
+      "MonsterText": "The %1% is dead, if largely intact.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:Speech",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:Magic",
+          "Value": 0
+        },
+        {
+          "Name": "Reaction:All",
+          "Value": -4
+        }
+      ]
+    },
+    {
+      "Code": "LegsDestroyed",
+      "PlayerText": "Both of %1%'s legs have been destroyed.",
+      "MonsterText": "The %1%'s legs have been destroyed.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:ForcedMarch",
+          "Value": 0
+        },
+        {
+          "Name": "Defence:AC",
+          "Value": -6
+        },
+        {
+          "Name": "Capability:Move",
+          "Value": 0
+        }
+      ]
+    },
+    {
+      "Code": "ArmsDestroyed",
+      "PlayerText": "Both of %1%'s arms have been destroyed.",
+      "MonsterText": "The %1%'s arms have been destroyed.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:Attack",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:UseItem",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:Climb",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:OpenLock",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:RemoveTrap",
+          "Value": 0
+        }
+      ]
+    },
+    {
+      "Code": "SpineDestroyed",
+      "PlayerText": "%1%'s spine has been broken.",
+      "MonsterText": "The %1%'s spine has been broken.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:ForcedMarch",
+          "Value": 0
+        },
+        {
+          "Name": "Defence:AC",
+          "Value": -6
+        },
+        {
+          "Name": "Capability:Move",
+          "Value": 0
+        },
+        {
+          "Name": "Annual:SaveVsDeath",
+          "Value": 1
+        }
+      ]
+    },
+    {
+      "Code": "NeckDestroyed",
+      "PlayerText": "%1%'s neck has been broken.",
+      "MonsterText": "The %1%'s neck has been broken.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:UseWeapon",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:UseItem",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:Climb",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:OpenLock",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:RemoveTrap",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:ForcedMarch",
+          "Value": 0
+        },
+        {
+          "Name": "Defence:AC",
+          "Value": -4
+        },
+        {
+          "Name": "Capability:Move",
+          "Value": 0
+        },
+        {
+          "Name": "Monthly:SaveVsDeath",
+          "Value": 1
+        }
+      ]
+    },
+    {
+      "Code": "EarDestroyed",
+      "PlayerText": "%1%'s ear has been destroyed.",
+      "MonsterText": "The %1%'s ear has been destroyed.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Proficiency:HearNoise:Roll",
+          "Value": -1
+        },
+        {
+          "Name": "SurpriseBonus",
+          "Value": -1
+        }
+      ]
+    },
+    {
+      "Code": "EyeDestroyed",
+      "PlayerText": "%1%'s eye has been destroyed.",
+      "MonsterText": "The %1%'s eye has been destroyed.",
+      "DoubleTo": "Blinded",
+      "SpecialPenalties": [
+        {
+          "Name": "Attack:Missile",
+          "Value": -2
+        }
+      ]
+    },
+    {
+      "Code": "LegDestroyed",
+      "PlayerText": "%1%'s leg has been destroyed.",
+      "MonsterText": "The %1%'s eye has been destroyed.",
+      "DoubleTo": "LegsDestroyed",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:ForcedMarch",
+          "Value": 0
+        },
+        {
+          "Name": "Defence:AC",
+          "Value": -3
+        },
+        {
+          "Name": "Capability:Move",
+          "Value": 0
+        }
+      ]
+    },
+    {
+      "Code": "ArmDestroyed",
+      "PlayerText": "%1%'s arm has been destroyed.",
+      "MonsterText": "The %1%'s arm has been destroyed.",
+      "DoubleTo": "ArmsDestroyed",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:Climb",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:UseShield",
+          "Value": -3
+        },
+        {
+          "Name": "Capability:DualWield",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:UseTwoHanded",
+          "Value": 0
+        }
+      ]
+    },
+    {
+      "Code": "ArmDestroyed",
+      "PlayerText": "%1%'s arm has been destroyed.",
+      "MonsterText": "The %1%'s arm has been destroyed.",
+      "DoubleTo": "ArmsDestroyed",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:Climb",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:UseShield",
+          "Value": -3
+        },
+        {
+          "Name": "Capability:DualWield",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:UseTwoHanded",
+          "Value": 0
+        }
+      ]
+    },
+    {
+      "Code": "DoubleLamed",
+      "PlayerText": "%1% is lame in both legs.",
+      "MonsterText": "The %1% is lame in both legs.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Movement:Base",
+          "Value": -60
+        },
+        {
+          "Name": "Defence:AC",
+          "Value": -5
+        }
+      ]
+    },
+    {
+      "Code": "BrainTrauma",
+      "PlayerText": "%1% is permanently addled from brain trauma.",
+      "MonsterText": "The %1% is permanently addled from brain trauma.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Magic:Research:Roll",
+          "Value": -2
+        },
+        {
+          "Name": "XPMultiplier",
+          "Value": 0.9
+        }
+      ]
+    },
+    {
+      "Code": "TeethLost",
+      "PlayerText": "%1% has lost multiple teeth.",
+      "MonsterText": "The %1% has lost multiple teeth.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Reaction:OppositeSex",
+          "Value": -2
+        },
+        {
+          "Name": "Reaction:UpperClass",
+          "Value": 2
+        }
+      ]
+    },
+    {
+      "Code": "EyeDamaged",
+      "PlayerText": "%1% has a damaged eye.",
+      "MonsterText": "The %1% has a damaged eye.",
+      "DoubleTo": "EyeDestroyed",
+      "SpecialPenalties": [
+        {
+          "Name": "Attack:Missile:Medium",
+          "Value": -2
+        },
+        {
+          "Name": "Attack:Missile:Long",
+          "Value": -2
+        }
+      ]
+    },
+    {
+      "Code": "KneeDamaged",
+      "PlayerText": "%1% has a damaged knee.",
+      "MonsterText": "The %1% has a damaged knee.",
+      "DoubleTo": "LegDestroyed",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:ForcedMarch",
+          "Value": 0
+        },
+        {
+          "Name": "CarryingCapacity",
+          "Value": -6
+        }
+      ]
+    },
+    {
+      "Code": "HandDamaged",
+      "PlayerText": "%1% has a damaged hand.",
+      "MonsterText": "The %1% has a damaged hand.",
+      "DoubleTo": "ArmDestroyed",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:DualWield",
+          "Value": 0
+        },
+        {
+          "Name": "Capability:UseTwoHanded",
+          "Value": 0
+        }
+      ]
+    },
+    {
+      "Code": "Lamed",
+      "PlayerText": "One of %1%'s legs is lamed.",
+      "MonsterText": "One of the %1%'s legs is lamed.",
+      "DoubleTo": "DoubleLame",
+      "SpecialPenalties": [
+        {
+          "Name": "Movement:Base",
+          "Value": -30
+        },
+        {
+          "Name": "Defence:AC",
+          "Value": -2
+        }
+      ]
+    },
+    {
+      "Code": "HeartLungDamage",
+      "PlayerText": "%1%'s heart and lungs are damaged.",
+      "MonsterText": "The %1%'s heart and lungs are damaged.",
+      "DoubleTo": "HeartLungDamage",
+      "SpecialPenalties": [
+        {
+          "Name": "RestRequirement",
+          "Value": 2
+        },
+        {
+          "Name": "Movement:Wilderness:Multiplier",
+          "Value": 0.66
+        },
+        {
+          "Name": "Attribute:Constitution:Multiplier",
+          "Value": 0.66
+        }
+      ]
+    },
+    {
+      "Code": "MinorScarring",
+      "PlayerText": "%1% suffers minor scarring.",
+      "MonsterText": "The %1% suffers minor scarring.",
+      "DoubleTo": "DoubleMinorScarring",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "DoubleMinorScarring",
+      "PlayerText": "%1% suffers further scarring.",
+      "MonsterText": "The %1% suffers further scarring.",
+      "DoubleTo": "NotableScarringScarring",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "NotableScarring",
+      "PlayerText": "%1% suffers significant scarring.",
+      "MonsterText": "The %1% suffers significant scarring.",
+      "DoubleTo": "DoubleNotableScarring",
+      "SpecialPenalties": [
+        {
+          "Name": "Proficiency:Disguise:Roll",
+          "Value": -2
+        }
+      ]
+    },
+    {
+      "Code": "DoubleNotableScarring",
+      "PlayerText": "%1% suffers more significant scarring.",
+      "MonsterText": "The %1% suffers more significant scarring.",
+      "DoubleTo": "GruesomeScarring",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "GruesomeScarring",
+      "PlayerText": "%1% suffers gruesome scarring.",
+      "MonsterText": "The %1% suffers gruesome scarring.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Proficiency:Disguise:Roll",
+          "Value": -2
+        },
+        {
+          "Name": "Reaction:Intimidate",
+          "Value": 2
+        },
+        {
+          "Name": "Reaction:All",
+          "Value": -4
+        }
+      ]
+    },
+    {
+      "Code": "BackDamaged",
+      "PlayerText": "%1% suffers damage to their hips and lower back.",
+      "MonsterText": "The %1% suffers damage to its hips and lower back.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Capability:ForcedMarch",
+          "Value": 0
+        }
+      ]
+    },
+    {
+      "Code": "DamagedGenitals",
+      "PlayerText": "%1%'s genitals are damaged.",
+      "MonsterText": "The %1%'s genitals are damaged.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "LostFingers",
+      "PlayerText": "%1% has lost fingers.",
+      "MonsterText": "The %1% has lost fingers.",
+      "DoubleTo": "HandDamaged",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "LostToes",
+      "PlayerText": "%1% has lost toes.",
+      "MonsterText": "The %1% has lost toes.",
+      "DoubleTo": "Lamed",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "Stiffened",
+      "PlayerText": "%1%'s wounds heal stiff and scarred.",
+      "MonsterText": "The %1%'s wounds heal stiff and scarred.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Intiative",
+          "Value": -1
+        }
+      ]
+    },
+    {
+      "Code": "Stiffened",
+      "PlayerText": "%1%'s wounds heal stiff and scarred.",
+      "MonsterText": "The %1%'s wounds heal stiff and scarred.",
+      "DoubleTo": "",
+      "SpecialPenalties": [
+        {
+          "Name": "Intiative",
+          "Value": -1
+        }
+      ]
+    },
+    {
+      "Code": "AchingWounds",
+      "PlayerText": "%1%'s wounds heal but ache in bad weather.",
+      "MonsterText": "The %1%'s wounds heal but ache in bad weather.",
+      "DoubleTo": "Stiffened",
+      "SpecialPenalties": [
+        {
+          "Name": "Intiative:Outdoor:Rainy",
+          "Value": -1
+        },
+        {
+          "Name": "Intiative:Outdoor:Cold",
+          "Value": -1
+        }
+      ]
+    },
+    {
+      "Code": "GhostlyVisions",
+      "PlayerText": "Ghostly visions of lost companions float before %1%'s eyes.",
+      "MonsterText": "Ghostly visions float before the %1%'s eyes.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "AfterlifeVision",
+      "PlayerText": "A vision of the afterlife haunts %1% before they awaken.",
+      "MonsterText": "A vision of the afterlife haunts the %1% before they awaken.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    },
+    {
+      "Code": "Choosers",
+      "PlayerText": "The Choosers of the Slain pass %1% by, and they awaken.",
+      "MonsterText": "The Choosers of the Slain pass the %1% by, and they awaken.",
+      "DoubleTo": "",
+      "SpecialPenalties": []
+    }
+  ]
+}

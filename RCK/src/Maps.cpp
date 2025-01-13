@@ -216,10 +216,11 @@ void MapManager::GeneratePrefabs()
 
 		std::vector<std::vector<std::string>> prefabSet;
 
-		for (std::string prefabPath : t.Prefabs())
+		for (auto prefabName : t.Prefabs())
 		{
-			gLog->Log("MapManager", "Loading Prefab:" + prefabPath);
-			prefabPath = "RCK/prefabs/" + prefabPath;
+            gLog->Log("MapManager", "Loading Prefab:" + prefabName);
+            std::string p = "RCK/prefabs" + prefabName;
+            auto prefabPath = get_data_dir() / p;
 			std::vector<std::string> prefabMap;
 
 			// load text file line by line into the prefab
@@ -232,8 +233,6 @@ void MapManager::GeneratePrefabs()
 				}
 				prefabSet.push_back(prefabMap);
 			}
-
-			
 		}
 
 		terrain_prefabs.push_back(prefabSet);
@@ -395,7 +394,7 @@ MapManager* MapManager::LoadMaps()
 	
 	gLog->Log("Map Manager", "Started");
 
-	const std::string mapsFilename = "RCK/prefabs/maps.json";
+	auto mapsFilename = get_data_dir() / "RCK/prefabs/maps.json";
 
 	std::ifstream is(mapsFilename);
 

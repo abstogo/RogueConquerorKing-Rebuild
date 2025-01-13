@@ -8,7 +8,7 @@ MobManager* MobManager::LoadMobData()
 {
 	gLog->Log("Monster Loader", "Started");
 
-	std::string mobFilename = "RCK/scripts/creatures.json";
+	auto mobFilename = get_data_dir() / "RCK/scripts/creatures.json";
 	
 	std::ifstream is(mobFilename);
 
@@ -16,7 +16,7 @@ MobManager* MobManager::LoadMobData()
 
 	is.close();
 
-	gLog->Log("Monster Loader", "Decoded " + mobFilename);
+	gLog->Log("Monster Loader", "Decoded " + mobFilename.string());
 	
 	const std::vector<CreatureTemplate>& creatureList = output->CreatureTemplates().CreatureTemplates();
 

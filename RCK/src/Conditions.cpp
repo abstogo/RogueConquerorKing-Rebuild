@@ -4,12 +4,12 @@ ConditionManager* ConditionManager::LoadConditions()
 {
 	gLog->Log("Condition Loader", "Started");
 	
-	std::string conditionsFilename = "RCK/scripts/conditions.json";
+	auto conditionsFilename = get_data_dir() / "RCK/scripts/conditions.json";
 	std::ifstream is(conditionsFilename);
 
 	ConditionManager* cm = new ConditionManager(jsoncons::decode_json<ConditionData>(is));
 
-	gLog->Log("Condition Loader", "Decoded " + conditionsFilename);
+	gLog->Log("Condition Loader", "Decoded " + conditionsFilename.string());
 
 	int nextConditionIndex = 0;
 
@@ -80,12 +80,12 @@ MortalWoundManager* MortalWoundManager::LoadMortalWoundData()
 {
 	gLog->Log("Mortal Loader", "Started");
 	
-	std::string mortalFilename = "RCK/scripts/mortal_wound_effects.json";
+	auto mortalFilename = get_data_dir() / "RCK/scripts/mortal_wound_effects.json";
 	std::ifstream is(mortalFilename);
 
 	MortalWoundManager* mwm = new MortalWoundManager(jsoncons::decode_json<MortalWoundData>(is));
 
-	gLog->Log("Mortal Loader", "Decoded " + mortalFilename);
+	gLog->Log("Mortal Loader", "Decoded " + mortalFilename.string());
 	
 	int nextMortalWoundIndex = 0;
 
@@ -142,7 +142,7 @@ void MortalRollStore::LoadMortalRollStore()
 {
 	std::vector<std::vector<std::string>> columnValues;
 
-	std::string csv_name = "RCK/scripts/mortal_wounds.csv";
+	auto csv_name = get_data_dir() / "RCK/scripts/mortal_wounds.csv";
 	std::ifstream csv(csv_name);
 
 	jsoncons::csv::csv_options options;

@@ -6,7 +6,7 @@ CharacterManager* CharacterManager::LoadCharacteristics()
 {
 	gLog->Log("Characteristic Loader","Started");
 
-	const std::string statsFilename = "RCK/scripts/statistics.json";
+	auto statsFilename = get_data_dir() / "RCK/scripts/statistics.json";
 	
 	std::ifstream is(statsFilename);
 
@@ -34,12 +34,12 @@ CharacterManager* CharacterManager::LoadCharacteristics()
 	}
 
 	is.close();
-
-	gLog->Log("Characteristic Loader", "Decoded " + statsFilename);
+    
+	gLog->Log("Characteristic Loader", "Decoded " + statsFilename.string());
 	
 	// read the characteristic bonuses from ability_bonus.csv
 
-	const std::string abilityBonusFilename = "RCK/scripts/ability_bonus.csv";
+	auto abilityBonusFilename = get_data_dir() / "RCK/scripts/ability_bonus.csv";
 
 	std::ifstream cs(abilityBonusFilename);
 	
@@ -60,9 +60,9 @@ CharacterManager* CharacterManager::LoadCharacteristics()
 
 	cs.close();
 
-	gLog->Log("Characteristic Loader", "Decoded " + abilityBonusFilename);
+	gLog->Log("Characteristic Loader", "Decoded " + abilityBonusFilename.string());
 
-	const std::string abilityRequisiteFilename = "RCK/scripts/ability_prime_req.csv";
+	auto abilityRequisiteFilename = get_data_dir() / "RCK/scripts/ability_prime_req.csv";
 	
 	std::ifstream prs(abilityRequisiteFilename);
 
@@ -80,7 +80,7 @@ CharacterManager* CharacterManager::LoadCharacteristics()
 
 	prs.close();
 
-	gLog->Log("Characteristic Loader", "Decoded " + abilityRequisiteFilename);
+	gLog->Log("Characteristic Loader", "Decoded " + abilityRequisiteFilename.string());
 
 	gLog->Log("Characteristic Loader", "Completed");
 

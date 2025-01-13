@@ -1,0 +1,204 @@
+{
+  "ItemTemplates": [
+    {
+      "Name": "Sword",
+      "Visual": "/",
+      "EquipmentTags": [
+        "Weapon",
+        "Melee",
+        "One-Handed",
+        "Two-Handed",
+        "Swords",
+        "Bladed",
+        "Any"
+      ],
+      "MaterialTypes": [
+        {
+          "Name": "Steel",
+          "Chance": 10,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        },
+        {
+          "Name": "Silver",
+          "Chance": 1,
+          "ValueMultiplier": 5.0,
+          "MaterialTags": [
+            "Silver"
+          ]
+        }
+      ],
+      "DecorationTypes": [
+        "inlaid",
+        "embed",
+        "inscribed",
+        "ornate"
+      ],
+      "Value": 1000,
+      "WeightNum": 1,
+      "WeightDen": 6
+    },
+
+    {
+      "Name": "Shortbow",
+      "Visual": "{",
+      "EquipmentTags": [
+        "Weapon",
+        "Missile",
+        "Fired",
+        "Two-Handed",
+        "Bows",
+        "Shortbows",
+        "Any"
+      ],
+      "MaterialTypes": [
+        {
+          "Name": "Wood",
+          "Chance": 5,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        },
+        {
+          "Name": "Horn",
+          "Chance": 5,
+          "ValueMultiplier": 1.1,
+          "MaterialTags": [
+          ]
+        }
+      ],
+      "DecorationTypes": [
+        "inlaid",
+        "embed",
+        "inscribed",
+        "ornate"
+      ],
+      "Value": 300,
+      "WeightNum": 1,
+      "WeightDen": 6
+    },
+
+    {
+      "Name": "Javelin",
+      "Visual": "|",
+      "EquipmentTags": [
+        "Weapon",
+        "Missile",
+        "One-Handed",
+        "Javelins",
+        "Any"
+      ],
+      "MaterialTypes": [
+        {
+          "Name": "Wood",
+          "Chance": 1,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        }
+      ],
+      "DecorationTypes": [
+        "inlaid",
+        "embed",
+        "inscribed",
+        "ornate"
+      ],
+      "Value": 100,
+      "WeightNum": 1,
+      "WeightDen": 6
+    },
+
+    {
+      "Name": "Comfrey",
+      "Visual": ",",
+      "EquipmentTags": [
+        "Healing|d3"
+      ],
+      "MaterialTypes": [
+      ],
+      "DecorationTypes": [
+      ],
+      "Value": 1000,
+      "WeightNum": 1,
+      "WeightDen": 6
+    },
+
+    {
+      "Name": "Chainmail",
+      "Visual": "%",
+      "EquipmentTags": [
+        "Armour",
+        "Chain",
+        "Metal",
+        "AC|4"
+      ],
+      "MaterialTypes": [
+        {
+          "Name": "Steel",
+          "Chance": 10.0,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        },
+        {
+          "Name": "Bronze",
+          "Chance": 0.1,
+          "ValueMultiplier": 0.8,
+          "MaterialTags": [
+          ]
+        }
+      ],
+      "DecorationTypes": [
+        "decorated",
+        "ornate"
+      ],
+      "Value": 4000,
+      "WeightNum": 4,
+      "WeightDen": 1
+    },
+
+    {
+      "Name": "Shield",
+      "Visual": "o",
+      "EquipmentTags": [
+        "One-Handed",
+        "Shield",
+        "AC|1"
+      ],
+      "MaterialTypes": [
+        {
+          "Name": "Wood",
+          "Chance": 8.0,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        },
+        {
+          "Name": "Bronze",
+          "Chance": 1.0,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        },
+        {
+          "Name": "Steel",
+          "Chance": 4.0,
+          "ValueMultiplier": 1.0,
+          "MaterialTags": [
+          ]
+        }
+      ],
+      "DecorationTypes": [
+        "painted",
+        "embed",
+        "decorated",
+        "ornate",
+        "inscribed"
+      ],
+      "Value": 1000,
+      "WeightNum": 1,
+      "WeightDen": 1
+    }
+  ]
+}

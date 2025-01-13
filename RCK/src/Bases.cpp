@@ -4,14 +4,14 @@ BaseManager* BaseManager::LoadBaseData()
 {
 	gLog->Log("Base Loader", "Started");
 	
-	std::string baseFilename = "RCK/scripts/bases.json";
+	auto baseFilename = get_data_dir() / "RCK/scripts/bases.json";
 	std::ifstream is(baseFilename);
 
 	BaseManager* output = new BaseManager(jsoncons::decode_json<BaseInfoSet>(is));
 
 	is.close();
 
-	gLog->Log("Base Loader", "Decoded " + baseFilename);
+	gLog->Log("Base Loader", "Decoded " + baseFilename.string());
 
 	// feed reverse lookup
 	for (int i = 0; i < output->baseInfoSet.BaseTypes().size(); i++)
