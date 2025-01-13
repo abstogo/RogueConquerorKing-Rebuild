@@ -1543,9 +1543,7 @@ void Game::MainLoop()
 	
 	do {
 		// render current sample
-
-		TCODConsole::root->clear();
-
+        
 		if(mMenuManager->MenuOpen())
 		{
 			MenuGameHandleKeyboard(&key);
@@ -1561,6 +1559,12 @@ void Game::MainLoop()
 
 			switch (mode)
 			{
+				case GM_MAIN:
+				{
+					RenderUI(currentCharacterID);
+				}
+				break;
+
 				case GM_CHARACTER:
 				{
 					RenderUI(currentCharacterID);
@@ -1612,11 +1616,12 @@ void Game::MainLoop()
 #endif
 			if (key.lalt) {
 				// ALT-PrintScreen : save to .asc format
-				TCODConsole::root->saveApf("samples.apf");
+				//g_context->save_screenshot("samples.apf");
+				//TCODConsole::root->saveApf("samples.apf");
 			}
 			else {
 				// save screenshot 
-				TCODSystem::saveScreenshot(NULL);
+				g_context->save_screenshot(NULL);
 			}
 		}
 	} while (!TCODConsole::isWindowClosed() && mode != GM_QUIT);
@@ -1779,10 +1784,10 @@ void Game::RenderUI(int selectedCharacterID)
 	std::string level = std::to_string(mCharacterManager->getCharacterLevel(selectedCharacterID));
 	std::string hp = std::to_string(mCharacterManager->getCharacterCurrentHitPoints(selectedCharacterID)) + "/" + std::to_string(mCharacterManager->getCharacterTotalHitPoints(selectedCharacterID));
 
-	TCODConsole::root->printf(60, 4, name.c_str());
-	TCODConsole::root->printf(60, 5, char_class.c_str());
-	TCODConsole::root->printf(60, 6, level.c_str());
-	TCODConsole::root->printf(60, 8, hp.c_str());
+	tcod::print(g_console, { 60,4 }, name,std::nullopt, std::nullopt);
+	tcod::print(g_console, { 60,5 }, char_class, std::nullopt, std::nullopt);
+	tcod::print(g_console, { 60,6 }, level, std::nullopt, std::nullopt);
+	tcod::print(g_console, { 60,8 }, hp, std::nullopt, std::nullopt);
 
 	// TODO: Status indicators
 }
@@ -1870,8 +1875,8 @@ void Game::RenderActionLog()
 {
 	const int BOX_HEIGHT = 5;
 	std::string logText = playLogString;
-	int size = TCODConsole::root->getHeightRect(2, 25, SAMPLE_SCREEN_WIDTH, BOX_HEIGHT, logText.c_str());
-
+	int size = tcod::get_height_rect(SAMPLE_SCREEN_WIDTH, logText);
+	
 	// now truncate our text line by line until it fits.
 
 	while (size > BOX_HEIGHT)
@@ -1881,16 +1886,15 @@ void Game::RenderActionLog()
 		n = logText.find_first_of(" \t", n);
 		logText.erase(0, logText.find_first_not_of(" \t", n));
 
-		size = TCODConsole::root->getHeightRect(2, 25, SAMPLE_SCREEN_WIDTH, BOX_HEIGHT, logText.c_str());
+        size = tcod::get_height_rect(SAMPLE_SCREEN_WIDTH, logText);
 	}
 	
-	TCODConsole::root->printRect(2, 25, SAMPLE_SCREEN_WIDTH, 5, logText.c_str());
+    tcod::print_rect(g_console, { 2, 25, SAMPLE_SCREEN_WIDTH, 5 }, logText, std::nullopt, std::nullopt);
 }
 
 void Game::ClearLookText()
 {
-	TCODConsole::root->printRect(0, 24, 50, 5, " ");
-	//TCODConsole::root->c
+	tcod::print_rect(g_console, { 0, 24, 50, 5 }, " ", std::nullopt, std::nullopt);
 }
 
 void Game::RenderCharacterSheet()
@@ -2049,6 +2053,8 @@ void Game::RenderOffscreenUI(bool inventory, bool character)
 
 	if (inventory)
 	{
+		// removed for new inventory system
+		/*
         tcod::blit(
                 g_console,
                 *inventoryScreen,
@@ -2061,6 +2067,7 @@ void Game::RenderOffscreenUI(bool inventory, bool character)
                 },
                 1.0f,
                 0.75f);
+				*/
 	}
 
 }

@@ -117,7 +117,7 @@ void MapManager::GeneratePrefabs()
 		for (auto prefabName : t.Prefabs())
 		{
             gLog->Log("MapManager", "Loading Prefab:" + prefabName);
-            std::string p = "RCK/prefabs" + prefabName;
+            std::string p = "RCK/prefabs/" + prefabName;
             auto prefabPath = get_data_dir() / p;
 			std::vector<std::string> prefabMap;
 
@@ -308,7 +308,6 @@ MapManager* MapManager::LoadMaps()
 	// load prefabs (could do this later?)
 
 	newManager->GeneratePrefabs();
-
 
 	return newManager;
 }
@@ -648,11 +647,14 @@ void MapManager::renderRegionMap(int centroid_x, int centroid_y)
 				// we should only show bases if they are not also a Site (we will overwrite it)
 				// IDEA: flip between indicators if eg a Camp is in the same hex as a Dungeon
 
-                TCOD_ConsoleTile& ref = g_console.at({render_x, render_y});
+				//TCOD_console_put_char(g_console.get(), render_x, render_y, TCOD_CHAR_RADIO_SET, TCOD_BKGND_NONE);
+				
+				TCOD_ConsoleTile& ref = g_console.at({render_x, render_y});
 
-                ref.ch = TCOD_CHAR_RADIO_SET;
+                ref.ch = 0x25C9; // TCOD_CHAR_RADIO_SET;
                 ref.fg = baseColor;
                 ref.bg = TCOD_ColorRGBA({0, 0, 0, 0});
+				
             }
             else
             {
@@ -660,11 +662,14 @@ void MapManager::renderRegionMap(int centroid_x, int centroid_y)
 
                 if (site == SITE_DUNGEON)
                 {
-                    TCOD_ConsoleTile& ref = g_console.at({render_x, render_y});
+					//TCOD_console_put_char(g_console.get(), render_x, render_y, TCOD_CHAR_DCROSS, TCOD_BKGND_NONE);
+                    
+					TCOD_ConsoleTile& ref = g_console.at({render_x, render_y});
 
-                    ref.ch = TCOD_CHAR_DCROSS;
+                    ref.ch = 0x256C; // black cross on white circle
                     ref.fg = baseColor;
                     ref.bg = TCOD_ColorRGBA({0, 0, 0, 0});
+
                 }
             }
 		}
@@ -747,7 +752,7 @@ void MapManager::renderMap(int index, int centroid_x, int centroid_y)
 					}
 					else if (content == CONTENT_TREE)
 					{
-                        g_console.at({render_x, render_y}).ch = TCOD_CHAR_ARROW_N;
+						g_console.at({ render_x, render_y }).ch = 0x2191; // uparrow
 					}
 					else if (content == CONTENT_WALL)
 					{
