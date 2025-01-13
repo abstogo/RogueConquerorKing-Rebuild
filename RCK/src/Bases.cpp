@@ -175,6 +175,11 @@ std::string BaseManager::GetBaseType(int baseID)
 	return baseInfoSet.BaseTypes()[bT].Name();
 }
 
+int BaseManager::GetInventoryID(int baseID)
+{
+	return gGame->mPartyManager->GetInventoryID(basePartyID[baseID]);
+}
+
 int BaseManager::GenerateCampAtLocation(int partyID, int basePosX, int basePosY)
 {
 	DebugLog("Creating a camp controlled by party #" + std::to_string(partyID) + " at (" + std::to_string(basePosX) + "," + std::to_string(basePosY) + ")");
