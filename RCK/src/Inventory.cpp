@@ -308,12 +308,14 @@ std::string InventoryManager::InvToText(int inventoryID, int slot)
 
 std::string InventoryManager::ItemToText(int itemID, int count)
 {
-    std::string output;
+    std::string output = "";
 
     std::string itemName = gGame->mItemManager->getName(itemID);
-    
-    if (count > 1)
-        output = std::to_string(count) + "x ";
+
+    if (gGame->mItemManager->hasTag(itemID, "Goods") || (count > 1))
+    {
+            output = std::to_string(count) + "x ";
+    }
     
     output = output + itemName;
 

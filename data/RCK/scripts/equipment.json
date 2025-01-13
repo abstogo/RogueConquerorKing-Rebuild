@@ -204,7 +204,7 @@
     {
       "Name": "Fur Pelt",
       "Visual": "£",
-      "EquipmentTags": ["Treasure"],
+      "EquipmentTags": ["Goods","Treasure"],
       "MaterialTypes": [
         {
           "Name": "Ermine",
