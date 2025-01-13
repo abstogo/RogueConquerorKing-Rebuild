@@ -141,6 +141,8 @@ public:
 		sampleConsole = new TCODConsole(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
 	}
 
+    void DataLoad();
+
 	void StartGame();
 	void ClearGame();
 	void CreateMenu();

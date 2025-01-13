@@ -3,26 +3,38 @@
 Game* gGame;
 
 auto get_data_dir() -> std::filesystem::path {
-  static auto root_directory = std::filesystem::path{"."};  // Begin at the working directory.
-  while (!std::filesystem::exists(root_directory / "data")) {
-    // If the current working directory is missing the data dir then it will assume it exists in any parent directory.
-    root_directory /= "..";
-    if (!std::filesystem::exists(root_directory)) {
-      throw std::runtime_error("Could not find the data directory.");
+    static auto root_directory = std::filesystem::path{"."};  // Begin at the working directory.
+    while (!std::filesystem::exists(root_directory / "data")) {
+      // If the current working directory is missing the data dir then it will assume it exists in any parent directory.
+      root_directory /= "..";
+      if (!std::filesystem::exists(root_directory)) {
+        throw std::runtime_error("Could not find the data directory.");
+      }
     }
-  }
-  return root_directory / "data";
+    return root_directory / "data";
 };
 
-void Game::StartGame()
-{
-	// Test game init
-	// Fixed square and hex maps, fixed mobs, fixed basic character
-	
-	// create game managers
 
-	DebugLog("Starting Game");
-	
+void Game::StartGame() {
+
+    // create game managers
+
+    DebugLog("Starting Game");
+
+    // DataLoad(); // delayed until after new game is selected so we can account for game options
+
+    CreateMenu();
+
+    mode = GM_MENU;
+}
+
+void Game::DataLoad()
+{
+	DebugLog("Loading Core Data Files");
+
+    // The core data files, stored in data/RCK/scripts are loaded here.
+    // Each primary manager is spawned from one or more core data files.
+
 	mCharacterManager = CharacterManager::LoadCharacteristics();
 	mClassManager = ClassManager::LoadClasses();
 	mMapManager = MapManager::LoadMaps();
@@ -35,12 +47,25 @@ void Game::StartGame()
 	mPartyManager = PartyManager::LoadPartyData();
 	mBaseManager = BaseManager::LoadBaseData();
 
-	DebugLog("Game Managers Created");
+    DebugLog("Game Managers Created");
+    DebugLog("Loading Secondary Data Files");
 
-	CreateMenu();
-	
-	mode = GM_MENU;
+    // This is where we will load Option and Mod files
+    // The idea is that we will have files which store replacement key sections in the various files
+    // As an example - under Axioms 12's extended thief rules, Dexterity applies to all thief skill rolls.
+    // So we can add an Option element which can be selected at game start,
+    // which will contain "add"->"statistics"->"dexterity"->"bonusTo"->"Action:MoveSilently" etc for all the thief skills
+    // Mods will work similarly but include the ability to completely replace data files instead of using endless deltas.
+
+    DebugLog("Loading Completed");
+
+    // Now we initialize the game managers using the collected data.
+
+    mCharacterManager->Initialise();
+
+    DebugLog("Game Managers Initialized");
 }
+
 
 void Game::QuitGame()
 {
@@ -61,6 +86,8 @@ void Game::CreateMenu()
 void Game::CreateTestGame()
 {
 	DebugLog("Creating Test Game");
+
+    DataLoad();
 
 	// starting character to make numbers match (0 = false, 0 = no character on map)
 	mCharacterManager->GenerateTestCharacter("NULL", "Fighter");
