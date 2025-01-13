@@ -563,30 +563,30 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
 		{
 			if (key->vk == TCODK_UP)
 			{
-				menuPosition[mode]--;
-				if (menuPosition[mode] < 0)
+				inventoryPosition--;
+				if (inventoryPosition < 0)
 				{
-					menuPosition[mode] = mCharacterManager->GetInventory(currentCharacterID).size() - 1;
+					inventoryPosition = mCharacterManager->GetInventory(currentCharacterID).size() - 1;
 				}
 			}
 			else if (key->vk == TCODK_DOWN)
 			{
-				menuPosition[mode]++;
-				if (menuPosition[mode] == mCharacterManager->GetInventory(currentCharacterID).size())
+				inventoryPosition++;
+				if (inventoryPosition == mCharacterManager->GetInventory(currentCharacterID).size())
 				{
-					menuPosition[mode] = 0;
+					inventoryPosition = 0;
 				}
 			}
 			else if (key->vk == TCODK_ENTER)
 			{
 				// enter is used to equip and unequip
-				if (mCharacterManager->GetEquipSlotForInventoryItem(currentCharacterID, menuPosition[mode]) != -1)
+				if (mCharacterManager->GetEquipSlotForInventoryItem(currentCharacterID, inventoryPosition) != -1)
 				{
-					mCharacterManager->UnequipItem(currentCharacterID, menuPosition[mode]);
+					mCharacterManager->UnequipItem(currentCharacterID, inventoryPosition);
 				}
 				else
 				{
-					mCharacterManager->EquipItem(currentCharacterID, menuPosition[mode]);
+					mCharacterManager->EquipItem(currentCharacterID, inventoryPosition);
 				}
 			}
 		}
@@ -1653,23 +1653,29 @@ void Game::RenderMap()
 	}
 	else
 	{
-		mMapManager->renderMap(sampleConsole, currentMapID,player_x,player_y);
+		mMapManager->renderMap(currentMapID,player_x,player_y);
 
 		std::vector<int> chars = mPartyManager->getPlayerCharacters(currentPartyID);
 		for (int ch : chars)
 		{
 			if (mCharacterManager->GetPlayerX(ch) != -1)
 			{
-				TCODColor baseColor = TCODColor::lighterGrey;
-				if (mCharacterManager->getCharacterHasCondition(ch, "Unconscious")) baseColor = baseColor * TCODColor::grey;
+				TCOD_ColorRGB baseColor = TCOD_lighter_gray;
+
+				if (mCharacterManager->getCharacterHasCondition(ch, "Unconscious"))
+				{
+					baseColor.r /= 2;
+					baseColor.g /= 2;
+					baseColor.b /= 2;
+				}
 
 				if (ch == currentCharacterID)
 				{
-					mMapManager->renderAtPosition(sampleConsole, currentMapID, player_x, player_y, mCharacterManager->GetPlayerX(ch), mCharacterManager->GetPlayerY(ch), '@', TCODColor::white);
+					mMapManager->renderAtPosition(currentMapID, player_x, player_y, mCharacterManager->GetPlayerX(ch), mCharacterManager->GetPlayerY(ch), '@', TCOD_white);
 				}
 				else
 				{
-					mMapManager->renderAtPosition(sampleConsole, currentMapID, player_x, player_y, mCharacterManager->GetPlayerX(ch), mCharacterManager->GetPlayerY(ch), '@', baseColor);
+					mMapManager->renderAtPosition(currentMapID, player_x, player_y, mCharacterManager->GetPlayerX(ch), mCharacterManager->GetPlayerY(ch), '@', baseColor);
 				}
 			}
 		}
@@ -1677,12 +1683,17 @@ void Game::RenderMap()
 		std::vector<int> henches = mPartyManager->getHenchmen(currentPartyID);
 		for (int ch : henches)
 		{
-			TCODColor baseColor = TCODColor::lighterGrey;
-			if (mCharacterManager->getCharacterHasCondition(ch, "Unconscious")) baseColor = baseColor * TCODColor::grey;
+			TCOD_ColorRGB baseColor = TCOD_lighter_gray;
+			if (mCharacterManager->getCharacterHasCondition(ch, "Unconscious"))
+			{
+				baseColor.r /= 2;
+				baseColor.g /= 2;
+				baseColor.b /= 2;
+			}
 
 			if (mCharacterManager->GetPlayerX(ch) != -1)
 			{
-				mMapManager->renderAtPosition(sampleConsole, currentMapID, player_x, player_y, mCharacterManager->GetPlayerX(ch), mCharacterManager->GetPlayerY(ch), '@', baseColor);
+				mMapManager->renderAtPosition(currentMapID, player_x, player_y, mCharacterManager->GetPlayerX(ch), mCharacterManager->GetPlayerY(ch), '@', baseColor);
 			}
 		}
 	}
@@ -1724,7 +1735,7 @@ void Game::RenderTargets()
 	{
 	case(TARGET_CELL):
 	{
-		mMapManager->renderAtPosition(sampleConsole, currentMapID, targetCursorX, targetCursorY, targetCursorX, targetCursorY, 'X');
+		mMapManager->renderAtPosition(currentMapID, targetCursorX, targetCursorY, targetCursorX, targetCursorY, 'X');
 	}
 	break;
 
@@ -1737,7 +1748,7 @@ void Game::RenderTargets()
 			{
 				//Creature& c = mMobManager->GetMonster(beastie);
 				
-				mMapManager->renderAtPosition(sampleConsole, currentMapID, mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), 'X');
+				mMapManager->renderAtPosition(currentMapID, mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), 'X');
 			}
 		}
 
@@ -1745,7 +1756,7 @@ void Game::RenderTargets()
 		{
 			for (int wossname : targets)
 			{
-				mMapManager->renderAtPosition(sampleConsole, currentMapID, mCharacterManager->GetPlayerX(wossname), mCharacterManager->GetPlayerY(wossname), mCharacterManager->GetPlayerX(wossname), mCharacterManager->GetPlayerY(wossname), 'X');
+				mMapManager->renderAtPosition(currentMapID, mCharacterManager->GetPlayerX(wossname), mCharacterManager->GetPlayerY(wossname), mCharacterManager->GetPlayerX(wossname), mCharacterManager->GetPlayerY(wossname), 'X');
 			}
 		}
 	}
@@ -1884,8 +1895,11 @@ void Game::RenderCharacterSheet()
 {
 	if (characterScreen == nullptr)
 	{
-		characterScreen = new TCODConsole(SAMPLE_SCREEN_WIDTH , SAMPLE_SCREEN_HEIGHT);
+        characterScreen = new tcod::Console(SAMPLE_SCREEN_WIDTH , SAMPLE_SCREEN_HEIGHT);
 	}
+
+	characterScreen->clear();
+
 	auto acks_class = mCharacterManager->getCharacterClass(currentCharacterID);
 	int level = mCharacterManager->getCharacterLevel(currentCharacterID);
 	
@@ -1894,29 +1908,24 @@ void Game::RenderCharacterSheet()
 	std::string name = mCharacterManager->getCharacterName(currentCharacterID);
 	std::string title = name + "," + rank;
 	
-	characterScreen->printFrame(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, false, TCOD_BKGND_SET, title.c_str());
-	// characterScreen->printRectEx(SAMPLE_SCREEN_WIDTH / 2, 2, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, TCOD_BKGND_NONE, TCOD_CENTER, "This will be the character sheet screen.");
+	tcod::print_frame(*characterScreen, { 0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT }, title, &TCOD_white, &TCOD_black, TCOD_BKGND_NONE, false);
 
-	characterScreen->printEx(25, 2, TCOD_BKGND_NONE, TCOD_LEFT, "Attributes");
-	characterScreen->printEx(25,4, TCOD_BKGND_NONE, TCOD_LEFT, "Strength");
-	characterScreen->printEx(25, 5, TCOD_BKGND_NONE, TCOD_LEFT, "Dexterity");
-	characterScreen->printEx(25, 6, TCOD_BKGND_NONE, TCOD_LEFT, "Constitution");
-	characterScreen->printEx(25, 7, TCOD_BKGND_NONE, TCOD_LEFT, "Intelligence");
-	characterScreen->printEx(25, 8, TCOD_BKGND_NONE, TCOD_LEFT, "Wisdom");
-	characterScreen->printEx(25, 9, TCOD_BKGND_NONE, TCOD_LEFT, "Charisma");
+	tcod::print(*characterScreen, { 25,2 }, "Attributes", TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 
-	characterScreen->printEx(40, 4, TCOD_BKGND_NONE, TCOD_LEFT, std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID,0)).c_str());
-	characterScreen->printEx(40, 5, TCOD_BKGND_NONE, TCOD_LEFT, std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID, 1)).c_str());
-	characterScreen->printEx(40, 6, TCOD_BKGND_NONE, TCOD_LEFT, std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID, 2)).c_str());
-	characterScreen->printEx(40, 7, TCOD_BKGND_NONE, TCOD_LEFT, std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID, 3)).c_str());
-	characterScreen->printEx(40, 8, TCOD_BKGND_NONE, TCOD_LEFT, std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID, 4)).c_str());
-	characterScreen->printEx(40, 9, TCOD_BKGND_NONE, TCOD_LEFT, std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID, 5)).c_str());
+	std::vector<Statistic> stats = mCharacterManager->cd.statistics();
+	
+	for(int i=0;i<stats.size();i++)
+	{
+		Statistic s = stats[i];
+		tcod::print(*characterScreen, { 25,4+i }, stats[i].name(), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+		tcod::print(*characterScreen, { 40, 4 + i }, std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID, i)), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+	}
 	
 	std::string clas = "Class:" + acks_class->Name();
 	std::string lev = "Level:" + std::to_string(level);
 
-	characterScreen->printEx(2, 2, TCOD_BKGND_NONE, TCOD_LEFT, clas.c_str());
-	characterScreen->printEx(2, 3, TCOD_BKGND_NONE, TCOD_LEFT, lev.c_str());
+	tcod::print(*characterScreen, { 2,2 }, clas, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+	tcod::print(*characterScreen, { 2,3 }, lev, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 
 	int xp = mCharacterManager->getCharacterExperience(currentCharacterID);
 	auto maxps = acks_class->LevelXPValues;
@@ -1927,7 +1936,7 @@ void Game::RenderCharacterSheet()
 	}
 	std::string exp = "Experience:" + std::to_string(xp) + "/" + nextp;
 	
-	characterScreen->printEx(2, 4, TCOD_BKGND_NONE, TCOD_LEFT, exp.c_str());
+	tcod::print(*characterScreen, { 2,4 }, exp, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 
 	auto advancement = mClassManager->GetAdvancementStore();
 	
@@ -1936,42 +1945,45 @@ void Game::RenderCharacterSheet()
 	std::string ab_melee = "Melee Attack:" + std::to_string(mCharacterManager->UpdateCurrentAttackValue(currentCharacterID, false));
 	std::string ab_missile = "Missile Attack:" + std::to_string(mCharacterManager->UpdateCurrentAttackValue(currentCharacterID, true));
 
-	characterScreen->printEx(2, 6, TCOD_BKGND_NONE, TCOD_LEFT, ab_melee.c_str());
-	characterScreen->printEx(2, 7, TCOD_BKGND_NONE, TCOD_LEFT, ab_missile.c_str());
+	tcod::print(*characterScreen, { 2,6 }, ab_melee, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+	tcod::print(*characterScreen, { 2,7 }, ab_missile, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 
-	characterScreen->printEx(25, 11, TCOD_BKGND_NONE, TCOD_LEFT, "Saves");
+	tcod::print(*characterScreen, { 25,11 }, "Saves", TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 	
 	for(int i=0;i<5;i++)
 	{
 		std::string save_name = saveTypes[i];
 
 		std::string display_name = save_name.substr(0, 13);
-		
-		characterScreen->printEx(25, 12+i, TCOD_BKGND_NONE, TCOD_LEFT, display_name.c_str());
+
+		tcod::print(*characterScreen, { 25,12+i }, display_name, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 
 		int saveVal = mCharacterManager->UpdateCurrentSaveValue(currentCharacterID, save_name);
 
-		characterScreen->printEx(40, 12+i, TCOD_BKGND_NONE, TCOD_LEFT, std::to_string(saveVal).c_str());
+		tcod::print(*characterScreen, { 40,12 + i }, std::to_string(saveVal), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 	}
 
 	std::string ac = "AC:" + std::to_string(mCharacterManager->GetCurrentAC(currentCharacterID));
-	characterScreen->printEx(2, 9, TCOD_BKGND_NONE, TCOD_LEFT, ac.c_str());
+	tcod::print(*characterScreen, { 2,9 }, ac, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+
 	std::string enc = "Encumbrance:" + mCharacterManager->GetCurrentEncumbranceType(currentCharacterID);
-	characterScreen->printEx(2, 10, TCOD_BKGND_NONE, TCOD_LEFT, enc.c_str());
+	tcod::print(*characterScreen, { 2,10 }, enc, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 }
 
 
 void Game::RenderInventory()
 {
+	// to be replaced by new inventory management system
+
+	/*
 	if(inventoryScreen == nullptr)
 	{
-		inventoryScreen = new TCODConsole(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+		inventoryScreen = new tcod::Console(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
 	}
 
 	inventoryScreen->clear();
 
 	inventoryScreen->printFrame(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, false, TCOD_BKGND_SET, "Inventory");
-	// inventoryScreen->printRectEx(SAMPLE_SCREEN_WIDTH / 2, 2, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, TCOD_BKGND_NONE, TCOD_CENTER, "This will be the inventory screen.");
 
 	auto inv = mCharacterManager->GetInventory(currentCharacterID);
 
@@ -2008,6 +2020,7 @@ void Game::RenderInventory()
 		inventoryScreen->setCharBackground(x, select_y, TCODColor::white, TCOD_BKGND_SET);
 		inventoryScreen->setCharForeground(x, select_y, TCODColor::black);
 	}
+	*/
 }
 
 void Game::RenderOffscreenUI(bool inventory, bool character)

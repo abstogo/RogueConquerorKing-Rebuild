@@ -218,11 +218,8 @@ public:
 	BaseManager* mBaseManager;
     MenuManager* mMenuManager;
 	
-	TCOD_Console* characterScreen = nullptr;
-	TCOD_Console* inventoryScreen = nullptr;
-
-	TCOD_Console* characterShot = nullptr;
-	TCOD_Console* inventoryShot = nullptr;
+	tcod::Console* characterScreen = nullptr;
+	tcod::Console* inventoryScreen = nullptr;
 
 	TCODRandom* randomiser = TCODRandom::getInstance();
 };
