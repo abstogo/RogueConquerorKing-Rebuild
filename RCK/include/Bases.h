@@ -156,6 +156,9 @@ class BaseManager
 	int getBasePartyCharacterCount(int baseID);
 	int getVisitingCharacterCount(int partyID);
 
+	int getBasePartyInventoryCount(int baseID);
+	int getVisitingInventoryCount(int partyID);
+
 public:
 	BaseManager(BaseInfoSet& _bis) : baseInfoSet(_bis)
 	{}

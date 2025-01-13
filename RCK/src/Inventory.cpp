@@ -78,10 +78,10 @@ void InventoryManager::TransferInventory(int sourceinventoryID, int destinationI
     {
         AddItemToInventory(destinationInventoryID, itemEntries[sourceinventoryID][i].first, itemEntries[sourceinventoryID][i].second);
     }
-    // delete source inventory
-    itemEntries.erase(itemEntries.begin() + sourceinventoryID);
-    ownerManagers.erase(ownerManagers.begin() + sourceinventoryID);
-    ownerEntities.erase(ownerEntities.begin() + sourceinventoryID);
+    // we do not delete source inventory. Instead we zero it out
+    itemEntries[sourceinventoryID].clear();
+    //ownerManagers.erase(ownerManagers.begin() + sourceinventoryID);
+    //ownerEntities.erase(ownerEntities.begin() + sourceinventoryID);
 }
 
 int InventoryManager::GetItemCount(int inventoryID, int itemID)
