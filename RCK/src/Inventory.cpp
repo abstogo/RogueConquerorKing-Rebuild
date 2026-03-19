@@ -25,13 +25,13 @@ int InventoryManager::AddItemToInventory(int inventoryID, int itemID, int count)
     int output = -1;
 
     auto vec = itemEntries[inventoryID];
-    auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.second == itemID; });
+    auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.first == itemID; });
 
     if( loc != vec.end())
     {
         // we already have this item, so increase the count
         int index = loc - vec.begin();
-        itemEntries[inventoryID][index].second = count;
+        itemEntries[inventoryID][index].second += count;
         output = index;
     }
     else
@@ -87,7 +87,7 @@ void InventoryManager::TransferInventory(int sourceinventoryID, int destinationI
 int InventoryManager::GetItemCount(int inventoryID, int itemID)
 {
     auto vec = itemEntries[inventoryID];
-    auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.second == itemID; });
+    auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.first == itemID; });
 
     // find corresponding count for the item ID
     if (loc != vec.end())
@@ -138,25 +138,29 @@ int InventoryManager::ControlMoveUp()
     int output = 0;
     if (sourcePane)
     {
+        int size = (int)itemEntries[sourceMenuInventoryID].size();
+        if (size == 0) return 0;
         if (sourceMenuPosition > 0)
         {
             sourceMenuPosition--;
         }
         else
         {
-            sourceMenuPosition = itemEntries[sourceMenuInventoryID].size() - 1;
+            sourceMenuPosition = size - 1;
         }
         output = sourceMenuPosition;
     }
     else
     {
+        int size = (int)itemEntries[targetMenuInventoryID].size();
+        if (size == 0) return 0;
         if (targetMenuPosition > 0)
         {
             targetMenuPosition--;
         }
         else
         {
-            targetMenuPosition = itemEntries[targetMenuInventoryID].size() - 1;
+            targetMenuPosition = size - 1;
         }
         output = targetMenuPosition;
     }
@@ -168,7 +172,9 @@ int InventoryManager::ControlMoveDown()
     int output = 0;
     if (sourcePane)
     {
-        if (sourceMenuPosition < itemEntries[sourceMenuInventoryID].size() - 1)
+        int size = (int)itemEntries[sourceMenuInventoryID].size();
+        if (size == 0) return 0;
+        if (sourceMenuPosition < size - 1)
         {
             sourceMenuPosition++;
         }
@@ -180,7 +186,9 @@ int InventoryManager::ControlMoveDown()
     }
     else
     {
-        if (targetMenuPosition < itemEntries[targetMenuInventoryID].size() - 1)
+        int size = (int)itemEntries[targetMenuInventoryID].size();
+        if (size == 0) return 0;
+        if (targetMenuPosition < size - 1)
         {
             targetMenuPosition++;
         }
