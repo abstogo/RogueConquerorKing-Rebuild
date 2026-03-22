@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
     gLog = new OutputLog();
     gGame->StartGame();
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(gGame->MainLoop, 0, 0);
+    emscripten_set_main_loop([]() { gGame->MainLoop(); }, 0, 0);
 #else
     gGame->MainLoop();
 #endif
