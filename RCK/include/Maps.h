@@ -136,7 +136,7 @@ class TerrainType {
   const std::string& Generator() const { return Generator_; }
   std::vector<std::string> Prefabs() const { return Prefabs_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS(
+JSONCONS_ALL_CTOR_GETTER_TRAITS(
     TerrainType,
     Name,
     RegionMapSymbol,
@@ -154,7 +154,7 @@ class TerrainTypeSet {
 
   std::vector<TerrainType> TerrainTypes() const { return TerrainTypes_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS(TerrainTypeSet, TerrainTypes)
+JSONCONS_ALL_CTOR_GETTER_TRAITS(TerrainTypeSet, TerrainTypes)
 
 struct RegionMap {
   TCODMap* map = NULL;

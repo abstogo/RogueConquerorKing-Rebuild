@@ -90,7 +90,7 @@ class ConditionData {
   std::vector<Condition>& Conditions_NC() { return Conditions_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS(
+JSONCONS_ALL_CTOR_GETTER_TRAITS(
     Condition,
     Name,
     Includes,
@@ -105,7 +105,7 @@ JSONCONS_ALL_GETTER_CTOR_TRAITS(
     SurpriseBonus,
     CanBeBackstabbed,
     Recovery)
-JSONCONS_ALL_GETTER_CTOR_TRAITS(ConditionData, Conditions)
+JSONCONS_ALL_CTOR_GETTER_TRAITS(ConditionData, Conditions)
 
 class SpecialPenalty {
   std::string Name_;
@@ -118,7 +118,7 @@ class SpecialPenalty {
   int Value() const { return Value_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS(SpecialPenalty, Name, Value)
+JSONCONS_ALL_CTOR_GETTER_TRAITS(SpecialPenalty, Name, Value)
 
 class MortalEffect {
   std::string Code_;
@@ -152,7 +152,7 @@ class MortalEffect {
   std::vector<SpecialPenalty> SpecialPenalties() const { return SpecialPenalties_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS(MortalEffect, Code, PlayerText, MonsterText, DoubleTo, SpecialPenalties)
+JSONCONS_ALL_CTOR_GETTER_TRAITS(MortalEffect, Code, PlayerText, MonsterText, DoubleTo, SpecialPenalties)
 
 class MortalWoundData {
   std::vector<MortalEffect> MortalEffects_;
@@ -164,7 +164,7 @@ class MortalWoundData {
   std::vector<MortalEffect>& MortalEffects_NC() { return MortalEffects_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS(MortalWoundData, MortalEffects)
+JSONCONS_ALL_CTOR_GETTER_TRAITS(MortalWoundData, MortalEffects)
 
 struct MortalRollResult {
   std::string status;

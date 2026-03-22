@@ -41,8 +41,8 @@ class CharacteristicData {
   std::vector<Statistic>& statistics_NC() { return statistics_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS(Statistic, name, bonusTo)
-JSONCONS_ALL_GETTER_CTOR_TRAITS(CharacteristicData, statistics)
+JSONCONS_ALL_CTOR_GETTER_TRAITS(Statistic, name, bonusTo)
+JSONCONS_ALL_CTOR_GETTER_TRAITS(CharacteristicData, statistics)
 
 // *****************************************************************************
 // CHARACTER INFORMATION
