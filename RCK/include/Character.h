@@ -4,7 +4,6 @@
 #include <jsoncons/json_type_traits_macros.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
 
-
 #include "Class.h"
 #include "Conditions.h"
 #include "Game.h"

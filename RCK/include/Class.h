@@ -4,7 +4,6 @@
 #include <jsoncons/json_type_traits_macros.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
 
-
 #include "Character.h"
 
 // ACKS Classes are rather fungible, being based upon a generation system taken from the Player's Handbook.
