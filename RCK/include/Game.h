@@ -94,6 +94,9 @@ class Game {
   int mode;
   int oldMode;
 
+  TCOD_key_t inputKey = {TCODK_NONE, 0};
+  TCOD_mouse_t inputMouse;
+
   Map* currentMap;
 
   const float TORCH_RADIUS = 10;
@@ -163,6 +166,7 @@ class Game {
       bool enemies = false,
       const std::vector<int>& targets = std::vector<int>());
 
+  void FrameStep();
   void MainLoop();
 
   void RenderMap();

@@ -1,3 +1,7 @@
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include "Game.h"
 
 Game* gGame;
@@ -1313,76 +1317,73 @@ void Game::CharacterDeath(int characterID) {
   // TODO: drop corpse item
 }
 
-void Game::MainLoop() {
-  TCOD_key_t key = {TCODK_NONE, 0};
-  TCOD_mouse_t mouse;
+void Game::FrameStep() {
+  if (mMenuManager->MenuOpen()) {
+    MenuGameHandleKeyboard(&inputKey);
+    mMenuManager->RenderCurrentMenu();
+  } else {
+    MainGameHandleKeyboard(&inputKey);
 
-  do {
-    // render current sample
+    RenderScreenFurniture();
 
-    if (mMenuManager->MenuOpen()) {
-      MenuGameHandleKeyboard(&key);
-      mMenuManager->RenderCurrentMenu();
-    } else {
-      MainGameHandleKeyboard(&key);
+    RenderMap();
 
-      RenderScreenFurniture();
+    switch (mode) {
+      case GM_MAIN: {
+        RenderUI(currentCharacterID);
+      } break;
 
-      RenderMap();
-
-      switch (mode) {
-        case GM_MAIN: {
-          RenderUI(currentCharacterID);
-        } break;
-
-        case GM_CHARACTER: {
-          RenderUI(currentCharacterID);
-          RenderCharacterSheet();
-        } break;
-        case GM_INVENTORY: {
-          RenderUI(currentCharacterID);
-          RenderInventory();
-        } break;
-        case GM_TARGET: {
-          RenderUI(currentCharacterID);
-          RenderTargets();
-        } break;
-        case GM_DOMAIN: {
-          // RenderUI is called from inside, to give selected character info
-          mBaseManager->RenderBaseMenu(currentBaseID);
-        }
+      case GM_CHARACTER: {
+        RenderUI(currentCharacterID);
+        RenderCharacterSheet();
+      } break;
+      case GM_INVENTORY: {
+        RenderUI(currentCharacterID);
+        RenderInventory();
+      } break;
+      case GM_TARGET: {
+        RenderUI(currentCharacterID);
+        RenderTargets();
+      } break;
+      case GM_DOMAIN: {
+        // RenderUI is called from inside, to give selected character info
+        mBaseManager->RenderBaseMenu(currentBaseID);
       }
-
-      RenderOffscreenUI(mode == GM_INVENTORY, mode == GM_CHARACTER);
-
-      RenderActionLog();
     }
 
-    // update the game screen
+    RenderOffscreenUI(mode == GM_INVENTORY, mode == GM_CHARACTER);
 
-    // TCODConsole::flush();
+    RenderActionLog();
+  }
 
-    g_context->present(g_console);
+  g_context->present(g_console);
 
-    // did the user hit a key ?
-    TCODSystem::checkForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE), &key, &mouse);
-    if (key.vk == TCODK_ENTER && key.lalt) {
-      // ALT-ENTER : switch fullscreen
-      TCODConsole::setFullscreen(!TCODConsole::isFullscreen());
+  TCODSystem::checkForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE), &inputKey, &inputMouse);
+  if (inputKey.vk == TCODK_ENTER && inputKey.lalt) {
+    // ALT-ENTER : switch fullscreen
+    TCODConsole::setFullscreen(!TCODConsole::isFullscreen());
 #ifdef TCOD_LINUX
-    } else if (key.c == 'p') {
+  } else if (inputKey.c == 'p') {
 #else
-    } else if (key.vk == TCODK_PRINTSCREEN) {
+  } else if (inputKey.vk == TCODK_PRINTSCREEN) {
 #endif
-      if (key.lalt) {
-        // ALT-PrintScreen : save to .asc format
-        // g_context->save_screenshot("samples.apf");
-        // TCODConsole::root->saveApf("samples.apf");
-      } else {
-        // save screenshot
-        g_context->save_screenshot(NULL);
-      }
+    if (inputKey.lalt) {
+      // ALT-PrintScreen : save to .asc format
+    } else {
+      g_context->save_screenshot(NULL);
     }
+  }
+
+#ifdef __EMSCRIPTEN__
+  if (TCODConsole::isWindowClosed() || mode == GM_QUIT) {
+    emscripten_cancel_main_loop();
+  }
+#endif
+}
+
+void Game::MainLoop() {
+  do {
+    FrameStep();
   } while (!TCODConsole::isWindowClosed() && mode != GM_QUIT);
 }
 
