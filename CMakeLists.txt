@@ -51,6 +51,7 @@ if (EMSCRIPTEN)
     target_link_options(${PROJECT_NAME} PRIVATE
         -fwasm-exceptions
         -sALLOW_MEMORY_GROWTH=1
+        -sASSERTIONS=1
         --preload-file "${CMAKE_CURRENT_SOURCE_DIR}/data@data"
     )
     # Set output to html to generate preview pages, otherwise you'll have to make your own html.
