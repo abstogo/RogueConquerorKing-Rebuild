@@ -25,7 +25,7 @@
 void main_loop() {
   // Rendering.
   g_console.clear();
-  tcod::print(g_console, {0, 0}, "Hello World", TCOD_white, std::nullopt);
+  tcod::print(g_console, {0, 0}, "Hello World", TCOD_ColorRGB{255, 255, 255}, std::nullopt);
   g_context->present(g_console);
 
   // Handle input.
@@ -36,7 +36,7 @@ void main_loop() {
 #endif
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
-      case SDL_QUIT:
+      case SDL_EVENT_QUIT:
         std::exit(EXIT_SUCCESS);
         break;
     }

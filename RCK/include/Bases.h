@@ -62,7 +62,7 @@ class BaseType {
       const std::vector<std::string>& Upkeep,
       const std::vector<std::string>& Core,
       const std::vector<std::string>& Options,
-      std::vector<PurchasableSlot>& Purchasable)
+      const std::vector<PurchasableSlot>& Purchasable)
       : Name_(Name),
         Buildable_(Buildable),
         Upkeep_(Upkeep),

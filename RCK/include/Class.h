@@ -77,7 +77,7 @@ class ACKSClass {
       const std::vector<std::string>& WeaponProficiencies,
       const std::vector<std::string>& FightingStyles,
       const std::vector<LevelledChartColumn>& LevelledChartColumns,
-      std::vector<LevelledAbility>& LevelledAbilities)
+      const std::vector<LevelledAbility>& LevelledAbilities)
       : Name_(Name),
         LevelChart_(LevelChart),
         AttackProgression_(AttackProgression),
