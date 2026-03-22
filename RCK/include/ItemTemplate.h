@@ -2,7 +2,7 @@
 
 #include <jsoncons/json.hpp>
 #include <jsoncons/json_type_traits_macros.hpp>
-#include <jsoncons_ext/jsonpath/json_query.hpp>
+
 
 #include "Class.h"
 #include "OutputLog.h"
@@ -71,7 +71,7 @@ class MaterialType {
   const double ValueMultiplier() const { return ValueMultiplier_; }
   const std::vector<std::string> MaterialTags() const { return MaterialTags_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(MaterialType, Name, Chance, ValueMultiplier, MaterialTags)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(MaterialType, Name, Chance, ValueMultiplier, MaterialTags)
 
 class ItemTemplate {
   std::string Name_;
@@ -111,7 +111,7 @@ class ItemTemplate {
   const int WeightDen() const { return WeightDen_; }
   const int WeightNum() const { return WeightNum_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(
+JSONCONS_ALL_GETTER_CTOR_TRAITS(
     ItemTemplate, Name, Visual, EquipmentTags, MaterialTypes, DecorationTypes, Value, WeightNum, WeightDen)
 
 class TemplateSet {
@@ -122,7 +122,7 @@ class TemplateSet {
 
   const std::vector<ItemTemplate>& ItemTemplates() const { return ItemTemplates_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(TemplateSet, ItemTemplates)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(TemplateSet, ItemTemplates)
 
 class DecorationMaterial {
   std::string Name_;
@@ -137,7 +137,7 @@ class DecorationMaterial {
   const double Chance() const { return Chance_; }
   const double ValueMultiplier() const { return ValueMultiplier_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(DecorationMaterial, Name, Chance, ValueMultiplier)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(DecorationMaterial, Name, Chance, ValueMultiplier)
 
 class Decoration {
   std::string Tag_;
@@ -158,7 +158,7 @@ class Decoration {
   const int ValueBase() const { return ValueBase_; }
   const std::vector<DecorationMaterial>& MaterialTypes() const { return MaterialTypes_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(Decoration, Tag, Text, ValueBase, MaterialTypes)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(Decoration, Tag, Text, ValueBase, MaterialTypes)
 
 class DecorationSet {
   std::vector<Decoration> Decorations_;
@@ -168,7 +168,7 @@ class DecorationSet {
 
   const std::vector<Decoration>& Decorations() const { return Decorations_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(DecorationSet, Decorations)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(DecorationSet, Decorations)
 
 // generated item
 struct ItemSet {

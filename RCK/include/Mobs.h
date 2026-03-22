@@ -3,7 +3,7 @@
 #include <jsoncons/json.hpp>
 #include <jsoncons/json_type_traits_macros.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
-#include <jsoncons_ext/jsonpath/json_query.hpp>
+
 
 #include "ItemTemplate.h"
 #include "OutputLog.h"
@@ -44,7 +44,7 @@ class AttackType {
   const int DamageDie() const { return DamageDie_; }
   const int DamageBonus() const { return DamageBonus_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(AttackType, Name, DamageDie, DamageBonus)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(AttackType, Name, DamageDie, DamageBonus)
 
 // Some creatures (especially humanoids and beastmen) have equipment rather than natural weapons/armour etc
 class EquipmentType {
@@ -59,7 +59,7 @@ class EquipmentType {
   const std::vector<std::string> Always() const { return Always_; }
   const std::vector<std::vector<std::string>> OneOf() const { return OneOf_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(EquipmentType, Always, OneOf)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(EquipmentType, Always, OneOf)
 
 class CreatureTemplate {
   std::string Name_;
@@ -139,7 +139,7 @@ class CreatureTemplate {
   const std::vector<std::vector<std::string>> AttackSequences() const { return AttackSequences_; }
   const EquipmentType& EquipmentSelection() const { return EquipmentSelection_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(
+JSONCONS_ALL_GETTER_CTOR_TRAITS(
     CreatureTemplate,
     Name,
     Visual,
@@ -166,7 +166,7 @@ class CreatureSet {
 
   const std::vector<CreatureTemplate>& CreatureTemplates() const { return CreatureTemplates_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(CreatureSet, CreatureTemplates)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(CreatureSet, CreatureTemplates)
 
 class Creature {
   std::string Name_;  // the name of this particular monster (in this version and for most monsters generally, this is

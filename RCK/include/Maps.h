@@ -8,7 +8,7 @@
 #include <jsoncons/json.hpp>
 #include <jsoncons/json_type_traits_macros.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
-#include <jsoncons_ext/jsonpath/json_query.hpp>
+
 #include <list>
 #include <queue>
 #include <stack>
@@ -137,7 +137,7 @@ class TerrainType {
   const std::string& Generator() const { return Generator_; }
   std::vector<std::string> Prefabs() const { return Prefabs_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(
+JSONCONS_ALL_GETTER_CTOR_TRAITS(
     TerrainType,
     Name,
     RegionMapSymbol,
@@ -155,7 +155,7 @@ class TerrainTypeSet {
 
   std::vector<TerrainType> TerrainTypes() const { return TerrainTypes_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(TerrainTypeSet, TerrainTypes)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(TerrainTypeSet, TerrainTypes)
 
 struct RegionMap {
   TCODMap* map = NULL;

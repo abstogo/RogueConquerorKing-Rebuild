@@ -3,7 +3,7 @@
 #include <jsoncons/json.hpp>
 #include <jsoncons/json_type_traits_macros.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
-#include <jsoncons_ext/jsonpath/json_query.hpp>
+
 
 #include "Character.h"
 #include "Class.h"
@@ -19,7 +19,7 @@ class PurchasableSlot {
   const std::string& Name() const { return Name_; }
   const int Cost() const { return Cost_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(PurchasableSlot, Name, Cost)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(PurchasableSlot, Name, Cost)
 
 class BaseTag {
   std::string Tag_;
@@ -46,7 +46,7 @@ class BaseTag {
   const std::vector<std::string>& Requires() const { return Requires_; }
   const std::vector<std::string>& Excludes() const { return Excludes_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(BaseTag, Tag, Type, Indicator, MenuText, Requires, Excludes)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(BaseTag, Tag, Type, Indicator, MenuText, Requires, Excludes)
 
 class BaseType {
   std::string Name_;
@@ -79,7 +79,7 @@ class BaseType {
 
   const std::vector<PurchasableSlot> Purchasable() const { return Purchasable_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(BaseType, Name, Buildable, Upkeep, Core, Options, Purchasable)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(BaseType, Name, Buildable, Upkeep, Core, Options, Purchasable)
 
 class BaseInfoSet {
   std::vector<BaseType> BaseTypes_;
@@ -92,7 +92,7 @@ class BaseInfoSet {
   const std::vector<BaseType>& BaseTypes() const { return BaseTypes_; }
   const std::vector<BaseTag>& Tags() const { return Tags_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(BaseInfoSet, BaseTypes, Tags)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(BaseInfoSet, BaseTypes, Tags)
 
 // screens are in fact handled in the tags. Each one has 3 sections: Base, Party and Manipulator.
 

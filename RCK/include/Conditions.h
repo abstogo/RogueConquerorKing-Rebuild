@@ -3,7 +3,7 @@
 #include <jsoncons/json.hpp>
 #include <jsoncons/json_type_traits_macros.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
-#include <jsoncons_ext/jsonpath/json_query.hpp>
+
 
 #include "Class.h"
 #include "Game.h"
@@ -91,7 +91,7 @@ class ConditionData {
   std::vector<Condition>& Conditions_NC() { return Conditions_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(
+JSONCONS_ALL_GETTER_CTOR_TRAITS(
     Condition,
     Name,
     Includes,
@@ -106,7 +106,7 @@ JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(
     SurpriseBonus,
     CanBeBackstabbed,
     Recovery)
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(ConditionData, Conditions)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(ConditionData, Conditions)
 
 class SpecialPenalty {
   std::string Name_;
@@ -119,7 +119,7 @@ class SpecialPenalty {
   int Value() const { return Value_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(SpecialPenalty, Name, Value)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(SpecialPenalty, Name, Value)
 
 class MortalEffect {
   std::string Code_;
@@ -153,7 +153,7 @@ class MortalEffect {
   std::vector<SpecialPenalty> SpecialPenalties() const { return SpecialPenalties_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(MortalEffect, Code, PlayerText, MonsterText, DoubleTo, SpecialPenalties)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(MortalEffect, Code, PlayerText, MonsterText, DoubleTo, SpecialPenalties)
 
 class MortalWoundData {
   std::vector<MortalEffect> MortalEffects_;
@@ -165,7 +165,7 @@ class MortalWoundData {
   std::vector<MortalEffect>& MortalEffects_NC() { return MortalEffects_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(MortalWoundData, MortalEffects)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(MortalWoundData, MortalEffects)
 
 struct MortalRollResult {
   std::string status;

@@ -3,7 +3,7 @@
 #include <jsoncons/json.hpp>
 #include <jsoncons/json_type_traits_macros.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
-#include <jsoncons_ext/jsonpath/json_query.hpp>
+
 
 #include "Character.h"
 
@@ -27,7 +27,7 @@ class LevelledChartColumn {
   const std::string& Name() const { return Name_; }
   const int Column() const { return Column_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(LevelledChartColumn, Name, Column)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(LevelledChartColumn, Name, Column)
 
 class LevelledAbility {
   std::string Name_;
@@ -44,7 +44,7 @@ class LevelledAbility {
   const int Level() const { return Level_; }
   const int Value() const { return Value_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(LevelledAbility, Name, Level, Type, Value)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(LevelledAbility, Name, Level, Type, Value)
 
 // Changed the naming so I'm not typing "class Class" :)
 class ACKSClass {
@@ -118,7 +118,7 @@ class ACKSClass {
 
   std::map<std::string, std::vector<int>> LevelTagBonuses;  // compiled list of tags per level
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(
+JSONCONS_ALL_GETTER_CTOR_TRAITS(
     ACKSClass,
     Name,
     LevelChart,
@@ -141,7 +141,7 @@ class ClassSet {
 
   const std::vector<ACKSClass>& Classes() const { return Classes_; }
 };
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(ClassSet, Classes)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(ClassSet, Classes)
 
 class AdvancementStore {
  public:

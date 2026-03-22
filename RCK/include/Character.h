@@ -3,7 +3,7 @@
 #include <jsoncons/json.hpp>
 #include <jsoncons/json_type_traits_macros.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
-#include <jsoncons_ext/jsonpath/json_query.hpp>
+
 
 #include "Class.h"
 #include "Conditions.h"
@@ -42,8 +42,8 @@ class CharacteristicData {
   std::vector<Statistic>& statistics_NC() { return statistics_; }
 };
 
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(Statistic, name, bonusTo)
-JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(CharacteristicData, statistics)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(Statistic, name, bonusTo)
+JSONCONS_ALL_GETTER_CTOR_TRAITS(CharacteristicData, statistics)
 
 // *****************************************************************************
 // CHARACTER INFORMATION
