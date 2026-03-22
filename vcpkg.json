@@ -1,25 +1,16 @@
 {
-  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
-  "name": "libtcod-template",
-  "version-semver": "0.0.0",
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "dependencies": [
-    "glad",
-    "lodepng-c",
-    "sdl2",
     {
-      "name": "sdl2",
-      "default-features": false,
+      "name": "libtcod",
+      "default-features": true,
       "features": [
-        "x11"
-      ],
-      "platform": "linux"
+        "png",
+        "sdl",
+        "unicode",
+        "zlib"
+      ]
     },
-    "stb",
-    "utf8proc",
-    {
-      "name": "vcpkg-cmake",
-      "host": true
-    },
-    "zlib"
+    "sdl3"
   ]
 }

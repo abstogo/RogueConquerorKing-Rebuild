@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.13...3.21)
+cmake_minimum_required (VERSION 3.19...4.0)
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE
@@ -17,10 +17,12 @@ file(
     GLOB_RECURSE SOURCE_FILES
     CONFIGURE_DEPENDS  # Automatically reconfigure if source files are added/removed.
     ${PROJECT_SOURCE_DIR}/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/*.hpp
     ${PROJECT_SOURCE_DIR}/RCK/src/*.cpp
-    
+    ${PROJECT_SOURCE_DIR}/RCK/src/*.hpp
 )
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} "RCK/src/Menus.cpp")
+
 target_include_directories(
   ${PROJECT_NAME}
   PRIVATE
@@ -54,8 +56,11 @@ if (EMSCRIPTEN)
     )
 endif()
 
-set(BUILD_SHARED_LIBS ${WIN32})  # Builds libtcod has a shared library.
-add_subdirectory("libtcod")  # This will error if you haven't initialized libtcod the submodule!
-
-find_package(SDL2 CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2::SDL2main libtcod::libtcod)
+find_package(SDL3 CONFIG REQUIRED)
+find_package(libtcod CONFIG REQUIRED)
+target_link_libraries(
+    ${PROJECT_NAME}
+    PRIVATE
+        SDL3::SDL3
+        libtcod::libtcod
+)
