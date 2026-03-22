@@ -24,7 +24,7 @@ class LevelledChartColumn {
   LevelledChartColumn(const std::string& Name, const int Column) : Name_(Name), Column_(Column) {}
 
   const std::string& Name() const { return Name_; }
-  const int Column() const { return Column_; }
+  int Column() const { return Column_; }
 };
 JSONCONS_ALL_CTOR_GETTER_TRAITS(LevelledChartColumn, Name, Column)
 
