@@ -129,13 +129,13 @@ class TerrainType {
         Generator_(Generator),
         Prefabs_(Prefabs) {}
 
-  const std::string& Name() { return Name_; }
-  const std::string& RegionMapSymbol() { return RegionMapSymbol_; }
-  const int OverlandTravelMultiplier() { return OverlandTravelMultiplier_; }
-  const int EncounterProbability() { return EncounterProbability_; }
-  const std::string& EncounterTable() { return EncounterTable_; }
-  const std::string& Generator() { return Generator_; }
-  std::vector<std::string> Prefabs() { return Prefabs_; }
+  const std::string& Name() const { return Name_; }
+  const std::string& RegionMapSymbol() const { return RegionMapSymbol_; }
+  int OverlandTravelMultiplier() const { return OverlandTravelMultiplier_; }
+  int EncounterProbability() const { return EncounterProbability_; }
+  const std::string& EncounterTable() const { return EncounterTable_; }
+  const std::string& Generator() const { return Generator_; }
+  std::vector<std::string> Prefabs() const { return Prefabs_; }
 };
 JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(
     TerrainType,
@@ -153,7 +153,7 @@ class TerrainTypeSet {
  public:
   TerrainTypeSet(const std::vector<TerrainType>& TerrainTypes) : TerrainTypes_(TerrainTypes) {}
 
-  std::vector<TerrainType> TerrainTypes() { return TerrainTypes_; }
+  std::vector<TerrainType> TerrainTypes() const { return TerrainTypes_; }
 };
 JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(TerrainTypeSet, TerrainTypes)
 
