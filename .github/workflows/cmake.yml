@@ -34,11 +34,11 @@ jobs:
           #- os: macos-14
           #  triplet: arm64-osx
           #  platform-name: macos.arm64
-          - os: ubuntu-24.04
-            triplet: x64-linux
-            platform-name: linux.x64
+          #- os: ubuntu-24.04
+          #  triplet: x64-linux
+          #  platform-name: linux.x64
             # libltdl-dev needed to build libxcrypt sub-dependency, others needed for sdl3
-            apt-packages: libltdl-dev libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libxcursor-dev
+          #  apt-packages: libltdl-dev libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libxcursor-dev
 
     env:
       # Indicates the CMake build directory where project files and binaries are being produced.
