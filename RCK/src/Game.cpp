@@ -6,2135 +6,1831 @@ tcod::Console g_console;  // The global console object.
 tcod::ContextPtr g_context;  // The global libtcod context.
 
 auto get_data_dir() -> std::filesystem::path {
-    static auto root_directory = std::filesystem::path{"."};  // Begin at the working directory.
-    while (!std::filesystem::exists(root_directory / "data")) {
-      // If the current working directory is missing the data dir then it will assume it exists in any parent directory.
-      root_directory /= "..";
-      if (!std::filesystem::exists(root_directory)) {
-        throw std::runtime_error("Could not find the data directory.");
-      }
+  static auto root_directory = std::filesystem::path{"."};  // Begin at the working directory.
+  while (!std::filesystem::exists(root_directory / "data")) {
+    // If the current working directory is missing the data dir then it will assume it exists in any parent directory.
+    root_directory /= "..";
+    if (!std::filesystem::exists(root_directory)) {
+      throw std::runtime_error("Could not find the data directory.");
     }
-    return root_directory / "data";
+  }
+  return root_directory / "data";
 };
 
-
 void Game::StartGame() {
+  // create game managers
 
-    // create game managers
+  DebugLog("Starting Game");
 
-    DebugLog("Starting Game");
+  mMenuManager = MenuManager::CreateMenuManager();
 
-	mMenuManager = MenuManager::CreateMenuManager();
+  // DataLoad(); // delayed until after new game is selected so we can account for game options
 
-    // DataLoad(); // delayed until after new game is selected so we can account for game options
+  CreateMenu();
 
-    CreateMenu();
-
-    mMenuManager->OpenMenu(mainMenuID);
+  mMenuManager->OpenMenu(mainMenuID);
 }
 
-void Game::DataLoad()
-{
-	DebugLog("Loading Core Data Files");
+void Game::DataLoad() {
+  DebugLog("Loading Core Data Files");
 
-    // The core data files, stored in data/RCK/scripts are loaded here.
-    // Each primary manager is spawned from one or more core data files.
+  // The core data files, stored in data/RCK/scripts are loaded here.
+  // Each primary manager is spawned from one or more core data files.
 
-	mInventoryManager = InventoryManager::CreateInventoryManager();
-	mCharacterManager = CharacterManager::LoadCharacteristics();
-	mClassManager = ClassManager::LoadClasses();
-	mMapManager = MapManager::LoadMaps();
-	mTimeManager = new TimeManager();
-	gLog->Log("Time Manager", "Started");
-	mItemManager = ItemManager::LoadItemTemplates();
-	mMobManager = MobManager::LoadMobData();
-	mConditionManager = ConditionManager::LoadConditions();
-	mMortalManager = MortalWoundManager::LoadMortalWoundData();
-	mPartyManager = PartyManager::LoadPartyData();
-	mBaseManager = BaseManager::LoadBaseData();
+  mInventoryManager = InventoryManager::CreateInventoryManager();
+  mCharacterManager = CharacterManager::LoadCharacteristics();
+  mClassManager = ClassManager::LoadClasses();
+  mMapManager = MapManager::LoadMaps();
+  mTimeManager = new TimeManager();
+  gLog->Log("Time Manager", "Started");
+  mItemManager = ItemManager::LoadItemTemplates();
+  mMobManager = MobManager::LoadMobData();
+  mConditionManager = ConditionManager::LoadConditions();
+  mMortalManager = MortalWoundManager::LoadMortalWoundData();
+  mPartyManager = PartyManager::LoadPartyData();
+  mBaseManager = BaseManager::LoadBaseData();
 
-    DebugLog("Game Managers Created");
-    DebugLog("Loading Secondary Data Files");
+  DebugLog("Game Managers Created");
+  DebugLog("Loading Secondary Data Files");
 
-    // This is where we will load Option and Mod files
-    // The idea is that we will have files which store replacement key sections in the various files
-    // As an example - under Axioms 12's extended thief rules, Dexterity applies to all thief skill rolls.
-    // So we can add an Option element which can be selected at game start,
-    // which will contain "add"->"statistics"->"dexterity"->"bonusTo"->"Action:MoveSilently" etc for all the thief skills
-    // Mods will work similarly but include the ability to completely replace data files instead of using endless deltas.
+  // This is where we will load Option and Mod files
+  // The idea is that we will have files which store replacement key sections in the various files
+  // As an example - under Axioms 12's extended thief rules, Dexterity applies to all thief skill rolls.
+  // So we can add an Option element which can be selected at game start,
+  // which will contain "add"->"statistics"->"dexterity"->"bonusTo"->"Action:MoveSilently" etc for all the thief skills
+  // Mods will work similarly but include the ability to completely replace data files instead of using endless deltas.
 
-    DebugLog("Loading Completed");
+  DebugLog("Loading Completed");
 
-    // Now we initialize the game managers using the collected data.
+  // Now we initialize the game managers using the collected data.
 
-    mCharacterManager->Initialise();
+  mCharacterManager->Initialise();
 
-    DebugLog("Game Managers Initialized");
+  DebugLog("Game Managers Initialized");
 }
 
+void Game::QuitGame() { mode = GM_QUIT; }
 
-void Game::QuitGame()
-{
-	mode = GM_QUIT;
+void Game::CreateMenu() {
+  mainMenuID = mMenuManager->BuildMenu(MANAGER_GAME, "Rogue, Conqueror, King");
+
+  mMenuManager->AddMenuEntry(mainMenuID, MenuEntryTypes::MT_SELECT, "Start Test Game");
+  mMenuManager->AddMenuEntry(mainMenuID, MenuEntryTypes::MT_SELECT, "Quit");
 }
 
-void Game::CreateMenu()
-{
-    mainMenuID = mMenuManager->BuildMenu(MANAGER_GAME, "Rogue, Conqueror, King");
+void Game::CreateTestGame() {
+  DebugLog("Creating Test Game");
 
-    mMenuManager->AddMenuEntry(mainMenuID, MenuEntryTypes::MT_SELECT, "Start Test Game");
-    mMenuManager->AddMenuEntry(mainMenuID, MenuEntryTypes::MT_SELECT, "Quit");
+  // Load data, including selected options
+  DataLoad();
+
+  // starting character to make numbers match (0 = false, 0 = no character on map)
+  mCharacterManager->GenerateTestCharacter("NULL", "Fighter");
+
+  currentPartyID = mPartyManager->GenerateAITestParty();
+  currentCharacterID = mPartyManager->getNextPlayerCharacter(currentPartyID);
+  currentBaseID = -1;
+
+  std::vector<std::string> indoorMap = {
+      "##############################################", "#.................#..........................#",
+      "#.................#..........................#", "#.................#..........................#",
+      "#.................#..........................#", "#............................................#",
+      "#.................#..........................#", "#.................#..........................#",
+      "#.................#..........................#", "#.................#..........................#",
+      "#.................#..........................#", "#########.#########..........................#",
+      "#.................#..........................#", "#.................#..........................#",
+      "#.................#..........................#", "#.................#..........................#",
+      "#.................#..........................#", "#.................#..........................#",
+      "#.................#..........................#", "##############################################",
+  };
+  int indoorMapID = mMapManager->buildMapFromText(indoorMap, false);
+
+  std::vector<std::string> regionMap = {
+      ". . . . . . . . . ~ ^ ^ ~ . . . . . . . . . . ",
+      " . . . . . . . . . ~ ^ ~ . . . . . . . . . . .",
+      ". . * * * . . . . ~ ~ ^ ~ . . . . . . * . . . ",
+      " . . * * * * . . . ~ ^ ~ . . . . . . . . . . .",
+      ". . * * * . . . . ~ ~ ~ . . . . . . . . . . . ",
+      " . . . * . . . . . . . . . . . . . . . * . . .",
+      ". . . . . . . . . . . . . . . . . . . . . . . ",
+      " s s s . . . . . . . . . . . . . . . . . . . .",
+      "s s s . * . . . . . . . . . . . . . . . * . . ",
+      " s s s . . . . . . . . . . * * . . . . . . . .",
+  };
+  mMapManager->BuildRegionMapFromText(regionMap);
+
+  std::vector<std::string> outdoorMap = {
+      ". . . . . . . . . . . . . . . . . . . . . . . ",
+      " . . . . . . . . . . . . . . . . . . . . . . .",
+      ". . . . . . . . . . . . . . . . . . . T . . . ",
+      " . . . . . . . . # # . . . . . . . . . . . . .",
+      ". . . . . . . . . # # # . . . . . . T T . . . ",
+      " . . . . . . . # # # # . . . . . T T T T . . .",
+      ". . . . . . . . # # # . . . . . . . . . . . . ",
+      " . . . . . . . . # . . . . . . . . . . . . . .",
+      ". . . . T . . . . . . . . . . . . . . . T . . ",
+      " . . . . . . . . . . . . . T T . . . . . . . .",
+  };
+  int outdoorMapID = mMapManager->GenerateMapFromPrefab(8, 6, outdoorMap, SITE_DUNGEON);
+
+  mPartyManager->SetPartyX(currentPartyID, 8);
+  mPartyManager->SetPartyY(currentPartyID, 6);
+
+  mMapManager->connectMaps(outdoorMapID, indoorMapID, 3, 3, 8, 15);
+
+  // recomputeFov = true;
+  // light_walls = true;
+
+  // add a sword to test character
+  int testItem = mItemManager->GenerateItemFromTemplate("Sword");
+  int inventoryID = mCharacterManager->AddInventoryItem(currentCharacterID, testItem);
+  mCharacterManager->EquipItem(currentCharacterID, inventoryID);
+
+  // add a bow to test character
+  int bowItem = mItemManager->GenerateItemFromTemplate("Shortbow");
+  int newItemID = mCharacterManager->AddInventoryItem(currentCharacterID, bowItem);
+  // mCharacterManager->EquipItem(currentCharacterID, newItemID);
+
+  int treasureItem = mItemManager->GenerateItemFromTemplate("Fur Pelt");
+  int treasureItemID = mCharacterManager->AddInventoryItem(currentCharacterID, treasureItem, 1);
+
+  // drop some items in test map
+  mMapManager->AddItem(outdoorMapID, 2, 2, "Chainmail");
+  mMapManager->AddItem(outdoorMapID, 2, 3, "Shield");
+
+  // add the test goblins to the test map
+  int testGoblinID = mMobManager->GenerateMonster("Goblin", outdoorMapID, 3, 2);
+  ;
+  int testGoblin2ID = mMobManager->GenerateMonster("Goblin", outdoorMapID, 3, 4);
+  int testGoblin3ID = mMobManager->GenerateMonster("Goblin", outdoorMapID, 4, 5);
+
+  // standing level spawner
+  SpawnLevel(outdoorMapID, 14, 3);
+
+  // test mortal wounds
+  int d20_roll = randomiser->diceRoll("1d20");
+  int d6_roll = randomiser->diceRoll("1d6");
+
+  MortalRollResult* result = mMortalManager->RollMortalWound(d20_roll, d6_roll);
+
+  DebugLog("Test Mortal Wound:");
+  DebugLog("D20/D6:" + std::to_string(d20_roll) + "/" + std::to_string(d6_roll));
+  DebugLog("Results:" + result->effect->PlayerText());
+
+  delete result;
+
+  mode = GM_MAIN;
 }
 
-void Game::CreateTestGame()
-{
-	DebugLog("Creating Test Game");
+void Game::ClearGame() {}
 
-    // Load data, including selected options
-    DataLoad();
+void Game::SpawnLevel(int mapID, int spawnPointX, int spawnPointY) {
+  DebugLog("SPAWNING LEVEL #" + std::to_string(mapID));
 
-	// starting character to make numbers match (0 = false, 0 = no character on map)
-	mCharacterManager->GenerateTestCharacter("NULL", "Fighter");
+  currentMapID = mapID;
+  currentMap = mMapManager->getMap(currentMapID);
 
-	currentPartyID = mPartyManager->GenerateAITestParty();
-	currentCharacterID = mPartyManager->getNextPlayerCharacter(currentPartyID);
-	currentBaseID = -1;
+  bool outdoor = currentMap->outdoor;
+  DebugLog("Level is " + outdoor ? "outdoor." : "indoor.");
 
-	std::vector<std::string> indoorMap = {
-		"##############################################",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#............................................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#########.#########..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"#.................#..........................#",
-		"##############################################",
-	};
-	int indoorMapID = mMapManager->buildMapFromText(indoorMap, false);
+  DebugLog("Spawning PCs");
+  const int MAX_SPAWN_DIST = 255;
+  int dist = 1;
+  int dist_mult = outdoor ? 6 : 8;
+  // arrange the relevant characters around the entry point. We care about PCs, henches, and animals.
+  std::vector<int> pcs = mPartyManager->getPlayerCharacters(currentPartyID);
+  for (int pc_id : pcs) {
+    if (pc_id == currentCharacterID) {
+      // the currently controlled character spawns on the spawn point
+      mCharacterManager->SetPlayerX(currentCharacterID, spawnPointX);
+      mCharacterManager->SetPlayerY(currentCharacterID, spawnPointY);
+      mCharacterManager->SetPlayerMap(currentCharacterID, mapID);
+      currentMap->setCharacter(spawnPointX, spawnPointY, currentCharacterID);
 
-	std::vector<std::string> regionMap = {
-		". . . . . . . . . ~ ^ ^ ~ . . . . . . . . . . ",
-		" . . . . . . . . . ~ ^ ~ . . . . . . . . . . .",
-		". . * * * . . . . ~ ~ ^ ~ . . . . . . * . . . ",
-		" . . * * * * . . . ~ ^ ~ . . . . . . . . . . .",
-		". . * * * . . . . ~ ~ ~ . . . . . . . . . . . ",
-		" . . . * . . . . . . . . . . . . . . . * . . .",
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" s s s . . . . . . . . . . . . . . . . . . . .",
-		"s s s . * . . . . . . . . . . . . . . . * . . ",
-		" s s s . . . . . . . . . . * * . . . . . . . .",
-	};
-	mMapManager->BuildRegionMapFromText(regionMap);
+      DebugLog(
+          "Spawning player onto position (" + std::to_string(spawnPointX) + "," + std::to_string(spawnPointY) + ")");
+    } else {
+      mCharacterManager->SpawnOnMap(pc_id, mapID, spawnPointX, spawnPointY);
+    }
+  }
 
-	std::vector<std::string> outdoorMap = {
-		". . . . . . . . . . . . . . . . . . . . . . . ",
-		" . . . . . . . . . . . . . . . . . . . . . . .",
-		". . . . . . . . . . . . . . . . . . . T . . . ",
-		" . . . . . . . . # # . . . . . . . . . . . . .",
-		". . . . . . . . . # # # . . . . . . T T . . . ",
-		" . . . . . . . # # # # . . . . . T T T T . . .",
-		". . . . . . . . # # # . . . . . . . . . . . . ",
-		" . . . . . . . . # . . . . . . . . . . . . . .",
-		". . . . T . . . . . . . . . . . . . . . T . . ",
-		" . . . . . . . . . . . . . T T . . . . . . . .",
-	};
-	int outdoorMapID = mMapManager->GenerateMapFromPrefab(8,6,outdoorMap,SITE_DUNGEON);
+  DebugLog("Spawning Henches");
+  std::vector<int> henches = mPartyManager->getHenchmen(currentPartyID);
+  for (int h_id : henches) {
+    mCharacterManager->SpawnOnMap(h_id, mapID, spawnPointX, spawnPointY);
+  }
 
-	mPartyManager->SetPartyX(currentPartyID,8);
-	mPartyManager->SetPartyY(currentPartyID, 6);
-
-	mMapManager->connectMaps(outdoorMapID, indoorMapID, 3, 3, 8, 15);
-
-	//recomputeFov = true;
-	//light_walls = true;
-
-	// add a sword to test character
-	int testItem = mItemManager->GenerateItemFromTemplate("Sword");
-	int inventoryID = mCharacterManager->AddInventoryItem(currentCharacterID, testItem);
-	mCharacterManager->EquipItem(currentCharacterID, inventoryID);
-
-	// add a bow to test character
-	int bowItem = mItemManager->GenerateItemFromTemplate("Shortbow");
-	int newItemID = mCharacterManager->AddInventoryItem(currentCharacterID, bowItem);
-	//mCharacterManager->EquipItem(currentCharacterID, newItemID);
-
-    int treasureItem = mItemManager->GenerateItemFromTemplate("Fur Pelt");
-    int treasureItemID = mCharacterManager->AddInventoryItem(currentCharacterID, treasureItem,1);
-
-	// drop some items in test map
-	mMapManager->AddItem(outdoorMapID, 2, 2, "Chainmail");
-	mMapManager->AddItem(outdoorMapID, 2, 3, "Shield");
-
-	// add the test goblins to the test map
-	int testGoblinID = mMobManager->GenerateMonster("Goblin", outdoorMapID, 3, 2);;
-	int testGoblin2ID = mMobManager->GenerateMonster("Goblin", outdoorMapID, 3, 4);
-	int testGoblin3ID = mMobManager->GenerateMonster("Goblin", outdoorMapID, 4, 5);
-
-	// standing level spawner
-	SpawnLevel(outdoorMapID, 14, 3);
-
-	// test mortal wounds
-	int d20_roll = randomiser->diceRoll("1d20");
-	int d6_roll = randomiser->diceRoll("1d6");
-
-	MortalRollResult* result = mMortalManager->RollMortalWound(d20_roll, d6_roll);
-
-	DebugLog("Test Mortal Wound:");
-	DebugLog("D20/D6:" + std::to_string(d20_roll) + "/" + std::to_string(d6_roll));
-	DebugLog("Results:" + result->effect->PlayerText());
-
-	delete result;
-
-	mode = GM_MAIN;
+  DebugLog("Spawning Animals");
+  std::vector<int> animals = mPartyManager->getAnimals(currentPartyID);
+  for (int a_id : animals) {
+    // everyone else is randomly placed around
+    if (outdoor || !mMobManager->GetMonster(a_id).HasAbility("NoDungeon")) {
+      mMobManager->SpawnOnMap(a_id, currentMapID, spawnPointX, spawnPointY);
+    }
+  }
 }
 
-void Game::ClearGame()
-{
+bool Game::MenuGameHandleKeyboard(TCOD_key_t* key) {
+  if (key->vk == TCODK_NONE) {
+    return false;
+  }
 
+  if (key->vk == TCODK_UP) {
+    mMenuManager->ControlMoveUp();
+  } else if (key->vk == TCODK_DOWN) {
+    mMenuManager->ControlMoveDown();
+  } else if (key->vk == TCODK_ENTER) {
+    mMenuManager->Select();
+  }
+
+  return true;
 }
 
-void Game::SpawnLevel(int mapID, int spawnPointX, int spawnPointY)
-{
-	DebugLog("SPAWNING LEVEL #" + std::to_string(mapID));
+bool Game::MainGameHandleKeyboard(TCOD_key_t* key) {
+  // returns true if anything has changed, false if it has not
+
+  int player_x, player_y;
+
+  if (currentMapID != -1) {
+    player_x = mCharacterManager->GetPlayerX(currentCharacterID);
+    player_y = mCharacterManager->GetPlayerY(currentCharacterID);
+  } else {
+    player_x = mPartyManager->GetPartyX(currentPartyID);
+    player_y = mPartyManager->GetPartyY(currentPartyID);
+  }
+
+  if (key->vk == TCODK_NONE) {
+    return false;
+  }
+
+  // Mode keys! These keys switch between the game's modal windows.
+  // Currently these are Inventory, Character, Ability and Spells
+  if (key->c == 'v') {
+    if (mode != GM_INVENTORY) {
+      mode = GM_INVENTORY;
+      if (currentMapID == -1) {
+        // we're in the overworld, so we open the party inventory interface
+        gGame->mInventoryManager->OpenInventoryMenu(
+            mPartyManager->GetInventoryID(currentPartyID),
+            mCharacterManager->GetInventory(currentCharacterID),
+            "Inventory");
+      } else {
+        // we're in the local map or dungeon, so open the inventory interface for the currently selected character
+        gGame->mInventoryManager->OpenInventoryMenu(
+            mCharacterManager->GetInventory(currentCharacterID), -1, "Inventory");
+      }
+    } else {
+      mode = GM_MAIN;
+      gGame->mInventoryManager->CloseMenu();
+    }
+  }
+
+  if (key->c == 'c') {
+    if (mode != GM_CHARACTER) {
+      mode = GM_CHARACTER;
+    } else {
+      mode = GM_MAIN;
+    }
+  }
+
+  // "a"/"A" is the "ability" button and opens the Character Ability window to use class abilities and proficiencies
+  // (where they have discrete activations rather than implicit bonuses etc)
+  if (key->c == 'a') {
+    /*
+    if (mode != GM_ABILITY)
+    {
+            mode = GM_ABILITY;
+    }
+    else
+    {
+            mode = GM_MAIN;
+    }
+    */
+  }
+
+  // "s"/"S" is the "spell" button and opens the Spells window to allow for casting spells
+  if (key->c == 's') {
+    /*
+    if (mode != GM_SPELL)
+    {
+            mode = GM_SPELL;
+    }
+    else
+    {
+            mode = GM_MAIN;
+    }
+    */
+  }
+
+  // "d"/"D" is the "domain" button and opens the Domain window to control camps/settlements/domains.
+  // Note this only intended on the Region map currently (and automatically triggers if you enter a settlement)
+  // The plan is to have camps/settlements etc explorable eventually, so the Domain mode will trigger the interface
+  // while inside them
+  if (key->c == 'd') {
+    if (currentMapID == -1) {
+      if (mode != GM_DOMAIN) {
+        mode = GM_DOMAIN;
+      } else {
+        mode = GM_MAIN;
+      }
+    }
+  }
+
+  // ACTION SYSTEM
+  // Basic idea is that there are a small number of controls (because the hex/ortho transition is complicated enough)
+  // Each control is largely contextual - so movement keys towards an enemy is an attack, toward a non-enemy is a
+  // discussion, etc.
+
+  switch (mode) {
+    case GM_MAIN: {
+      if (currentMapID == -1) {
+        // '>' is 'go in'. I use only one button to go up/down etc. The other button is used for region transition
+        if (key->c == '.' && key->shift) {
+          // we're on the region map, so we head 'down' into the local wilderness map
+          // this automatically generates a local wilderness map if one does not exist
+          int mapID = mMapManager->GetMapAtLocation(player_x, player_y);
+          currentMapID = mapID;
+          currentMap = mMapManager->getMap(mapID);
 
-	currentMapID = mapID;
-	currentMap = mMapManager->getMap(currentMapID);
+          SpawnLevel(mapID, OUTDOOR_MAP_WIDTH / 2, OUTDOOR_MAP_HEIGHT / 2);
 
-	bool outdoor = currentMap->outdoor;
-	DebugLog("Level is " + outdoor ? "outdoor." : "indoor.");
+          recomputeFov = true;
 
-	DebugLog("Spawning PCs");
-	const int MAX_SPAWN_DIST = 255;
-	int dist = 1;
-	int dist_mult = outdoor ? 6 : 8;
-	// arrange the relevant characters around the entry point. We care about PCs, henches, and animals.
-	std::vector<int> pcs =  mPartyManager->getPlayerCharacters(currentPartyID);
-	for (int pc_id : pcs)
-	{
-		if (pc_id == currentCharacterID)
-		{
-			// the currently controlled character spawns on the spawn point
-			mCharacterManager->SetPlayerX(currentCharacterID, spawnPointX);
-			mCharacterManager->SetPlayerY(currentCharacterID, spawnPointY);
-			mCharacterManager->SetPlayerMap(currentCharacterID, mapID);
-			currentMap->setCharacter(spawnPointX, spawnPointY, currentCharacterID);
-
-			DebugLog("Spawning player onto position (" + std::to_string(spawnPointX) + "," + std::to_string(spawnPointY) + ")");
-		}
-		else
-		{
-			mCharacterManager->SpawnOnMap(pc_id, mapID, spawnPointX, spawnPointY);
-		}
-	}
-
-	DebugLog("Spawning Henches");
-	std::vector<int> henches = mPartyManager->getHenchmen(currentPartyID);
-	for (int h_id : henches)
-	{
-		mCharacterManager->SpawnOnMap(h_id, mapID, spawnPointX, spawnPointY);
-	}
-
-	DebugLog("Spawning Animals");
-	std::vector<int> animals = mPartyManager->getAnimals(currentPartyID);
-	for (int a_id : animals)
-	{
-		// everyone else is randomly placed around
-		if (outdoor || !mMobManager->GetMonster(a_id).HasAbility("NoDungeon"))
-		{
-			mMobManager->SpawnOnMap(a_id, currentMapID, spawnPointX, spawnPointY);
-		}
-	}
-}
-
-bool Game::MenuGameHandleKeyboard(TCOD_key_t* key)
-{
-	if (key->vk == TCODK_NONE)
-	{
-		return false;
-	}
-
-	if (key->vk == TCODK_UP)
-	{
-        mMenuManager->ControlMoveUp();
-	}
-	else if (key->vk == TCODK_DOWN)
-	{
-        mMenuManager->ControlMoveDown();
-	}
-	else if (key->vk == TCODK_ENTER)
-	{
-        mMenuManager->Select();
-	}
-
-	return true;
-}
-
-bool Game::MainGameHandleKeyboard(TCOD_key_t* key)
-{
-	// returns true if anything has changed, false if it has not
-
-	int player_x, player_y;
-
-	if (currentMapID != -1)
-	{
-		player_x = mCharacterManager->GetPlayerX(currentCharacterID);
-		player_y = mCharacterManager->GetPlayerY(currentCharacterID);
-	}
-	else
-	{
-		player_x = mPartyManager->GetPartyX(currentPartyID);
-		player_y = mPartyManager->GetPartyY(currentPartyID);
-	}
-
-	if(key->vk == TCODK_NONE)
-	{
-		return false;
-	}
-
-	// Mode keys! These keys switch between the game's modal windows.
-	// Currently these are Inventory, Character, Ability and Spells
-	if(key->c == 'v')
-	{
-        if (mode != GM_INVENTORY)
-		{
-			mode = GM_INVENTORY;
-			if (currentMapID == -1)
-			{
-				// we're in the overworld, so we open the party inventory interface
-				gGame->mInventoryManager->OpenInventoryMenu(mPartyManager->GetInventoryID(currentPartyID), mCharacterManager->GetInventory(currentCharacterID),"Inventory");
-			}
-			else
-			{
-				// we're in the local map or dungeon, so open the inventory interface for the currently selected character
-				gGame->mInventoryManager->OpenInventoryMenu(mCharacterManager->GetInventory(currentCharacterID), -1, "Inventory");
-			}
-		}
-		else
-		{
-			mode = GM_MAIN;
-			gGame->mInventoryManager->CloseMenu();
-		}
-	}
-
-	if (key->c == 'c')
-	{
-		if (mode != GM_CHARACTER)
-		{
-			mode = GM_CHARACTER;
-		}
-		else
-		{
-			mode = GM_MAIN;
-		}
-	}
-
-	// "a"/"A" is the "ability" button and opens the Character Ability window to use class abilities and proficiencies (where they have discrete activations rather than implicit bonuses etc)
-	if (key->c == 'a')
-	{
-		/*
-		if (mode != GM_ABILITY)
-		{
-			mode = GM_ABILITY;
-		}
-		else
-		{
-			mode = GM_MAIN;
-		}
-		*/
-	}
-
-	// "s"/"S" is the "spell" button and opens the Spells window to allow for casting spells
-	if (key->c == 's')
-	{
-		/*
-		if (mode != GM_SPELL)
-		{
-			mode = GM_SPELL;
-		}
-		else
-		{
-			mode = GM_MAIN;
-		}
-		*/
-	}
-
-	// "d"/"D" is the "domain" button and opens the Domain window to control camps/settlements/domains.
-	// Note this only intended on the Region map currently (and automatically triggers if you enter a settlement)
-	// The plan is to have camps/settlements etc explorable eventually, so the Domain mode will trigger the interface while inside them
-	if (key->c == 'd')
-	{
-		if (currentMapID == -1)
-		{
-			if (mode != GM_DOMAIN)
-			{
-				mode = GM_DOMAIN;
-			}
-			else
-			{
-				mode = GM_MAIN;
-			}
-		}
-	}
-
-
-	// ACTION SYSTEM
-	// Basic idea is that there are a small number of controls (because the hex/ortho transition is complicated enough)
-	// Each control is largely contextual - so movement keys towards an enemy is an attack, toward a non-enemy is a discussion, etc.
-
-	switch (mode)
-	{
-		case GM_MAIN:
-		{
-			if (currentMapID == -1)
-			{
-				// '>' is 'go in'. I use only one button to go up/down etc. The other button is used for region transition
-				if (key->c == '.' && key->shift)
-				{
-					// we're on the region map, so we head 'down' into the local wilderness map
-					// this automatically generates a local wilderness map if one does not exist
-					int mapID = mMapManager->GetMapAtLocation(player_x, player_y);
-					currentMapID = mapID;
-					currentMap = mMapManager->getMap(mapID);
-
-					SpawnLevel(mapID, OUTDOOR_MAP_WIDTH / 2, OUTDOOR_MAP_HEIGHT / 2);
-
-					recomputeFov = true;
-
-					return true;
-				}
-
-				// "." is the traditional "do nothing" button. In our case, it advances time by 1 hour and returns true.
-				if (key->c == '.' && !key->shift)
-				{
-					double time = 3600.0;
-					mTimeManager->AdvanceTimeBy(time);
-				}
-
-				if (HandleHexKeyboard(key))
-				{
-					return true;
-				}
-			}
-			else
-			{
-				// party dump (can also use in select mode to pick dumps)
-				if (key->c == '`')
-				{
-					mPartyManager->DumpParty(currentPartyID);
-				}
-
-				// "." is the traditional "do nothing" button. In our case, it advances time a bit and returns true.
-				if (key->c == '.' && !key->shift)
-				{
-					double time = mMapManager->getMovementTime(currentMapID, mCharacterManager->GetCurrentSpeed(currentCharacterID));
-					mTimeManager->AdvanceTimeBy(time);
-				}
-
-				// "," is the "pick up" button
-				if (key->c == ',' && !key->shift)
-				{
-					int p = mMapManager->TakeTopItem(currentMapID, player_x, player_y);
-					if (p != -1)
-					{
-						mCharacterManager->AddInventoryItem(currentCharacterID, p);
-						AddActionLogText(mCharacterManager->getCharacterName(currentCharacterID) + " picks up a " + mItemManager->getShortDescription(p) + ".");
-					}
-				}
-
-				// 't'/'T' triggers a missile attack with the current wielded missile or thrown weapon.
-				if (key->c == 't')
-				{
-					int wieldedID = mCharacterManager->GetItemInEquipSlot(currentCharacterID, HAND_MAIN);
-					if (wieldedID != -1)
-					{
-						bool missile = mItemManager->hasTag(wieldedID, "Missile");
-
-						// just ignore this press if we're not using a missile weapon of some kind
-						if (missile)
-						{
-							// set cleave count for current character (remember this is reset if we change, balanced by change delay)
-							remainingCleaves = mCharacterManager->GetCleaveCount(currentCharacterID);
-
-							// now select a target
-							int range = mItemManager->getMaxRange(wieldedID) / 5;
-							int x = mCharacterManager->GetPlayerX(currentCharacterID);
-							int y = mCharacterManager->GetPlayerY(currentCharacterID);
-							//std::vector<int> monstersInRange = mMobManager->GetAllMonstersInRange(currentMapID, x, y, range, true, true);
-							std::vector<int> monsters = mMobManager->GetAllEnemyMonstersOnMap(currentMapID, currentPartyID, true);
-							std::vector<int> monstersInView = mMapManager->filterByFOV(MANAGER_CHARACTER, currentCharacterID, MANAGER_MOB, monsters, range);
-							if (monstersInView.size() > 0)
-								TriggerTargeting(TARGET_CREATURE, -1, 1, range, 1, false, true, monstersInView);
-						}
-					}
-				}
-
-				// Tab switches active character
-				if (key->vk == TCODK_TAB)
-				{
-					int shiftCharacterID = mPartyManager->getNextPlayerCharacter(currentPartyID, currentCharacterID);
-					if (shiftCharacterID != -1)
-					{
-						mCharacterManager->SetBehaviour(currentCharacterID, CHAR_BEHAVIOUR_UNSET);
-						mTimeManager->SetEntityTime(currentCharacterID, MANAGER_CHARACTER, 0.01);
-						mCharacterManager->SetBehaviour(shiftCharacterID, CHAR_BEHAVIOUR_UNSET);
-
-						DebugLog("Switching to character " + std::to_string(shiftCharacterID));
-						currentCharacterID = shiftCharacterID;
-						player_x = mCharacterManager->GetPlayerX(currentCharacterID);
-						player_y = mCharacterManager->GetPlayerY(currentCharacterID);
-
-						recomputeFov = true;
-					}
-					else
-					{
-						DebugLog("Tab pressed but no valid character available.");
-					}
-				}
-
-				// 'l'/'L' triggers Look Mode
-				if (key->c == 'l')
-				{
-					TriggerTargeting(TARGET_CELL, -1, 0);
-					return false;
-				}
-
-				// '>' is 'go in'. I use only one button to go up/down etc. The other button is used for region transition
-				if (key->c == '.' && key->shift)
-				{
-					// check for transition between zones
-					if (currentMap->getContent(player_x, player_y) >= CONTENT_TRANSITION_STAIRS)
-					{
-						// there is a transition here. Look it up
-						int targetMapIndex = currentMap->getTransition(player_x, player_y);
-						Map* targetMap = mMapManager->getMap(targetMapIndex);
-
-						std::vector<int>::iterator iter = std::find(targetMap->reverse_transition_mapindex.begin(), targetMap->reverse_transition_mapindex.end(), currentMapID);
-
-						// sanity check - is it in the vector?
-						if (iter != targetMap->reverse_transition_mapindex.end())
-						{
-							// get the count
-							int i = iter - targetMap->reverse_transition_mapindex.begin();
-							player_x = targetMap->reverse_transition_xpos[i];
-							player_y = targetMap->reverse_transition_ypos[i];
-
-							currentMapID = targetMapIndex;
-							currentMap = targetMap;
-
-							recomputeFov = true;
-						}
-					}
-
-					return true;
-				}
-
-				if (key->c == ',' && key->shift)
-				{
-					if (currentMap->outdoor)
-					{
-						// we're on the local wilderness map, so head out to the region map
-
-						// TODO: Check for active enemies, don't allow zooming out if there are any (thank you Skyrim)
-
-						GoToRegionMap();
-					}
-
-					return true;
-				}
-
-				if (currentMap->outdoor)
-				{
-					if (HandleHexKeyboard(key))
-					{
-						return true;
-					}
-				}
-				else
-				{
-					if (HandleOrthoKeyboard(key))
-					{
-						return true;
-					}
-				}
-			}
-		}
-		break;
-
-		case GM_INVENTORY:
-		{
-            // operate whatever inventory menu is currently open
-
-			if (key->vk == TCODK_UP)
-			{
-				gGame->mInventoryManager->ControlMoveUp();
-			}
-			else if (key->vk == TCODK_DOWN)
-			{
-				gGame->mInventoryManager->ControlMoveDown();
-			}
-			else if (key->vk == TCODK_LEFT)
-			{
-				gGame->mInventoryManager->ControlMoveDown();
-			}
-			else if (key->vk == TCODK_RIGHT)
-			{
-				gGame->mInventoryManager->ControlMoveDown();
-			}
-			else if (key->vk == TCODK_ENTER)
-			{
-				gGame->mInventoryManager->SelectPrimary();
-			}
-			else if (key->vk == TCODK_SPACE)
-			{
-				gGame->mInventoryManager->SelectSecondary();
-			}
-		}
-		break;
-
-		case(GM_TARGET):
-		{
-			if (currentMap->outdoor)
-			{
-				if (HandleHexKeyboard(key))
-				{
-					return true;
-				}
-			}
-			else
-			{
-				if (HandleOrthoKeyboard(key))
-				{
-					return true;
-				}
-			}
-
-			switch (targetMode)
-			{
-				case(TARGET_CREATURE):
-				{
-					if (key->vk == TCODK_ENTER)
-					{
-						// TargetingReturn(targetIDs[targetIndex], targetingData[3], targetingData[1]);
-						int managerID = targetingData[0];
-						int returnCode = targetingData[1];
-						std::vector<int> entityIDs = GetTargetedEntities();
-
-						bool completion = true;
-
-						switch (managerID)
-						{
-							case MANAGER_GAME:
-							{
-								for (int entityID : entityIDs)
-									if (!gGame->TargetHandler(entityID, returnCode)) completion = false;
-							}
-							break;
-							case MANAGER_CHARACTER:
-							{
-								for(int entityID : entityIDs)
-									if (!gGame->mCharacterManager->TargetHandler(entityID, returnCode)) completion = false;
-							}
-							break;
-							case MANAGER_MOB:
-							{
-								for (int entityID : entityIDs)
-									if (!gGame->mMobManager->TargetHandler(entityID, returnCode)) completion = false;
-							}
-							break;
-
-							case MANAGER_MAP:
-							{
-								for (int entityID : entityIDs)
-									if (!gGame->mMapManager->TargetHandler(entityID, returnCode)) completion = false;
-							}
-							break;
-
-							case MANAGER_ITEM:
-							{
-								// gGame->mItemManager->TurnHandler(*ent_iter, *time_iter);
-							}
-							break;
-						}
-					}
-				}
-				break;
-
-				case(TARGET_CELL):
-				{
-					// debug dump button
-					if (key->c == '`')
-					{
-						auto items = mMapManager->getMap(currentMapID)->getItems(targetCursorX, targetCursorY);
-						if (items->size() > 0)
-						{
-							//for (int entityID : items)
-							//	gGame->mItemManager->DumpItem(entityID);
-						}
-
-						int mobID = currentMap->getMobAt(targetCursorX, targetCursorY);
-						if (mobID != 0)
-						{
-							gGame->mMobManager->DumpMob(mobID);
-						}
-
-						int charID = currentMap->getCharacterAt(targetCursorX, targetCursorY);
-						if (charID != 0)
-						{
-							gGame->mCharacterManager->DumpCharacter(charID);
-						}
-					}
-					if (key->vk == TCODK_ENTER)
-					{
-						//TargetingReturn(targetCursorX, targetCursorY, targetingData[3], targetingData[1]);
-						TargetHandler(currentCharacterID, 0);
-						return true;
-					}
-				}
-				break;
-			}
-
-		}
-		break;
-
-		case(GM_DOMAIN):
-		{
-			mBaseManager->ControlCommand(key, currentBaseID);
-		}
-		break;
-
-		case(GM_CHARACTER):
-		{
-
-		}
-		break;
-	}
-
-	return false;
-}
-
-void Game::TriggerTargeting(int targetingMode, int returnManager, int returnCode, int range, int size, bool allies, bool enemies, const std::vector<int>& targets)
-{
-	mode = GM_TARGET;
-	targetMode = targetingMode;
-	targetingData.clear();
-	targetingData.push_back(returnManager);
-	targetingData.push_back(returnCode);
-	targetingData.push_back(range);
-	int flags = (allies ? TF_FRIEND : 0) | (enemies ? TF_ENEMY : 0);
-	targetingData.push_back(flags);
-	targetingData.push_back(size);
-
-	targetIDs.clear();
-	targetIDs = std::vector<int>(targets);
-
-	if (targetingMode == TARGET_CREATURE)
-	{
-		targetIndex = 0;
-	}
-	else if (targetingMode == TARGET_CELL)
-	{
-		targetCursorX = mCharacterManager->GetPlayerX(currentCharacterID);
-		targetCursorY = mCharacterManager->GetPlayerY(currentCharacterID);
-	}
-
-}
-
-void Game::GoToRegionMap()
-{
-    // shift to "no map"
-	currentMapID = -1;
-	currentMap = NULL;
-
-	// deregister all entities from the time manager to avoid ticking local entities
-	mTimeManager->DeregisterEntities();
-
-	// clear the action log
-	AddActionLogText("", true);
-
-    // move all "Goods" tagged items from character inventories into the party inventory
-	int partyInventoryID = gGame->mPartyManager->GetInventoryID(currentPartyID);
-	for (auto& pc : gGame->mPartyManager->getPlayerCharacters(currentPartyID))
-	{
-        int pcInventoryID = gGame->mCharacterManager->GetInventory(pc);
-        for (auto& item : gGame->mInventoryManager->GetInventory(pcInventoryID))
-        {
-            if (gGame->mItemManager->hasTag(item.first, "Goods"))
-            {
-                gGame->mInventoryManager->RemoveItemFromInventory(pcInventoryID, item.first, item.second);
-                gGame->mInventoryManager->AddItemToInventory(partyInventoryID, item.first, item.second);
-            }
+          return true;
         }
-	}
+
+        // "." is the traditional "do nothing" button. In our case, it advances time by 1 hour and returns true.
+        if (key->c == '.' && !key->shift) {
+          double time = 3600.0;
+          mTimeManager->AdvanceTimeBy(time);
+        }
+
+        if (HandleHexKeyboard(key)) {
+          return true;
+        }
+      } else {
+        // party dump (can also use in select mode to pick dumps)
+        if (key->c == '`') {
+          mPartyManager->DumpParty(currentPartyID);
+        }
+
+        // "." is the traditional "do nothing" button. In our case, it advances time a bit and returns true.
+        if (key->c == '.' && !key->shift) {
+          double time =
+              mMapManager->getMovementTime(currentMapID, mCharacterManager->GetCurrentSpeed(currentCharacterID));
+          mTimeManager->AdvanceTimeBy(time);
+        }
+
+        // "," is the "pick up" button
+        if (key->c == ',' && !key->shift) {
+          int p = mMapManager->TakeTopItem(currentMapID, player_x, player_y);
+          if (p != -1) {
+            mCharacterManager->AddInventoryItem(currentCharacterID, p);
+            AddActionLogText(
+                mCharacterManager->getCharacterName(currentCharacterID) + " picks up a " +
+                mItemManager->getShortDescription(p) + ".");
+          }
+        }
+
+        // 't'/'T' triggers a missile attack with the current wielded missile or thrown weapon.
+        if (key->c == 't') {
+          int wieldedID = mCharacterManager->GetItemInEquipSlot(currentCharacterID, HAND_MAIN);
+          if (wieldedID != -1) {
+            bool missile = mItemManager->hasTag(wieldedID, "Missile");
+
+            // just ignore this press if we're not using a missile weapon of some kind
+            if (missile) {
+              // set cleave count for current character (remember this is reset if we change, balanced by change delay)
+              remainingCleaves = mCharacterManager->GetCleaveCount(currentCharacterID);
+
+              // now select a target
+              int range = mItemManager->getMaxRange(wieldedID) / 5;
+              int x = mCharacterManager->GetPlayerX(currentCharacterID);
+              int y = mCharacterManager->GetPlayerY(currentCharacterID);
+              // std::vector<int> monstersInRange = mMobManager->GetAllMonstersInRange(currentMapID, x, y, range, true,
+              // true);
+              std::vector<int> monsters = mMobManager->GetAllEnemyMonstersOnMap(currentMapID, currentPartyID, true);
+              std::vector<int> monstersInView =
+                  mMapManager->filterByFOV(MANAGER_CHARACTER, currentCharacterID, MANAGER_MOB, monsters, range);
+              if (monstersInView.size() > 0)
+                TriggerTargeting(TARGET_CREATURE, -1, 1, range, 1, false, true, monstersInView);
+            }
+          }
+        }
+
+        // Tab switches active character
+        if (key->vk == TCODK_TAB) {
+          int shiftCharacterID = mPartyManager->getNextPlayerCharacter(currentPartyID, currentCharacterID);
+          if (shiftCharacterID != -1) {
+            mCharacterManager->SetBehaviour(currentCharacterID, CHAR_BEHAVIOUR_UNSET);
+            mTimeManager->SetEntityTime(currentCharacterID, MANAGER_CHARACTER, 0.01);
+            mCharacterManager->SetBehaviour(shiftCharacterID, CHAR_BEHAVIOUR_UNSET);
+
+            DebugLog("Switching to character " + std::to_string(shiftCharacterID));
+            currentCharacterID = shiftCharacterID;
+            player_x = mCharacterManager->GetPlayerX(currentCharacterID);
+            player_y = mCharacterManager->GetPlayerY(currentCharacterID);
+
+            recomputeFov = true;
+          } else {
+            DebugLog("Tab pressed but no valid character available.");
+          }
+        }
+
+        // 'l'/'L' triggers Look Mode
+        if (key->c == 'l') {
+          TriggerTargeting(TARGET_CELL, -1, 0);
+          return false;
+        }
+
+        // '>' is 'go in'. I use only one button to go up/down etc. The other button is used for region transition
+        if (key->c == '.' && key->shift) {
+          // check for transition between zones
+          if (currentMap->getContent(player_x, player_y) >= CONTENT_TRANSITION_STAIRS) {
+            // there is a transition here. Look it up
+            int targetMapIndex = currentMap->getTransition(player_x, player_y);
+            Map* targetMap = mMapManager->getMap(targetMapIndex);
+
+            std::vector<int>::iterator iter = std::find(
+                targetMap->reverse_transition_mapindex.begin(),
+                targetMap->reverse_transition_mapindex.end(),
+                currentMapID);
+
+            // sanity check - is it in the vector?
+            if (iter != targetMap->reverse_transition_mapindex.end()) {
+              // get the count
+              int i = iter - targetMap->reverse_transition_mapindex.begin();
+              player_x = targetMap->reverse_transition_xpos[i];
+              player_y = targetMap->reverse_transition_ypos[i];
+
+              currentMapID = targetMapIndex;
+              currentMap = targetMap;
+
+              recomputeFov = true;
+            }
+          }
+
+          return true;
+        }
+
+        if (key->c == ',' && key->shift) {
+          if (currentMap->outdoor) {
+            // we're on the local wilderness map, so head out to the region map
+
+            // TODO: Check for active enemies, don't allow zooming out if there are any (thank you Skyrim)
+
+            GoToRegionMap();
+          }
+
+          return true;
+        }
+
+        if (currentMap->outdoor) {
+          if (HandleHexKeyboard(key)) {
+            return true;
+          }
+        } else {
+          if (HandleOrthoKeyboard(key)) {
+            return true;
+          }
+        }
+      }
+    } break;
+
+    case GM_INVENTORY: {
+      // operate whatever inventory menu is currently open
+
+      if (key->vk == TCODK_UP) {
+        gGame->mInventoryManager->ControlMoveUp();
+      } else if (key->vk == TCODK_DOWN) {
+        gGame->mInventoryManager->ControlMoveDown();
+      } else if (key->vk == TCODK_LEFT) {
+        gGame->mInventoryManager->ControlMoveDown();
+      } else if (key->vk == TCODK_RIGHT) {
+        gGame->mInventoryManager->ControlMoveDown();
+      } else if (key->vk == TCODK_ENTER) {
+        gGame->mInventoryManager->SelectPrimary();
+      } else if (key->vk == TCODK_SPACE) {
+        gGame->mInventoryManager->SelectSecondary();
+      }
+    } break;
+
+    case (GM_TARGET): {
+      if (currentMap->outdoor) {
+        if (HandleHexKeyboard(key)) {
+          return true;
+        }
+      } else {
+        if (HandleOrthoKeyboard(key)) {
+          return true;
+        }
+      }
+
+      switch (targetMode) {
+        case (TARGET_CREATURE): {
+          if (key->vk == TCODK_ENTER) {
+            // TargetingReturn(targetIDs[targetIndex], targetingData[3], targetingData[1]);
+            int managerID = targetingData[0];
+            int returnCode = targetingData[1];
+            std::vector<int> entityIDs = GetTargetedEntities();
+
+            bool completion = true;
+
+            switch (managerID) {
+              case MANAGER_GAME: {
+                for (int entityID : entityIDs)
+                  if (!gGame->TargetHandler(entityID, returnCode)) completion = false;
+              } break;
+              case MANAGER_CHARACTER: {
+                for (int entityID : entityIDs)
+                  if (!gGame->mCharacterManager->TargetHandler(entityID, returnCode)) completion = false;
+              } break;
+              case MANAGER_MOB: {
+                for (int entityID : entityIDs)
+                  if (!gGame->mMobManager->TargetHandler(entityID, returnCode)) completion = false;
+              } break;
+
+              case MANAGER_MAP: {
+                for (int entityID : entityIDs)
+                  if (!gGame->mMapManager->TargetHandler(entityID, returnCode)) completion = false;
+              } break;
+
+              case MANAGER_ITEM: {
+                // gGame->mItemManager->TurnHandler(*ent_iter, *time_iter);
+              } break;
+            }
+          }
+        } break;
+
+        case (TARGET_CELL): {
+          // debug dump button
+          if (key->c == '`') {
+            auto items = mMapManager->getMap(currentMapID)->getItems(targetCursorX, targetCursorY);
+            if (items->size() > 0) {
+              // for (int entityID : items)
+              //	gGame->mItemManager->DumpItem(entityID);
+            }
+
+            int mobID = currentMap->getMobAt(targetCursorX, targetCursorY);
+            if (mobID != 0) {
+              gGame->mMobManager->DumpMob(mobID);
+            }
+
+            int charID = currentMap->getCharacterAt(targetCursorX, targetCursorY);
+            if (charID != 0) {
+              gGame->mCharacterManager->DumpCharacter(charID);
+            }
+          }
+          if (key->vk == TCODK_ENTER) {
+            // TargetingReturn(targetCursorX, targetCursorY, targetingData[3], targetingData[1]);
+            TargetHandler(currentCharacterID, 0);
+            return true;
+          }
+        } break;
+      }
+
+    } break;
+
+    case (GM_DOMAIN): {
+      mBaseManager->ControlCommand(key, currentBaseID);
+    } break;
+
+    case (GM_CHARACTER): {
+    } break;
+  }
+
+  return false;
 }
 
+void Game::TriggerTargeting(
+    int targetingMode,
+    int returnManager,
+    int returnCode,
+    int range,
+    int size,
+    bool allies,
+    bool enemies,
+    const std::vector<int>& targets) {
+  mode = GM_TARGET;
+  targetMode = targetingMode;
+  targetingData.clear();
+  targetingData.push_back(returnManager);
+  targetingData.push_back(returnCode);
+  targetingData.push_back(range);
+  int flags = (allies ? TF_FRIEND : 0) | (enemies ? TF_ENEMY : 0);
+  targetingData.push_back(flags);
+  targetingData.push_back(size);
 
-bool Game::TargetHandler(int entityID, int returnCode)
-{
-	// target handler returns true if we're done and should return to normal mode.
+  targetIDs.clear();
+  targetIDs = std::vector<int>(targets);
 
-	// return code 0: Look/Examine response
-	if (returnCode == 0)
-	{
-		// we only come here if we don't have an Examine set up for the object under the cursor, so return to main mode
-		mode = GM_MAIN;
-		return true;
-	}
-
-	// return code 1: Missile Attack response
-	if (returnCode == 1)
-	{
-		if(ResolveAttacks(MANAGER_CHARACTER, gGame->currentCharacterID, MANAGER_MOB, entityID, true))
-			mode = GM_MAIN;
-		return true;
-	}
-
-	// return code 2: Melee cleave response
-	if (returnCode == 2)
-	{
-		if(ResolveAttacks(MANAGER_CHARACTER, gGame->currentCharacterID, MANAGER_MOB, entityID, false))
-			mode = GM_MAIN;
-		return true;
-	}
-
-	return true;
+  if (targetingMode == TARGET_CREATURE) {
+    targetIndex = 0;
+  } else if (targetingMode == TARGET_CELL) {
+    targetCursorX = mCharacterManager->GetPlayerX(currentCharacterID);
+    targetCursorY = mCharacterManager->GetPlayerY(currentCharacterID);
+  }
 }
 
-void Game::MoveCharacter(int new_x, int new_y)
-{
-	// a somewhat modified version of the CharacterManager's "MoveTo" function used for the current character under player control
-	if (!gGame->mMapManager->isOutOfBounds(currentMapID, new_x, new_y))
-	{
-		if (currentMapID != -1)
-		{
-			if (currentMap->map->isWalkable(new_x, new_y))
-			{
-				int character = currentMap->getCharacterAt(new_x, new_y);
-				if (currentMap->getCharacterAt(new_x, new_y))
-				{
-					// there's a character there. Check if we want to attack them
-					//if (c.IsHostile())
-					//{
-						// close-quarters attack!
-					//}
-					//else
-					//{
-						// we don't want to attack, so we just don't move
-					//}
-					//
+void Game::GoToRegionMap() {
+  // shift to "no map"
+  currentMapID = -1;
+  currentMap = NULL;
 
-					// if we're not attacking, check if the character is blocking the way
-					if (mCharacterManager->getCharacterHasCondition(character, "Unconscious"))
-					{
-						// unconscious character. Check if they have an unresolved injury
-						if (mCharacterManager->getCharacterHasCondition(character, "Injured"))
-						{
-							if (mCharacterManager->getCharacterCapabilityFlag(currentCharacterID, "TreatWounds"))
-							{
-								std::string charName = mCharacterManager->getCharacterName(character);
-								DebugLog("Performing mortal wounds check on " + charName + ".");
-								std::string text2 = mCharacterManager->getCharacterName(currentCharacterID) + " checks " + charName + "'s wounds.";
-								AddActionLogText(text2);
-								// unresolved injury. Calculate modifiers for roll
-								// TODO: Account for time since injury. Probably replace "Injured" condition.
-								// Or track time since condition? Useful for temporary conditions!
-								int bonus = mCharacterManager->getCharacterAbilityBonus(character, "Constitution");
-								int hp = mCharacterManager->getCharacterCurrentHitPoints(character);
-								if (hp == 0)
-								{
-									bonus += 5;
-								}
-								else
-								{
-									int hp_floor = -mCharacterManager->getCharacterTotalHitPoints(character);
-									if ((hp <= (hp_floor / 4)) && (hp > hp_floor / 2))
-									{
-										bonus -= 2;
-									}
-									else if (hp <= (hp_floor / 2))
-									{
-										bonus -= 5;
-									}
-								}
-								bonus += mCharacterManager->getTagValue(currentCharacterID, "Healing:MortalWound:Bonus");
+  // deregister all entities from the time manager to avoid ticking local entities
+  mTimeManager->DeregisterEntities();
 
-								DebugLog("Severity roll at " + std::to_string(bonus));
-								// test mortal wounds
-								int d20_roll = randomiser->diceRoll("1d20") + bonus;
-								int d6_roll = randomiser->diceRoll("1d6");
+  // clear the action log
+  AddActionLogText("", true);
 
-								DebugLog("D20/D6:" + std::to_string(d20_roll) + "/" + std::to_string(d6_roll));
-
-								MortalRollResult* result = mMortalManager->RollMortalWound(d20_roll, d6_roll);
-
-								std::string text = result->effect->PlayerText();
-
-								text.replace(text.find("%1%"), sizeof("%1%") - 1, charName);
-
-								DebugLog("Results:" + text);
-
-								AddActionLogText(text);
-
-								mCharacterManager->AddMortalEffect(character, result->effect);
-								// injury is resolved now (one way or the other). If we get attacked again, we set this again.
-								mCharacterManager->RemoveCondition(character, "Injured");
-
-								// there are 3 possible wound states: Recover, Wounded (ie Dying) or Dead.
-								if (result->status == "Recover")
-								{
-									// character gets back up; remove Injured and Unconscious
-									mCharacterManager->RemoveCondition(character, "Unconscious");
-								}
-
-								if (result->status == "Wounded")
-								{
-									std::string p = "They are wounded and will die within 1 " + result->recovery + " without healing.";
-									AddActionLogText(p);
-
-									long double time = 0.0L;
-									if (result->recovery == "Round") time = TimeManager::GetTimePeriodInSeconds(TIME_ROUND);
-									if (result->recovery == "Turn") time = TimeManager::GetTimePeriodInSeconds(TIME_TURN);
-									if (result->recovery == "Day") time = TimeManager::GetTimePeriodInSeconds(TIME_DAY);
-
-									mCharacterManager->SetCondition(character, "Dying", time);
-								}
-
-								if (result->status == "Dead")
-								{
-									CharacterDeath(character);
-								}
-								else
-								{
-									// if the character isn't dead, check for bed rest requirements
-									if (result->bedRest > 0)
-									{
-										mCharacterManager->SetCondition(character, "Recovering", TimeManager::GetTimePeriodInSeconds(TIME_DAY) * result->bedRest);
-									}
-								}
-							}
-						}
-					}
-				}
-				else if (currentMap->getMobAt(new_x, new_y))
-				{
-					// there's a monster there
-					int c_id = currentMap->getMobAt(new_x, new_y);
-					Creature& c = gGame->mMobManager->GetMonster(c_id);
-
-					if (c.IsBlocking())
-					{
-						// set cleave count for current character (remember this is reset if we change, balanced by change delay)
-						remainingCleaves = mCharacterManager->GetCleaveCount(currentCharacterID);
-
-						if (c.IsHostile())
-						{
-							// the monster is hostile, automatically attack
-							if (ResolveAttacks(MANAGER_CHARACTER, gGame->currentCharacterID, MANAGER_MOB, c_id, false))
-								mode = GM_MAIN;
-						}
-						else
-						{
-							// TODO: Options controls for non-hostiles (allow/confirm/deny, currently only confirm)
-							if (!mPartyManager->IsInParty(currentPartyID, MANAGER_MOB, c_id))
-							{
-								if (hostilifying)
-								{
-									AddActionLogText(c.GetName() + " is now hostile.");
-									c.SetHostile(true);
-									if (ResolveAttacks(MANAGER_CHARACTER, gGame->currentCharacterID, MANAGER_MOB, c_id, false))
-										mode = GM_MAIN;
-									hostilifying = false;
-								}
-								else
-								{
-									AddActionLogText("Are you sure? " + c.GetName() + " is not hostile. Attack again to confirm.");
-									hostilifying = true;
-								}
-							}
-						}
-					}
-					else
-					{
-						// not attacking anything, so calm down
-						hostilifying = false;
-
-						// there isn't another creature there, so move
-						mCharacterManager->SetPlayerX(currentCharacterID, new_x);
-						mCharacterManager->SetPlayerY(currentCharacterID, new_y);
-						recomputeFov = true;
-
-						UpdateLookText(new_x, new_y);
-						double time = mMapManager->getMovementTime(currentMapID, mCharacterManager->GetCurrentSpeed(currentCharacterID));
-						mTimeManager->AdvanceTimeBy(time);
-					}
-
-				}
-				else
-				{
-					// not attacking anything, so calm down
-					hostilifying = false;
-
-					// there isn't another creature there, so move
-					mCharacterManager->SetPlayerX(currentCharacterID, new_x);
-					mCharacterManager->SetPlayerY(currentCharacterID, new_y);
-					recomputeFov = true;
-
-					UpdateLookText(new_x, new_y);
-					double time = mMapManager->getMovementTime(currentMapID, mCharacterManager->GetCurrentSpeed(currentCharacterID));
-					mTimeManager->AdvanceTimeBy(time);
-				}
-			}
-		}
-		else
-		{
-			if (mMapManager->getRegionMap()->map->isWalkable(new_x, new_y))
-			{
-				mPartyManager->SetPartyX(currentPartyID, new_x);
-				mPartyManager->SetPartyY(currentPartyID, new_y);
-
-				//UpdateLookText(new_x, new_y);
-				double time = mMapManager->getMovementTime(currentMapID, mCharacterManager->GetCurrentSpeed(currentCharacterID));
-				mTimeManager->AdvanceTimeBy(time);
-
-				int baseID = mBaseManager->GetBaseAt(new_x, new_y);
-				if (baseID != -1)
-				{
-					// we just moved onto a base
-					if (mBaseManager->GetBaseOwner(baseID) == currentPartyID)
-					{
-						// and it's ours
-						currentBaseID = baseID;
-					}
-				}
-				else
-				{
-					int partyID = mPartyManager->GetPartyAt(new_x, new_y);
-					if (partyID != -1)
-					{
-						// we just moved onto a party
-					}
-				}
-
-
-
-			}
-		}
-	}
+  // move all "Goods" tagged items from character inventories into the party inventory
+  int partyInventoryID = gGame->mPartyManager->GetInventoryID(currentPartyID);
+  for (auto& pc : gGame->mPartyManager->getPlayerCharacters(currentPartyID)) {
+    int pcInventoryID = gGame->mCharacterManager->GetInventory(pc);
+    for (auto& item : gGame->mInventoryManager->GetInventory(pcInventoryID)) {
+      if (gGame->mItemManager->hasTag(item.first, "Goods")) {
+        gGame->mInventoryManager->RemoveItemFromInventory(pcInventoryID, item.first, item.second);
+        gGame->mInventoryManager->AddItemToInventory(partyInventoryID, item.first, item.second);
+      }
+    }
+  }
 }
 
-bool Game::HexKeyboardMove(int move_value)
-{
-	// split off from HandleHexKeyboard as we need to handle multiple contexts
-	int player_x, player_y;
-	if(currentMapID != -1)
-	{
-		player_x = mCharacterManager->GetPlayerX(currentCharacterID);
-		player_y = mCharacterManager->GetPlayerY(currentCharacterID);
-	}
-	else
-	{
-		player_x = mPartyManager->GetPartyX(currentPartyID);
-		player_y = mPartyManager->GetPartyY(currentPartyID);
-	}
-	int new_x, new_y;
+bool Game::TargetHandler(int entityID, int returnCode) {
+  // target handler returns true if we're done and should return to normal mode.
 
-	mMapManager->shift(currentMapID, new_x, new_y, player_x, player_y, move_value);
+  // return code 0: Look/Examine response
+  if (returnCode == 0) {
+    // we only come here if we don't have an Examine set up for the object under the cursor, so return to main mode
+    mode = GM_MAIN;
+    return true;
+  }
 
-	MoveCharacter(new_x, new_y);
+  // return code 1: Missile Attack response
+  if (returnCode == 1) {
+    if (ResolveAttacks(MANAGER_CHARACTER, gGame->currentCharacterID, MANAGER_MOB, entityID, true)) mode = GM_MAIN;
+    return true;
+  }
 
-	return true;
+  // return code 2: Melee cleave response
+  if (returnCode == 2) {
+    if (ResolveAttacks(MANAGER_CHARACTER, gGame->currentCharacterID, MANAGER_MOB, entityID, false)) mode = GM_MAIN;
+    return true;
+  }
+
+  return true;
 }
 
-bool Game::HandleHexKeyboard(TCOD_key_t* key)
-{
-	// return true if we had a move-action here, false if we didn't
+void Game::MoveCharacter(int new_x, int new_y) {
+  // a somewhat modified version of the CharacterManager's "MoveTo" function used for the current character under player
+  // control
+  if (!gGame->mMapManager->isOutOfBounds(currentMapID, new_x, new_y)) {
+    if (currentMapID != -1) {
+      if (currentMap->map->isWalkable(new_x, new_y)) {
+        int character = currentMap->getCharacterAt(new_x, new_y);
+        if (currentMap->getCharacterAt(new_x, new_y)) {
+          // there's a character there. Check if we want to attack them
+          // if (c.IsHostile())
+          //{
+          // close-quarters attack!
+          //}
+          // else
+          //{
+          // we don't want to attack, so we just don't move
+          //}
+          //
 
-	int move_value = -1;
+          // if we're not attacking, check if the character is blocking the way
+          if (mCharacterManager->getCharacterHasCondition(character, "Unconscious")) {
+            // unconscious character. Check if they have an unresolved injury
+            if (mCharacterManager->getCharacterHasCondition(character, "Injured")) {
+              if (mCharacterManager->getCharacterCapabilityFlag(currentCharacterID, "TreatWounds")) {
+                std::string charName = mCharacterManager->getCharacterName(character);
+                DebugLog("Performing mortal wounds check on " + charName + ".");
+                std::string text2 =
+                    mCharacterManager->getCharacterName(currentCharacterID) + " checks " + charName + "'s wounds.";
+                AddActionLogText(text2);
+                // unresolved injury. Calculate modifiers for roll
+                // TODO: Account for time since injury. Probably replace "Injured" condition.
+                // Or track time since condition? Useful for temporary conditions!
+                int bonus = mCharacterManager->getCharacterAbilityBonus(character, "Constitution");
+                int hp = mCharacterManager->getCharacterCurrentHitPoints(character);
+                if (hp == 0) {
+                  bonus += 5;
+                } else {
+                  int hp_floor = -mCharacterManager->getCharacterTotalHitPoints(character);
+                  if ((hp <= (hp_floor / 4)) && (hp > hp_floor / 2)) {
+                    bonus -= 2;
+                  } else if (hp <= (hp_floor / 2)) {
+                    bonus -= 5;
+                  }
+                }
+                bonus += mCharacterManager->getTagValue(currentCharacterID, "Healing:MortalWound:Bonus");
 
-	if (key->c == '8')
-	{
-		move_value = HEX_LEFTUP;
-	}
+                DebugLog("Severity roll at " + std::to_string(bonus));
+                // test mortal wounds
+                int d20_roll = randomiser->diceRoll("1d20") + bonus;
+                int d6_roll = randomiser->diceRoll("1d6");
 
-	if (key->c == '9')
-	{
-		move_value = HEX_RIGHTUP;
-	}
+                DebugLog("D20/D6:" + std::to_string(d20_roll) + "/" + std::to_string(d6_roll));
 
-	if (key->c == 'U' || key->c == 'u')
-	{
-		move_value = HEX_LEFT;
-	}
+                MortalRollResult* result = mMortalManager->RollMortalWound(d20_roll, d6_roll);
 
-	if (key->c == 'O' || key->c == 'o')
-	{
-		move_value = HEX_RIGHT;
-	}
+                std::string text = result->effect->PlayerText();
 
-	if (key->c == 'J' || key->c == 'j')
-	{
-		move_value = HEX_LEFTDOWN;
-	}
+                text.replace(text.find("%1%"), sizeof("%1%") - 1, charName);
 
-	if (key->c == 'K' || key->c == 'k')
-	{
-		move_value = HEX_RIGHTDOWN;
-	}
+                DebugLog("Results:" + text);
 
-	if (move_value != -1)
-	{
-		if(mode == GM_MAIN)
-			return HexKeyboardMove(move_value);
+                AddActionLogText(text);
 
-		if(mode == GM_TARGET)
-		{
-			return HexKeyboardTarget(move_value);
-		}
-	}
+                mCharacterManager->AddMortalEffect(character, result->effect);
+                // injury is resolved now (one way or the other). If we get attacked again, we set this again.
+                mCharacterManager->RemoveCondition(character, "Injured");
 
-	return false;
+                // there are 3 possible wound states: Recover, Wounded (ie Dying) or Dead.
+                if (result->status == "Recover") {
+                  // character gets back up; remove Injured and Unconscious
+                  mCharacterManager->RemoveCondition(character, "Unconscious");
+                }
+
+                if (result->status == "Wounded") {
+                  std::string p = "They are wounded and will die within 1 " + result->recovery + " without healing.";
+                  AddActionLogText(p);
+
+                  long double time = 0.0L;
+                  if (result->recovery == "Round") time = TimeManager::GetTimePeriodInSeconds(TIME_ROUND);
+                  if (result->recovery == "Turn") time = TimeManager::GetTimePeriodInSeconds(TIME_TURN);
+                  if (result->recovery == "Day") time = TimeManager::GetTimePeriodInSeconds(TIME_DAY);
+
+                  mCharacterManager->SetCondition(character, "Dying", time);
+                }
+
+                if (result->status == "Dead") {
+                  CharacterDeath(character);
+                } else {
+                  // if the character isn't dead, check for bed rest requirements
+                  if (result->bedRest > 0) {
+                    mCharacterManager->SetCondition(
+                        character, "Recovering", TimeManager::GetTimePeriodInSeconds(TIME_DAY) * result->bedRest);
+                  }
+                }
+              }
+            }
+          }
+        } else if (currentMap->getMobAt(new_x, new_y)) {
+          // there's a monster there
+          int c_id = currentMap->getMobAt(new_x, new_y);
+          Creature& c = gGame->mMobManager->GetMonster(c_id);
+
+          if (c.IsBlocking()) {
+            // set cleave count for current character (remember this is reset if we change, balanced by change delay)
+            remainingCleaves = mCharacterManager->GetCleaveCount(currentCharacterID);
+
+            if (c.IsHostile()) {
+              // the monster is hostile, automatically attack
+              if (ResolveAttacks(MANAGER_CHARACTER, gGame->currentCharacterID, MANAGER_MOB, c_id, false))
+                mode = GM_MAIN;
+            } else {
+              // TODO: Options controls for non-hostiles (allow/confirm/deny, currently only confirm)
+              if (!mPartyManager->IsInParty(currentPartyID, MANAGER_MOB, c_id)) {
+                if (hostilifying) {
+                  AddActionLogText(c.GetName() + " is now hostile.");
+                  c.SetHostile(true);
+                  if (ResolveAttacks(MANAGER_CHARACTER, gGame->currentCharacterID, MANAGER_MOB, c_id, false))
+                    mode = GM_MAIN;
+                  hostilifying = false;
+                } else {
+                  AddActionLogText("Are you sure? " + c.GetName() + " is not hostile. Attack again to confirm.");
+                  hostilifying = true;
+                }
+              }
+            }
+          } else {
+            // not attacking anything, so calm down
+            hostilifying = false;
+
+            // there isn't another creature there, so move
+            mCharacterManager->SetPlayerX(currentCharacterID, new_x);
+            mCharacterManager->SetPlayerY(currentCharacterID, new_y);
+            recomputeFov = true;
+
+            UpdateLookText(new_x, new_y);
+            double time =
+                mMapManager->getMovementTime(currentMapID, mCharacterManager->GetCurrentSpeed(currentCharacterID));
+            mTimeManager->AdvanceTimeBy(time);
+          }
+
+        } else {
+          // not attacking anything, so calm down
+          hostilifying = false;
+
+          // there isn't another creature there, so move
+          mCharacterManager->SetPlayerX(currentCharacterID, new_x);
+          mCharacterManager->SetPlayerY(currentCharacterID, new_y);
+          recomputeFov = true;
+
+          UpdateLookText(new_x, new_y);
+          double time =
+              mMapManager->getMovementTime(currentMapID, mCharacterManager->GetCurrentSpeed(currentCharacterID));
+          mTimeManager->AdvanceTimeBy(time);
+        }
+      }
+    } else {
+      if (mMapManager->getRegionMap()->map->isWalkable(new_x, new_y)) {
+        mPartyManager->SetPartyX(currentPartyID, new_x);
+        mPartyManager->SetPartyY(currentPartyID, new_y);
+
+        // UpdateLookText(new_x, new_y);
+        double time =
+            mMapManager->getMovementTime(currentMapID, mCharacterManager->GetCurrentSpeed(currentCharacterID));
+        mTimeManager->AdvanceTimeBy(time);
+
+        int baseID = mBaseManager->GetBaseAt(new_x, new_y);
+        if (baseID != -1) {
+          // we just moved onto a base
+          if (mBaseManager->GetBaseOwner(baseID) == currentPartyID) {
+            // and it's ours
+            currentBaseID = baseID;
+          }
+        } else {
+          int partyID = mPartyManager->GetPartyAt(new_x, new_y);
+          if (partyID != -1) {
+            // we just moved onto a party
+          }
+        }
+      }
+    }
+  }
 }
 
-bool Game::HexKeyboardTarget(int move_value)
-{
-	switch(targetMode)
-	{
-		case TARGET_CREATURE:
-		{
-			// creatures are treated as a list. As a result, we translate hex to ortho and send it there.
-			return OrthoKeyboardTarget(HexToOrtho(move_value));
-		}
-		break;
+bool Game::HexKeyboardMove(int move_value) {
+  // split off from HandleHexKeyboard as we need to handle multiple contexts
+  int player_x, player_y;
+  if (currentMapID != -1) {
+    player_x = mCharacterManager->GetPlayerX(currentCharacterID);
+    player_y = mCharacterManager->GetPlayerY(currentCharacterID);
+  } else {
+    player_x = mPartyManager->GetPartyX(currentPartyID);
+    player_y = mPartyManager->GetPartyY(currentPartyID);
+  }
+  int new_x, new_y;
 
-		case TARGET_CELL:
-		{
-			// cell cursor needs to be moved around directly, so we treat this similarly to a move command
-			int new_x, new_y;
-			mMapManager->shift(currentMapID, new_x, new_y, targetCursorX, targetCursorY, move_value);
-			targetCursorX = new_x;
-			targetCursorY = new_y;
+  mMapManager->shift(currentMapID, new_x, new_y, player_x, player_y, move_value);
 
-			UpdateLookText(targetCursorX, targetCursorY);
-		}
-		break;
+  MoveCharacter(new_x, new_y);
 
-	}
-
-	return false;
+  return true;
 }
 
-bool Game::OrthoKeyboardTarget(int move_value)
-{
-	switch (targetMode)
-	{
-		case TARGET_CREATURE:
-		{
-			if (move_value == ORTHO_UP)
-			{
-				// move between targetIDs
-				targetIndex++;
-				if (targetIndex > targetIDs.size()-1) targetIndex = 0;
-			}
-			else if (move_value == ORTHO_DOWN)
-			{
-				targetIndex--;
-				if (targetIndex < 0) targetIndex = targetIDs.size()-1;
-			}
-		}
-		break;
+bool Game::HandleHexKeyboard(TCOD_key_t* key) {
+  // return true if we had a move-action here, false if we didn't
 
-		case TARGET_CELL:
-		{
-			// cell cursor needs to be moved around directly, so we treat this similarly to a move command
-			int new_x, new_y;
-			mMapManager->shift(currentMapID, new_x, new_y, targetCursorX, targetCursorY, move_value);
-			targetCursorX = new_x;
-			targetCursorY = new_y;
+  int move_value = -1;
 
-			UpdateLookText(targetCursorX, targetCursorY);
-		}
-		break;
-	}
+  if (key->c == '8') {
+    move_value = HEX_LEFTUP;
+  }
 
-	return false;
+  if (key->c == '9') {
+    move_value = HEX_RIGHTUP;
+  }
+
+  if (key->c == 'U' || key->c == 'u') {
+    move_value = HEX_LEFT;
+  }
+
+  if (key->c == 'O' || key->c == 'o') {
+    move_value = HEX_RIGHT;
+  }
+
+  if (key->c == 'J' || key->c == 'j') {
+    move_value = HEX_LEFTDOWN;
+  }
+
+  if (key->c == 'K' || key->c == 'k') {
+    move_value = HEX_RIGHTDOWN;
+  }
+
+  if (move_value != -1) {
+    if (mode == GM_MAIN) return HexKeyboardMove(move_value);
+
+    if (mode == GM_TARGET) {
+      return HexKeyboardTarget(move_value);
+    }
+  }
+
+  return false;
 }
 
-int Game::HexToOrtho(int input)
-{
-	// Translates HEX_ move codes to ORTHO_ move codes.
-	// Can't do this in reverse simply as we need to move upleft/upright etc
-	// TODO: OrthoToHex
+bool Game::HexKeyboardTarget(int move_value) {
+  switch (targetMode) {
+    case TARGET_CREATURE: {
+      // creatures are treated as a list. As a result, we translate hex to ortho and send it there.
+      return OrthoKeyboardTarget(HexToOrtho(move_value));
+    } break;
 
-	if (input == HEX_LEFT)
-		return ORTHO_LEFT;
+    case TARGET_CELL: {
+      // cell cursor needs to be moved around directly, so we treat this similarly to a move command
+      int new_x, new_y;
+      mMapManager->shift(currentMapID, new_x, new_y, targetCursorX, targetCursorY, move_value);
+      targetCursorX = new_x;
+      targetCursorY = new_y;
 
-	if (input == HEX_RIGHT)
-		return ORTHO_RIGHT;
+      UpdateLookText(targetCursorX, targetCursorY);
+    } break;
+  }
 
-	if (input == HEX_LEFTUP || input == HEX_RIGHTUP)
-		return ORTHO_UP;
-
-	if (input == HEX_LEFTDOWN || input == HEX_RIGHTDOWN)
-		return ORTHO_DOWN;
-
-	return -1;
+  return false;
 }
 
-bool Game::OrthoKeyboardMove(int move_value)
-{
-	int player_x = mCharacterManager->GetPlayerX(currentCharacterID);
-	int player_y = mCharacterManager->GetPlayerY(currentCharacterID);
+bool Game::OrthoKeyboardTarget(int move_value) {
+  switch (targetMode) {
+    case TARGET_CREATURE: {
+      if (move_value == ORTHO_UP) {
+        // move between targetIDs
+        targetIndex++;
+        if (targetIndex > targetIDs.size() - 1) targetIndex = 0;
+      } else if (move_value == ORTHO_DOWN) {
+        targetIndex--;
+        if (targetIndex < 0) targetIndex = targetIDs.size() - 1;
+      }
+    } break;
 
-	int new_x, new_y;
+    case TARGET_CELL: {
+      // cell cursor needs to be moved around directly, so we treat this similarly to a move command
+      int new_x, new_y;
+      mMapManager->shift(currentMapID, new_x, new_y, targetCursorX, targetCursorY, move_value);
+      targetCursorX = new_x;
+      targetCursorY = new_y;
 
-	mMapManager->shift(currentMapID, new_x, new_y, player_x, player_y, move_value);
+      UpdateLookText(targetCursorX, targetCursorY);
+    } break;
+  }
 
-	MoveCharacter(new_x, new_y);
-
-	return true;
+  return false;
 }
 
-bool Game::HandleOrthoKeyboard(TCOD_key_t* key)
-{
-	int move_value = -1;
+int Game::HexToOrtho(int input) {
+  // Translates HEX_ move codes to ORTHO_ move codes.
+  // Can't do this in reverse simply as we need to move upleft/upright etc
+  // TODO: OrthoToHex
 
-	if (key->c == 'U' || key->c == 'u')
-	{
-		move_value = ORTHO_UP;
-	}
+  if (input == HEX_LEFT) return ORTHO_LEFT;
 
-	if (key->c == 'K' || key->c == 'k')
-	{
-		move_value = ORTHO_RIGHT;
-	}
+  if (input == HEX_RIGHT) return ORTHO_RIGHT;
 
-	if (key->c == 'J' || key->c == 'j')
-	{
-		move_value = ORTHO_DOWN;
-	}
+  if (input == HEX_LEFTUP || input == HEX_RIGHTUP) return ORTHO_UP;
 
-	if (key->c == 'H' || key->c == 'h')
-	{
-		move_value = ORTHO_LEFT;
-	}
+  if (input == HEX_LEFTDOWN || input == HEX_RIGHTDOWN) return ORTHO_DOWN;
 
-	if (move_value != -1)
-	{
-		if (mode == GM_MAIN)
-			return OrthoKeyboardMove(move_value);
-
-		if (mode == GM_TARGET)
-		{
-			return OrthoKeyboardTarget(move_value);
-		}
-	}
-
-	return false;
+  return -1;
 }
 
-bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManager, int defenderID, bool missile)
-{
-	// can be used for different entity types (mob and character) using managers
-	// we'll use this for traps using the map manager later too
+bool Game::OrthoKeyboardMove(int move_value) {
+  int player_x = mCharacterManager->GetPlayerX(currentCharacterID);
+  int player_y = mCharacterManager->GetPlayerY(currentCharacterID);
 
-	// Many monsters have an attack sequence, and any creature can Cleave (up to certain limitations).
-	// Attack sequences always go off, and Cleaves go off if we fell an enemy with an attack.
-	// Finally, we can have a couple of different kind of magical and non-magical ranged attack, some of which have attack rolls and some don't
+  int new_x, new_y;
 
-	// How do Cleaves interact with multi-attack sequences?
-	// Essentially every creature gets a given number of Cleaves each turn, and they can be used on any given attack until they run out.
+  mMapManager->shift(currentMapID, new_x, new_y, player_x, player_y, move_value);
 
-	int attackerAttackBonus, attackerDamageDieType, attackerDamageDice, attackerDamageBonus, attackerCleaveCount;
+  MoveCharacter(new_x, new_y);
 
-	switch (attackerManager)
-	{
-		case MANAGER_CHARACTER:
-			{
-				Creature& c = mMobManager->GetMonster(defenderID);
-				std::string attackText = gGame->mCharacterManager->getCharacterName(attackerID) + " attacks " + c.GetName() + ".";
-				gGame->AddActionLogText(attackText);
-
-				// PCs/NPCs get only one attack each, barring things like "Haste".
-				attackerAttackBonus = mCharacterManager->UpdateCurrentAttackValue(attackerID, missile);
-
-				// retrieve current weapon
-				int weaponID = mCharacterManager->GetItemInEquipSlot(attackerID, HAND_MAIN);
-				int offhandID = mCharacterManager->GetItemInEquipSlot(attackerID, HAND_OFF);
-
-				if (weaponID != -1)
-				{
-					if (weaponID != offhandID)
-					{
-						// if the weapon is in one hand and has the "Grab" tag, the die is d2 (bolas, whips etc)
-						// if the weapon is in one hand and has the "Light" tag, the die is d4 (Clubs/Daggers etc)
-						// if the weapon is in one hand only, the die is d6 (one handed weapon only)
-						attackerDamageDieType = 6;
-						if (mItemManager->hasTag(weaponID, "Light")) attackerDamageDieType = 4;
-						if (mItemManager->hasTag(weaponID, "Grab")) attackerDamageDieType = 2;
-					}
-					else
-					{
-						// if the weapon is in two hands and has the "One-Handed" tag, the die is d8 (bastard weapon wielded in two hands)
-						// if the weapon is in two hands and does not have the "One-Handed" tag, the die is d10 (full two-hander)
-						if (mItemManager->hasTag(weaponID, "One-Handed"))
-						{
-							attackerDamageDieType = 8;
-						}
-						else
-						{
-							attackerDamageDieType = 10;
-						}
-					}
-
-
-					// range modifiers
-					if(missile)
-					{
-						int x = mCharacterManager->GetPlayerX(attackerID);
-						int y = mCharacterManager->GetPlayerY(attackerID);
-
-						int tx = mMobManager->GetMobX(defenderID);
-						int ty = mMobManager->GetMobY(defenderID);
-
-						float dist = sqrt(pow(x - tx,2) +  pow(y - ty,2))  * 5; // each square or hex is 5ft or 5yd (which are treated the same by ACKS rules indoor/outdoor)
-						int rangePenalty = mItemManager->getRangePenalty(weaponID, dist);
-						attackerAttackBonus += rangePenalty;
-					}
-
-					// bow weapons are an exception to the usual damage pattern.
-					if(mItemManager->hasTag(weaponID, "Bows") || mItemManager->hasTag(weaponID, "Crossbows"))
-					{
-						attackerDamageDieType = 6;
-					}
-
-					// barring special circumstances (criticals, spear charges etc) this is always 1 damage die
-					attackerDamageDice = 1;
-
-					// attacker damage bonus
-					attackerDamageBonus = mCharacterManager->GetCurrentDamageBonus(attackerID, missile);
-
-					bool slain = ResolveAttack(attackerAttackBonus, attackerDamageDieType, attackerDamageBonus, defenderManager, defenderID, missile);
-					if(slain && remainingCleaves > 0)
-					{
-						// If we're in missile mode, act as though we just pressed "t" but exclude the current target from the list
-						// If we're in melee mode, spawn an entity list consisting of all adjacent monsters but exclude the current target from the list
-						gGame->AddActionLogText("Cleave!");
-						remainingCleaves--;
-						if(missile)
-						{
-							int wieldedID = mCharacterManager->GetItemInEquipSlot(currentCharacterID, HAND_MAIN);
-
-							// on-hand weapon is missile, so select a target
-							int range = mItemManager->getMaxRange(wieldedID);
-							int x = mCharacterManager->GetPlayerX(currentCharacterID);
-							int y = mCharacterManager->GetPlayerY(currentCharacterID);
-							std::vector<int> monstersInRange = mMobManager->GetAllMonstersInRange(currentMapID, x, y, range, true);
-							std::remove(monstersInRange.begin(), monstersInRange.end(), defenderID);
-
-							// What happens next depends on the number of available targets.
-							// If there are none, we are done with the attack sequence.
-							if(monstersInRange.size()<1)
-							{
-								return true;
-							}
-							// If there is only one, we don't need to target, so immediately run that attack sequence
-							if(monstersInRange.size() == 1)
-							{
-								ResolveAttacks(attackerManager, attackerID, MANAGER_MOB, monstersInRange[0], missile);
-							}
-							// otherwise, trigger the targeting sequence to pick the cleave target
-							TriggerTargeting(TARGET_CREATURE, -1, 1, range, 1, false, true, monstersInRange);
-							return false;
-						}
-						else
-						{
-							int new_x = mMobManager->GetMobX(defenderID);
-							int new_y = mMobManager->GetMobY(defenderID);
-
-							mCharacterManager->SetPlayerX(currentCharacterID, new_x);
-							mCharacterManager->SetPlayerY(currentCharacterID, new_y);
-							recomputeFov = true;
-
-							UpdateLookText(new_x, new_y);
-
-							std::vector<int> monstersInRange = mMobManager->GetAllMonstersInRange(currentMapID, new_x, new_y, 1, true);
-							std::remove(monstersInRange.begin(), monstersInRange.end(), defenderID);
-
-							// What happens next depends on the number of available targets.
-							// If there are none, we are done with the attack sequence.
-							if (monstersInRange.size() < 1)
-							{
-								return true;
-							}
-							// If there is only one, we don't need to target, so immediately run that attack sequence
-							if (monstersInRange.size() == 1)
-							{
-								ResolveAttacks(attackerManager, attackerID, MANAGER_MOB, monstersInRange[0], missile);
-							}
-
-							TriggerTargeting(TARGET_CREATURE, -1, 2, 1, 1, false, true, monstersInRange);
-							return false;
-						}
-					}
-				}
-			}
-			break;
-		case MANAGER_MOB:
-			{
-				// Monsters usually either get 1 weapon attack (like PCs) or get an attack sequence like Claw/Claw/Bite
-				Creature& c = mMobManager->GetMonster(attackerID);
-
-				std::string attackText = c.GetName() + " attacks " + gGame->mCharacterManager->getCharacterName(defenderID) + ".";
-				gGame->AddActionLogText(attackText);
-
-				attackerCleaveCount = c.GetCleaveCount();
-
-				AdvancementStore* as = mClassManager->GetAdvancementStore();
-				attackerAttackBonus = as->AttackBonusLookup["Monster"][c.GetHitDie()];
-
-				std::vector <std::vector<std::string>>& attackSequences = c.GetAttackSequences();
-				int sequence = randomiser->getInt(0, attackSequences.size()-1);
-				std::vector<std::string>& attackSequence = attackSequences[sequence];
-
-				for(std::string attack : attackSequence)
-				{
-					AttackType at = c.GetAttack(attack);
-					attackerDamageBonus = at.DamageBonus();
-					attackerDamageDieType = at.DamageDie();
-					// TODO: Damage Dice in AttackType
-					attackerDamageDice = 1;
-					std::string attackName = at.Name();
-					// TODO: Missile attacks in attackType
-					bool slain = ResolveAttack(attackerAttackBonus, attackerDamageDieType, attackerDamageBonus, defenderManager, defenderID, missile);
-					while(slain && attackerCleaveCount > 0)
-					{
-						// TODO: Cleaves
-					}
-				}
-			}
-			break;
-		default:
-			{
-			}
-			break;
-
-	}
-	return true; // if we didn't go out any other way, we need to return to GM_MAIN
+  return true;
 }
 
-bool Game::ResolveAttack(int attackBonus, int damageDie, int damageBonus, int defenderMananger, int defenderID, bool missile)
-{
-	// This function resolves the results of a single attack and returns if the target was killed by this attack.
-	// attack bonus is calculated before entering this function
+bool Game::HandleOrthoKeyboard(TCOD_key_t* key) {
+  int move_value = -1;
 
-	int defenderAC = 0; // damage reduction?
+  if (key->c == 'U' || key->c == 'u') {
+    move_value = ORTHO_UP;
+  }
 
-	// retrieve attacker's stats
-	switch(defenderMananger)
-	{
-		case MANAGER_CHARACTER:
-			{
-				defenderAC = mCharacterManager->getCharacterCurrentArmourClass(defenderID);
-			}
-			break;
-		case MANAGER_MOB:
-			{
-				Creature& c = mMobManager->GetMonster(defenderID);
-				defenderAC = c.GetArmourClass();
-			}
-			break;
-		default:
-			{
-				// TODO: Add attack against object
-			}
-		break;
-	}
+  if (key->c == 'K' || key->c == 'k') {
+    move_value = ORTHO_RIGHT;
+  }
 
-	// Now we know the attacker's attack bonus and the defender's AC, we can perform the roll.
-	// "Attack Bonus" here is actually a roll-up value. We add the AC to that value, and try to roll equal to or above it on a d20.
+  if (key->c == 'J' || key->c == 'j') {
+    move_value = ORTHO_DOWN;
+  }
 
-	int finalTargetValue = attackBonus + defenderAC;
+  if (key->c == 'H' || key->c == 'h') {
+    move_value = ORTHO_LEFT;
+  }
 
-	//TCOD_dice_t attackDie;
-	//attackDie.nb_faces = 20;
-	//attackDie.nb_rolls = 1;
-	int roll = randomiser->diceRoll("1d20");
-	if(roll<finalTargetValue)
-	{
-		// a miss!
-		gGame->AddActionLogText("The attack misses!");
-		return false;
-	}
-	else
-	{
-		// a hit, a palpable hit!
-		gGame->AddActionLogText("The attack hits!");
-		return ResolveDamage(damageDie, damageBonus, defenderMananger, defenderID);
-	}
+  if (move_value != -1) {
+    if (mode == GM_MAIN) return OrthoKeyboardMove(move_value);
+
+    if (mode == GM_TARGET) {
+      return OrthoKeyboardTarget(move_value);
+    }
+  }
+
+  return false;
 }
 
-bool Game::ResolveDamage(int damageDie, int damageBonus, int defenderMananger, int defenderID)
-{
-	// this function resolves the damage applied to a given opponent and returns whether they were killed.
-	// It can be used directly for non-rolled attacks (eg Magic Missile, Fireball, Lightning Bolt)
-	// TODO: add specific tag effects to this damage for eg elemental resistance
+bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManager, int defenderID, bool missile) {
+  // can be used for different entity types (mob and character) using managers
+  // we'll use this for traps using the map manager later too
 
-	TCOD_dice_t damageRoller;
-	damageRoller.nb_faces = damageDie;
-	damageRoller.nb_rolls = 1; // needs updating for eg monster attacks for 2d6, lightning bolt etc
-	damageRoller.addsub = damageBonus;
-	damageRoller.multiplier = 1;
+  // Many monsters have an attack sequence, and any creature can Cleave (up to certain limitations).
+  // Attack sequences always go off, and Cleaves go off if we fell an enemy with an attack.
+  // Finally, we can have a couple of different kind of magical and non-magical ranged attack, some of which have attack
+  // rolls and some don't
 
-	// and make the roll
-	int result = randomiser->diceRoll(damageRoller);
+  // How do Cleaves interact with multi-attack sequences?
+  // Essentially every creature gets a given number of Cleaves each turn, and they can be used on any given attack until
+  // they run out.
 
-	// subtract that many hits from the target
-	bool disabled = false;
-	switch (defenderMananger)
-	{
-	case MANAGER_CHARACTER:
-	{
-		int currentHP = mCharacterManager->getCharacterCurrentHitPoints(defenderID);
-		currentHP -= result;
-		disabled = (currentHP < 1);
-		mCharacterManager->setCharacterCurrentHitPoints(defenderID, currentHP);
-		if (disabled)
-		{
-			std::string c = mCharacterManager->getCharacterName(defenderID);
-			gGame->AddActionLogText(c + " falls!");
-			mCharacterManager->SetCondition(defenderID,"Unconscious",-255);
-			mCharacterManager->SetCondition(defenderID, "Injured",-255);
-			mCharacterManager->SetBehaviour(defenderID, "Unconscious");
-			// if the defender is the currently active character
-			if(defenderID == currentCharacterID)
-			{
-				int nextChar = mPartyManager->getNextPlayerCharacter(currentPartyID, currentCharacterID);
-				if(nextChar == -1)
-				{
-					// GAME OVER!
-					gGame->AddActionLogText("Game over!");
-					// TODO: end game element? Traditionally there's an endgame screen or summat
-					ClearGame();
-					mode = GM_MENU;
-				}
-				else
-				{
-					// we've moved to the next character in the stack
-					currentCharacterID = nextChar;
-				}
-			}
-		}
-	}
-	break;
-	case MANAGER_MOB:
-	{
-		Creature& c = mMobManager->GetMonster(defenderID);
-		int currentHP = c.GetHitPoints();
-		currentHP -= result;
-		disabled = (currentHP < 1);
-		c.SetHitPoints(currentHP);
-		if(disabled)
-		{
-			gGame->AddActionLogText(c.GetName() + " falls!");
-			c.SetCondition("Unconscious");
-			c.SetCondition("Injured");
-			mMobManager->SetBehaviour(defenderID, "Unconscious"); // will be moved into the condition management eventually
-		}
-	}
-	break;
-	default:
-	{
-		// TODO: Add attack against object
-	}
-	break;
-	}
+  int attackerAttackBonus, attackerDamageDieType, attackerDamageDice, attackerDamageBonus, attackerCleaveCount;
 
-	return disabled;
+  switch (attackerManager) {
+    case MANAGER_CHARACTER: {
+      Creature& c = mMobManager->GetMonster(defenderID);
+      std::string attackText = gGame->mCharacterManager->getCharacterName(attackerID) + " attacks " + c.GetName() + ".";
+      gGame->AddActionLogText(attackText);
+
+      // PCs/NPCs get only one attack each, barring things like "Haste".
+      attackerAttackBonus = mCharacterManager->UpdateCurrentAttackValue(attackerID, missile);
+
+      // retrieve current weapon
+      int weaponID = mCharacterManager->GetItemInEquipSlot(attackerID, HAND_MAIN);
+      int offhandID = mCharacterManager->GetItemInEquipSlot(attackerID, HAND_OFF);
+
+      if (weaponID != -1) {
+        if (weaponID != offhandID) {
+          // if the weapon is in one hand and has the "Grab" tag, the die is d2 (bolas, whips etc)
+          // if the weapon is in one hand and has the "Light" tag, the die is d4 (Clubs/Daggers etc)
+          // if the weapon is in one hand only, the die is d6 (one handed weapon only)
+          attackerDamageDieType = 6;
+          if (mItemManager->hasTag(weaponID, "Light")) attackerDamageDieType = 4;
+          if (mItemManager->hasTag(weaponID, "Grab")) attackerDamageDieType = 2;
+        } else {
+          // if the weapon is in two hands and has the "One-Handed" tag, the die is d8 (bastard weapon wielded in two
+          // hands) if the weapon is in two hands and does not have the "One-Handed" tag, the die is d10 (full
+          // two-hander)
+          if (mItemManager->hasTag(weaponID, "One-Handed")) {
+            attackerDamageDieType = 8;
+          } else {
+            attackerDamageDieType = 10;
+          }
+        }
+
+        // range modifiers
+        if (missile) {
+          int x = mCharacterManager->GetPlayerX(attackerID);
+          int y = mCharacterManager->GetPlayerY(attackerID);
+
+          int tx = mMobManager->GetMobX(defenderID);
+          int ty = mMobManager->GetMobY(defenderID);
+
+          float dist = sqrt(pow(x - tx, 2) + pow(y - ty, 2)) *
+                       5;  // each square or hex is 5ft or 5yd (which are treated the same by ACKS rules indoor/outdoor)
+          int rangePenalty = mItemManager->getRangePenalty(weaponID, dist);
+          attackerAttackBonus += rangePenalty;
+        }
+
+        // bow weapons are an exception to the usual damage pattern.
+        if (mItemManager->hasTag(weaponID, "Bows") || mItemManager->hasTag(weaponID, "Crossbows")) {
+          attackerDamageDieType = 6;
+        }
+
+        // barring special circumstances (criticals, spear charges etc) this is always 1 damage die
+        attackerDamageDice = 1;
+
+        // attacker damage bonus
+        attackerDamageBonus = mCharacterManager->GetCurrentDamageBonus(attackerID, missile);
+
+        bool slain = ResolveAttack(
+            attackerAttackBonus, attackerDamageDieType, attackerDamageBonus, defenderManager, defenderID, missile);
+        if (slain && remainingCleaves > 0) {
+          // If we're in missile mode, act as though we just pressed "t" but exclude the current target from the list
+          // If we're in melee mode, spawn an entity list consisting of all adjacent monsters but exclude the current
+          // target from the list
+          gGame->AddActionLogText("Cleave!");
+          remainingCleaves--;
+          if (missile) {
+            int wieldedID = mCharacterManager->GetItemInEquipSlot(currentCharacterID, HAND_MAIN);
+
+            // on-hand weapon is missile, so select a target
+            int range = mItemManager->getMaxRange(wieldedID);
+            int x = mCharacterManager->GetPlayerX(currentCharacterID);
+            int y = mCharacterManager->GetPlayerY(currentCharacterID);
+            std::vector<int> monstersInRange = mMobManager->GetAllMonstersInRange(currentMapID, x, y, range, true);
+            std::remove(monstersInRange.begin(), monstersInRange.end(), defenderID);
+
+            // What happens next depends on the number of available targets.
+            // If there are none, we are done with the attack sequence.
+            if (monstersInRange.size() < 1) {
+              return true;
+            }
+            // If there is only one, we don't need to target, so immediately run that attack sequence
+            if (monstersInRange.size() == 1) {
+              ResolveAttacks(attackerManager, attackerID, MANAGER_MOB, monstersInRange[0], missile);
+            }
+            // otherwise, trigger the targeting sequence to pick the cleave target
+            TriggerTargeting(TARGET_CREATURE, -1, 1, range, 1, false, true, monstersInRange);
+            return false;
+          } else {
+            int new_x = mMobManager->GetMobX(defenderID);
+            int new_y = mMobManager->GetMobY(defenderID);
+
+            mCharacterManager->SetPlayerX(currentCharacterID, new_x);
+            mCharacterManager->SetPlayerY(currentCharacterID, new_y);
+            recomputeFov = true;
+
+            UpdateLookText(new_x, new_y);
+
+            std::vector<int> monstersInRange = mMobManager->GetAllMonstersInRange(currentMapID, new_x, new_y, 1, true);
+            std::remove(monstersInRange.begin(), monstersInRange.end(), defenderID);
+
+            // What happens next depends on the number of available targets.
+            // If there are none, we are done with the attack sequence.
+            if (monstersInRange.size() < 1) {
+              return true;
+            }
+            // If there is only one, we don't need to target, so immediately run that attack sequence
+            if (monstersInRange.size() == 1) {
+              ResolveAttacks(attackerManager, attackerID, MANAGER_MOB, monstersInRange[0], missile);
+            }
+
+            TriggerTargeting(TARGET_CREATURE, -1, 2, 1, 1, false, true, monstersInRange);
+            return false;
+          }
+        }
+      }
+    } break;
+    case MANAGER_MOB: {
+      // Monsters usually either get 1 weapon attack (like PCs) or get an attack sequence like Claw/Claw/Bite
+      Creature& c = mMobManager->GetMonster(attackerID);
+
+      std::string attackText = c.GetName() + " attacks " + gGame->mCharacterManager->getCharacterName(defenderID) + ".";
+      gGame->AddActionLogText(attackText);
+
+      attackerCleaveCount = c.GetCleaveCount();
+
+      AdvancementStore* as = mClassManager->GetAdvancementStore();
+      attackerAttackBonus = as->AttackBonusLookup["Monster"][c.GetHitDie()];
+
+      std::vector<std::vector<std::string>>& attackSequences = c.GetAttackSequences();
+      int sequence = randomiser->getInt(0, attackSequences.size() - 1);
+      std::vector<std::string>& attackSequence = attackSequences[sequence];
+
+      for (std::string attack : attackSequence) {
+        AttackType at = c.GetAttack(attack);
+        attackerDamageBonus = at.DamageBonus();
+        attackerDamageDieType = at.DamageDie();
+        // TODO: Damage Dice in AttackType
+        attackerDamageDice = 1;
+        std::string attackName = at.Name();
+        // TODO: Missile attacks in attackType
+        bool slain = ResolveAttack(
+            attackerAttackBonus, attackerDamageDieType, attackerDamageBonus, defenderManager, defenderID, missile);
+        while (slain && attackerCleaveCount > 0) {
+          // TODO: Cleaves
+        }
+      }
+    } break;
+    default: {
+    } break;
+  }
+  return true;  // if we didn't go out any other way, we need to return to GM_MAIN
 }
 
-void Game::CharacterDeath(int characterID)
-{
-	// sad times :(
-	// TODO: drop all items
-	mCharacterManager->DeactivateCharacter(characterID);
-	mPartyManager->RemoveCharacter(currentPartyID, characterID);
-	// TODO: drop corpse item
+bool Game::ResolveAttack(
+    int attackBonus, int damageDie, int damageBonus, int defenderMananger, int defenderID, bool missile) {
+  // This function resolves the results of a single attack and returns if the target was killed by this attack.
+  // attack bonus is calculated before entering this function
+
+  int defenderAC = 0;  // damage reduction?
+
+  // retrieve attacker's stats
+  switch (defenderMananger) {
+    case MANAGER_CHARACTER: {
+      defenderAC = mCharacterManager->getCharacterCurrentArmourClass(defenderID);
+    } break;
+    case MANAGER_MOB: {
+      Creature& c = mMobManager->GetMonster(defenderID);
+      defenderAC = c.GetArmourClass();
+    } break;
+    default: {
+      // TODO: Add attack against object
+    } break;
+  }
+
+  // Now we know the attacker's attack bonus and the defender's AC, we can perform the roll.
+  // "Attack Bonus" here is actually a roll-up value. We add the AC to that value, and try to roll equal to or above it
+  // on a d20.
+
+  int finalTargetValue = attackBonus + defenderAC;
+
+  // TCOD_dice_t attackDie;
+  // attackDie.nb_faces = 20;
+  // attackDie.nb_rolls = 1;
+  int roll = randomiser->diceRoll("1d20");
+  if (roll < finalTargetValue) {
+    // a miss!
+    gGame->AddActionLogText("The attack misses!");
+    return false;
+  } else {
+    // a hit, a palpable hit!
+    gGame->AddActionLogText("The attack hits!");
+    return ResolveDamage(damageDie, damageBonus, defenderMananger, defenderID);
+  }
 }
 
+bool Game::ResolveDamage(int damageDie, int damageBonus, int defenderMananger, int defenderID) {
+  // this function resolves the damage applied to a given opponent and returns whether they were killed.
+  // It can be used directly for non-rolled attacks (eg Magic Missile, Fireball, Lightning Bolt)
+  // TODO: add specific tag effects to this damage for eg elemental resistance
 
-void Game::MainLoop()
-{
-	TCOD_key_t key = { TCODK_NONE,0 };
-	TCOD_mouse_t mouse;
+  TCOD_dice_t damageRoller;
+  damageRoller.nb_faces = damageDie;
+  damageRoller.nb_rolls = 1;  // needs updating for eg monster attacks for 2d6, lightning bolt etc
+  damageRoller.addsub = damageBonus;
+  damageRoller.multiplier = 1;
 
-	do {
-		// render current sample
+  // and make the roll
+  int result = randomiser->diceRoll(damageRoller);
 
-		if(mMenuManager->MenuOpen())
-		{
-			MenuGameHandleKeyboard(&key);
-            mMenuManager->RenderCurrentMenu();
-		}
-		else
-		{
-			MainGameHandleKeyboard(&key);
+  // subtract that many hits from the target
+  bool disabled = false;
+  switch (defenderMananger) {
+    case MANAGER_CHARACTER: {
+      int currentHP = mCharacterManager->getCharacterCurrentHitPoints(defenderID);
+      currentHP -= result;
+      disabled = (currentHP < 1);
+      mCharacterManager->setCharacterCurrentHitPoints(defenderID, currentHP);
+      if (disabled) {
+        std::string c = mCharacterManager->getCharacterName(defenderID);
+        gGame->AddActionLogText(c + " falls!");
+        mCharacterManager->SetCondition(defenderID, "Unconscious", -255);
+        mCharacterManager->SetCondition(defenderID, "Injured", -255);
+        mCharacterManager->SetBehaviour(defenderID, "Unconscious");
+        // if the defender is the currently active character
+        if (defenderID == currentCharacterID) {
+          int nextChar = mPartyManager->getNextPlayerCharacter(currentPartyID, currentCharacterID);
+          if (nextChar == -1) {
+            // GAME OVER!
+            gGame->AddActionLogText("Game over!");
+            // TODO: end game element? Traditionally there's an endgame screen or summat
+            ClearGame();
+            mode = GM_MENU;
+          } else {
+            // we've moved to the next character in the stack
+            currentCharacterID = nextChar;
+          }
+        }
+      }
+    } break;
+    case MANAGER_MOB: {
+      Creature& c = mMobManager->GetMonster(defenderID);
+      int currentHP = c.GetHitPoints();
+      currentHP -= result;
+      disabled = (currentHP < 1);
+      c.SetHitPoints(currentHP);
+      if (disabled) {
+        gGame->AddActionLogText(c.GetName() + " falls!");
+        c.SetCondition("Unconscious");
+        c.SetCondition("Injured");
+        mMobManager->SetBehaviour(defenderID, "Unconscious");  // will be moved into the condition management eventually
+      }
+    } break;
+    default: {
+      // TODO: Add attack against object
+    } break;
+  }
 
-			RenderScreenFurniture();
+  return disabled;
+}
 
-			RenderMap();
+void Game::CharacterDeath(int characterID) {
+  // sad times :(
+  // TODO: drop all items
+  mCharacterManager->DeactivateCharacter(characterID);
+  mPartyManager->RemoveCharacter(currentPartyID, characterID);
+  // TODO: drop corpse item
+}
 
-			switch (mode)
-			{
-				case GM_MAIN:
-				{
-					RenderUI(currentCharacterID);
-				}
-				break;
+void Game::MainLoop() {
+  TCOD_key_t key = {TCODK_NONE, 0};
+  TCOD_mouse_t mouse;
 
-				case GM_CHARACTER:
-				{
-					RenderUI(currentCharacterID);
-					RenderCharacterSheet();
-				}
-				break;
-				case GM_INVENTORY:
-				{
-					RenderUI(currentCharacterID);
-					RenderInventory();
-				}
-				break;
-				case GM_TARGET:
-				{
-					RenderUI(currentCharacterID);
-					RenderTargets();
-				}
-				break;
-				case GM_DOMAIN:
-				{
-					// RenderUI is called from inside, to give selected character info
-					mBaseManager->RenderBaseMenu(currentBaseID);
-				}
-			}
+  do {
+    // render current sample
 
+    if (mMenuManager->MenuOpen()) {
+      MenuGameHandleKeyboard(&key);
+      mMenuManager->RenderCurrentMenu();
+    } else {
+      MainGameHandleKeyboard(&key);
 
-			RenderOffscreenUI(mode == GM_INVENTORY, mode == GM_CHARACTER);
+      RenderScreenFurniture();
 
-			RenderActionLog();
-		}
+      RenderMap();
 
-		// update the game screen
+      switch (mode) {
+        case GM_MAIN: {
+          RenderUI(currentCharacterID);
+        } break;
 
-        // TCODConsole::flush();
+        case GM_CHARACTER: {
+          RenderUI(currentCharacterID);
+          RenderCharacterSheet();
+        } break;
+        case GM_INVENTORY: {
+          RenderUI(currentCharacterID);
+          RenderInventory();
+        } break;
+        case GM_TARGET: {
+          RenderUI(currentCharacterID);
+          RenderTargets();
+        } break;
+        case GM_DOMAIN: {
+          // RenderUI is called from inside, to give selected character info
+          mBaseManager->RenderBaseMenu(currentBaseID);
+        }
+      }
 
-        g_context->present(g_console);
+      RenderOffscreenUI(mode == GM_INVENTORY, mode == GM_CHARACTER);
 
-		// did the user hit a key ?
-		TCODSystem::checkForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE), &key, &mouse);
-		if (key.vk == TCODK_ENTER && key.lalt) {
-			// ALT-ENTER : switch fullscreen
-			TCODConsole::setFullscreen(!TCODConsole::isFullscreen());
+      RenderActionLog();
+    }
+
+    // update the game screen
+
+    // TCODConsole::flush();
+
+    g_context->present(g_console);
+
+    // did the user hit a key ?
+    TCODSystem::checkForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE), &key, &mouse);
+    if (key.vk == TCODK_ENTER && key.lalt) {
+      // ALT-ENTER : switch fullscreen
+      TCODConsole::setFullscreen(!TCODConsole::isFullscreen());
 #ifdef TCOD_LINUX
-		}
-		else if (key.c == 'p') {
+    } else if (key.c == 'p') {
 #else
-		}
-		else if (key.vk == TCODK_PRINTSCREEN) {
+    } else if (key.vk == TCODK_PRINTSCREEN) {
 #endif
-			if (key.lalt) {
-				// ALT-PrintScreen : save to .asc format
-				//g_context->save_screenshot("samples.apf");
-				//TCODConsole::root->saveApf("samples.apf");
-			}
-			else {
-				// save screenshot
-				g_context->save_screenshot(NULL);
-			}
-		}
-	} while (!TCODConsole::isWindowClosed() && mode != GM_QUIT);
+      if (key.lalt) {
+        // ALT-PrintScreen : save to .asc format
+        // g_context->save_screenshot("samples.apf");
+        // TCODConsole::root->saveApf("samples.apf");
+      } else {
+        // save screenshot
+        g_context->save_screenshot(NULL);
+      }
+    }
+  } while (!TCODConsole::isWindowClosed() && mode != GM_QUIT);
 }
 
-void Game::RenderMap()
-{
-	int player_x, player_y;
-	if(currentMapID == -1)
-	{
-		player_x = mPartyManager->GetPartyX(currentPartyID);
-		player_y = mPartyManager->GetPartyY(currentPartyID);
-	}
-	else
-	{
-		player_x = mCharacterManager->GetPlayerX(currentCharacterID);
-		player_y = mCharacterManager->GetPlayerY(currentCharacterID);
-	}
-    g_console.clear();
+void Game::RenderMap() {
+  int player_x, player_y;
+  if (currentMapID == -1) {
+    player_x = mPartyManager->GetPartyX(currentPartyID);
+    player_y = mPartyManager->GetPartyY(currentPartyID);
+  } else {
+    player_x = mCharacterManager->GetPlayerX(currentCharacterID);
+    player_y = mCharacterManager->GetPlayerY(currentCharacterID);
+  }
+  g_console.clear();
 
-	if (recomputeFov) {
-		// calculate the field of view from the player position
-		recomputeFov = false;
-		//currentMap->map->computeFov(player_x, player_y, 0, light_walls, FOV_PERMISSIVE_1);
-		currentMap->map->computeFov(player_x, player_y, 0, light_walls, FOV_BASIC);
-	}
+  if (recomputeFov) {
+    // calculate the field of view from the player position
+    recomputeFov = false;
+    // currentMap->map->computeFov(player_x, player_y, 0, light_walls, FOV_PERMISSIVE_1);
+    currentMap->map->computeFov(player_x, player_y, 0, light_walls, FOV_BASIC);
+  }
 
-	// why did I remove the torch variation effect?
-	// Because the wilderness is intended to be more "open-feeling" than the dungeon. If we keep the torch effect in the dungeons,
-	// that adds to the sense of claustrophobia. But outdoors should feel airy and open, even in the dark.
+  // why did I remove the torch variation effect?
+  // Because the wilderness is intended to be more "open-feeling" than the dungeon. If we keep the torch effect in the
+  // dungeons, that adds to the sense of claustrophobia. But outdoors should feel airy and open, even in the dark.
 
-	if (currentMapID == -1)
-	{
-		mMapManager->renderRegionMap(player_x,player_y);
-            mMapManager->renderAtPosition(-1, player_x, player_y, player_x, player_y, '@', TCOD_white);
-	}
-	else
-	{
-		mMapManager->renderMap(currentMapID,player_x,player_y);
+  if (currentMapID == -1) {
+    mMapManager->renderRegionMap(player_x, player_y);
+    mMapManager->renderAtPosition(-1, player_x, player_y, player_x, player_y, '@', TCOD_white);
+  } else {
+    mMapManager->renderMap(currentMapID, player_x, player_y);
 
-		std::vector<int> chars = mPartyManager->getPlayerCharacters(currentPartyID);
-		for (int ch : chars)
-		{
-			if (mCharacterManager->GetPlayerX(ch) != -1)
-			{
-				TCOD_ColorRGB baseColor = TCOD_lighter_gray;
+    std::vector<int> chars = mPartyManager->getPlayerCharacters(currentPartyID);
+    for (int ch : chars) {
+      if (mCharacterManager->GetPlayerX(ch) != -1) {
+        TCOD_ColorRGB baseColor = TCOD_lighter_gray;
 
-				if (mCharacterManager->getCharacterHasCondition(ch, "Unconscious"))
-				{
-					baseColor.r /= 2;
-					baseColor.g /= 2;
-					baseColor.b /= 2;
-				}
+        if (mCharacterManager->getCharacterHasCondition(ch, "Unconscious")) {
+          baseColor.r /= 2;
+          baseColor.g /= 2;
+          baseColor.b /= 2;
+        }
 
-				if (ch == currentCharacterID)
-				{
-					mMapManager->renderAtPosition(currentMapID, player_x, player_y, mCharacterManager->GetPlayerX(ch), mCharacterManager->GetPlayerY(ch), '@', TCOD_white);
-				}
-				else
-				{
-					mMapManager->renderAtPosition(currentMapID, player_x, player_y, mCharacterManager->GetPlayerX(ch), mCharacterManager->GetPlayerY(ch), '@', baseColor);
-				}
-			}
-		}
+        if (ch == currentCharacterID) {
+          mMapManager->renderAtPosition(
+              currentMapID,
+              player_x,
+              player_y,
+              mCharacterManager->GetPlayerX(ch),
+              mCharacterManager->GetPlayerY(ch),
+              '@',
+              TCOD_white);
+        } else {
+          mMapManager->renderAtPosition(
+              currentMapID,
+              player_x,
+              player_y,
+              mCharacterManager->GetPlayerX(ch),
+              mCharacterManager->GetPlayerY(ch),
+              '@',
+              baseColor);
+        }
+      }
+    }
 
-		std::vector<int> henches = mPartyManager->getHenchmen(currentPartyID);
-		for (int ch : henches)
-		{
-			TCOD_ColorRGB baseColor = TCOD_lighter_gray;
-			if (mCharacterManager->getCharacterHasCondition(ch, "Unconscious"))
-			{
-				baseColor.r /= 2;
-				baseColor.g /= 2;
-				baseColor.b /= 2;
-			}
+    std::vector<int> henches = mPartyManager->getHenchmen(currentPartyID);
+    for (int ch : henches) {
+      TCOD_ColorRGB baseColor = TCOD_lighter_gray;
+      if (mCharacterManager->getCharacterHasCondition(ch, "Unconscious")) {
+        baseColor.r /= 2;
+        baseColor.g /= 2;
+        baseColor.b /= 2;
+      }
 
-			if (mCharacterManager->GetPlayerX(ch) != -1)
-			{
-				mMapManager->renderAtPosition(currentMapID, player_x, player_y, mCharacterManager->GetPlayerX(ch), mCharacterManager->GetPlayerY(ch), '@', baseColor);
-			}
-		}
-	}
+      if (mCharacterManager->GetPlayerX(ch) != -1) {
+        mMapManager->renderAtPosition(
+            currentMapID,
+            player_x,
+            player_y,
+            mCharacterManager->GetPlayerX(ch),
+            mCharacterManager->GetPlayerY(ch),
+            '@',
+            baseColor);
+      }
+    }
+  }
 }
 
-std::vector<int> Game::GetTargetedEntities()
-{
-	// can't have more entities targeted than were in the original selection set
-	int effect_size = targetingData[4];
-	if (effect_size > targetIDs.size()) effect_size = targetIDs.size();
+std::vector<int> Game::GetTargetedEntities() {
+  // can't have more entities targeted than were in the original selection set
+  int effect_size = targetingData[4];
+  if (effect_size > targetIDs.size()) effect_size = targetIDs.size();
 
-	// the ids need to lap around. So if we're selecting 3 from a set of {1,2,3,4,5}, and our targeting starts at 4, then we want 4,5,1
-	std::vector<int> output;
+  // the ids need to lap around. So if we're selecting 3 from a set of {1,2,3,4,5}, and our targeting starts at 4, then
+  // we want 4,5,1
+  std::vector<int> output;
 
-	size_t i = targetIndex;
+  size_t i = targetIndex;
 
-	while(effect_size > 0)
-	{
-		output.push_back(targetIDs[i]);
-		effect_size--;
-		i++;
-		if (i > (targetIDs.size() - 1)) i = 0;
-	}
+  while (effect_size > 0) {
+    output.push_back(targetIDs[i]);
+    effect_size--;
+    i++;
+    if (i > (targetIDs.size() - 1)) i = 0;
+  }
 
-	return output;
+  return output;
 }
 
-void Game::RenderTargets()
-{
-	// what we render depends on the targeting mode. The most basic approach is to render Xs over the targeted units or positions
-	// targeting data setup:
-	// 0: Return Manager
-	// 1: Return Code
-	// 2: Range
-	// 3: Ally/Enemy flags (if any)
-	// 4: Effect Size (affected creatures, radius, width at cone end)
-	//
-	switch (targetMode)
-	{
-	case(TARGET_CELL):
-	{
-		mMapManager->renderAtPosition(currentMapID, targetCursorX, targetCursorY, targetCursorX, targetCursorY, 'X');
-	}
-	break;
+void Game::RenderTargets() {
+  // what we render depends on the targeting mode. The most basic approach is to render Xs over the targeted units or
+  // positions targeting data setup: 0: Return Manager 1: Return Code 2: Range 3: Ally/Enemy flags (if any) 4: Effect
+  // Size (affected creatures, radius, width at cone end)
+  //
+  switch (targetMode) {
+    case (TARGET_CELL): {
+      mMapManager->renderAtPosition(currentMapID, targetCursorX, targetCursorY, targetCursorX, targetCursorY, 'X');
+    } break;
 
-	case(TARGET_CREATURE):
-	{
-		auto targets = GetTargetedEntities();
-		if (targetingData[3] & TARGET_FLAGS::TF_ENEMY)
-		{
-			for (int beastie : targets)
-			{
-				//Creature& c = mMobManager->GetMonster(beastie);
+    case (TARGET_CREATURE): {
+      auto targets = GetTargetedEntities();
+      if (targetingData[3] & TARGET_FLAGS::TF_ENEMY) {
+        for (int beastie : targets) {
+          // Creature& c = mMobManager->GetMonster(beastie);
 
-				mMapManager->renderAtPosition(currentMapID, mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), mMobManager->GetMobX(beastie), 'X');
-			}
-		}
+          mMapManager->renderAtPosition(
+              currentMapID,
+              mMobManager->GetMobX(beastie),
+              mMobManager->GetMobX(beastie),
+              mMobManager->GetMobX(beastie),
+              mMobManager->GetMobX(beastie),
+              'X');
+        }
+      }
 
-		if (targetingData[3] & TARGET_FLAGS::TF_FRIEND)
-		{
-			for (int wossname : targets)
-			{
-				mMapManager->renderAtPosition(currentMapID, mCharacterManager->GetPlayerX(wossname), mCharacterManager->GetPlayerY(wossname), mCharacterManager->GetPlayerX(wossname), mCharacterManager->GetPlayerY(wossname), 'X');
-			}
-		}
-	}
-	break;
-	}
+      if (targetingData[3] & TARGET_FLAGS::TF_FRIEND) {
+        for (int wossname : targets) {
+          mMapManager->renderAtPosition(
+              currentMapID,
+              mCharacterManager->GetPlayerX(wossname),
+              mCharacterManager->GetPlayerY(wossname),
+              mCharacterManager->GetPlayerX(wossname),
+              mCharacterManager->GetPlayerY(wossname),
+              'X');
+        }
+      }
+    } break;
+  }
 }
 
-void Game::RenderScreenFurniture()
-{
-	// currently none. May add some later
+void Game::RenderScreenFurniture() {
+  // currently none. May add some later
 }
 
-void Game::RenderUI(int selectedCharacterID)
-{
-	// Three main screen regions. Top left and middle is the main map, the bottom is the log, right side is a stats summary
-	std::string name = mCharacterManager->getCharacterName(selectedCharacterID);
-	std::string char_class = mCharacterManager->getCharacterClass(selectedCharacterID)->Name();
-	std::string level = std::to_string(mCharacterManager->getCharacterLevel(selectedCharacterID));
-	std::string hp = std::to_string(mCharacterManager->getCharacterCurrentHitPoints(selectedCharacterID)) + "/" + std::to_string(mCharacterManager->getCharacterTotalHitPoints(selectedCharacterID));
+void Game::RenderUI(int selectedCharacterID) {
+  // Three main screen regions. Top left and middle is the main map, the bottom is the log, right side is a stats
+  // summary
+  std::string name = mCharacterManager->getCharacterName(selectedCharacterID);
+  std::string char_class = mCharacterManager->getCharacterClass(selectedCharacterID)->Name();
+  std::string level = std::to_string(mCharacterManager->getCharacterLevel(selectedCharacterID));
+  std::string hp = std::to_string(mCharacterManager->getCharacterCurrentHitPoints(selectedCharacterID)) + "/" +
+                   std::to_string(mCharacterManager->getCharacterTotalHitPoints(selectedCharacterID));
 
-	tcod::print(g_console, { 60,4 }, name,std::nullopt, std::nullopt);
-	tcod::print(g_console, { 60,5 }, char_class, std::nullopt, std::nullopt);
-	tcod::print(g_console, { 60,6 }, level, std::nullopt, std::nullopt);
-	tcod::print(g_console, { 60,8 }, hp, std::nullopt, std::nullopt);
+  tcod::print(g_console, {60, 4}, name, std::nullopt, std::nullopt);
+  tcod::print(g_console, {60, 5}, char_class, std::nullopt, std::nullopt);
+  tcod::print(g_console, {60, 6}, level, std::nullopt, std::nullopt);
+  tcod::print(g_console, {60, 8}, hp, std::nullopt, std::nullopt);
 
-	// TODO: Status indicators
+  // TODO: Status indicators
 }
 
-void Game::UpdateLookText(int x, int y)
-{
-	playLogString = "";
+void Game::UpdateLookText(int x, int y) {
+  playLogString = "";
 
+  if (currentMapID != -1) {
+    auto items = mMapManager->getMap(currentMapID)->getItems(x, y);
+    if (items->size() > 0) {
+      playLogString += mMapManager->ItemDesc(currentMapID, x, y);
+    }
 
-	if (currentMapID != -1)
-	{
-		auto items = mMapManager->getMap(currentMapID)->getItems(x, y);
-		if (items->size() > 0)
-		{
-			playLogString += mMapManager->ItemDesc(currentMapID, x, y);
-		}
+    int mobID = currentMap->getMobAt(x, y);
+    if (mobID != 0) {
+      Creature& c = mMobManager->GetMonster(mobID);
+      if (c.HasCondition("Unconscious")) {
+        playLogString += "There is an unconscious " + c.GetName() + ".";
+      } else {
+        playLogString += "There is a " + c.GetName() + ".";
+      }
+    }
 
-		int mobID = currentMap->getMobAt(x, y);
-		if (mobID != 0)
-		{
-			Creature& c = mMobManager->GetMonster(mobID);
-			if (c.HasCondition("Unconscious"))
-			{
-				playLogString += "There is an unconscious " + c.GetName() + ".";
-			}
-			else
-			{
-				playLogString += "There is a " + c.GetName() + ".";
-			}
-		}
+    int charID = currentMap->getCharacterAt(x, y);
+    if (charID != 0 && charID != currentCharacterID) {
+      if (mCharacterManager->getCharacterHasCondition(charID, "Unconscious")) {
+        playLogString += mCharacterManager->getCharacterName(charID) + "lies here, unconscious.";
+      } else {
+        playLogString += mCharacterManager->getCharacterName(charID) + " is here.";
+      }
+    }
+  } else {
+    // overland map
+    if (currentBaseID != -1) {
+      if (mBaseManager->GetBaseOwner(currentBaseID) == currentPartyID) {
+        // this is our base!
+        playLogString += "Our " + mBaseManager->GetBaseType(currentBaseID) + " is here.";
+      } else {
+        // this is someone else's base!
+        playLogString += "A " + mBaseManager->GetBaseType(currentBaseID) + " is here.";
+      }
+    }
+  }
 
-		int charID = currentMap->getCharacterAt(x, y);
-		if (charID != 0 && charID != currentCharacterID)
-		{
-			if (mCharacterManager->getCharacterHasCondition(charID, "Unconscious"))
-			{
-				playLogString += mCharacterManager->getCharacterName(charID) + "lies here, unconscious.";
-			}
-			else
-			{
-				playLogString += mCharacterManager->getCharacterName(charID) + " is here.";
-			}
-		}
-	}
-	else
-	{
-		// overland map
-		if (currentBaseID != -1)
-		{
-			if (mBaseManager->GetBaseOwner(currentBaseID) == currentPartyID)
-			{
-				// this is our base!
-				playLogString += "Our " + mBaseManager->GetBaseType(currentBaseID) + " is here.";
-			}
-			else
-			{
-				// this is someone else's base!
-				playLogString += "A " + mBaseManager->GetBaseType(currentBaseID) + " is here.";
-			}
-		}
-	}
-
-	DebugLog("Action Log changed to:" + playLogString);
+  DebugLog("Action Log changed to:" + playLogString);
 }
 
-void Game::AddActionLogText(std::string term, bool clear)
-{
-	if(clear)
-	{
-		playLogString = "";
-	}
-	playLogString += " " + term;
+void Game::AddActionLogText(std::string term, bool clear) {
+  if (clear) {
+    playLogString = "";
+  }
+  playLogString += " " + term;
 
-	if (clear)
-	{
-		DebugLog("Action Log cleared and added:" + term);
-	}
-	else
-	{
-		DebugLog("Action Log added:" + term);
-	}
+  if (clear) {
+    DebugLog("Action Log cleared and added:" + term);
+  } else {
+    DebugLog("Action Log added:" + term);
+  }
 }
 
-void Game::RenderActionLog()
-{
-	const int BOX_HEIGHT = 5;
-	std::string logText = playLogString;
-	int size = tcod::get_height_rect(SAMPLE_SCREEN_WIDTH, logText);
+void Game::RenderActionLog() {
+  const int BOX_HEIGHT = 5;
+  std::string logText = playLogString;
+  int size = tcod::get_height_rect(SAMPLE_SCREEN_WIDTH, logText);
 
-	// now truncate our text line by line until it fits.
+  // now truncate our text line by line until it fits.
 
-	while (size > BOX_HEIGHT)
-	{
-		std::string::size_type n = 0;
-		n = logText.find_first_not_of(" \t", n);
-		n = logText.find_first_of(" \t", n);
-		logText.erase(0, logText.find_first_not_of(" \t", n));
+  while (size > BOX_HEIGHT) {
+    std::string::size_type n = 0;
+    n = logText.find_first_not_of(" \t", n);
+    n = logText.find_first_of(" \t", n);
+    logText.erase(0, logText.find_first_not_of(" \t", n));
 
-        size = tcod::get_height_rect(SAMPLE_SCREEN_WIDTH, logText);
-	}
+    size = tcod::get_height_rect(SAMPLE_SCREEN_WIDTH, logText);
+  }
 
-    tcod::print_rect(g_console, { 2, 25, SAMPLE_SCREEN_WIDTH, 5 }, logText, std::nullopt, std::nullopt);
+  tcod::print_rect(g_console, {2, 25, SAMPLE_SCREEN_WIDTH, 5}, logText, std::nullopt, std::nullopt);
 }
 
-void Game::ClearLookText()
-{
-	tcod::print_rect(g_console, { 0, 24, 50, 5 }, " ", std::nullopt, std::nullopt);
+void Game::ClearLookText() { tcod::print_rect(g_console, {0, 24, 50, 5}, " ", std::nullopt, std::nullopt); }
+
+void Game::RenderCharacterSheet() {
+  if (characterScreen == nullptr) {
+    characterScreen = new tcod::Console(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+  }
+
+  characterScreen->clear();
+
+  auto acks_class = mCharacterManager->getCharacterClass(currentCharacterID);
+  int level = mCharacterManager->getCharacterLevel(currentCharacterID);
+
+  auto ranks = acks_class->LevelTitles;
+  std::string rank = ranks[level];
+  std::string name = mCharacterManager->getCharacterName(currentCharacterID);
+  std::string title = name + "," + rank;
+
+  tcod::print_frame(
+      *characterScreen,
+      {0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT},
+      title,
+      &TCOD_white,
+      &TCOD_black,
+      TCOD_BKGND_NONE,
+      false);
+
+  tcod::print(*characterScreen, {25, 2}, "Attributes", TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+
+  std::vector<Statistic> stats = mCharacterManager->cd.statistics();
+
+  for (int i = 0; i < stats.size(); i++) {
+    Statistic s = stats[i];
+    tcod::print(*characterScreen, {25, 4 + i}, stats[i].name(), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+    tcod::print(
+        *characterScreen,
+        {40, 4 + i},
+        std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID, i)),
+        TCOD_white,
+        TCOD_black,
+        TCOD_LEFT,
+        TCOD_BKGND_NONE);
+  }
+
+  std::string clas = "Class:" + acks_class->Name();
+  std::string lev = "Level:" + std::to_string(level);
+
+  tcod::print(*characterScreen, {2, 2}, clas, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+  tcod::print(*characterScreen, {2, 3}, lev, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+
+  int xp = mCharacterManager->getCharacterExperience(currentCharacterID);
+  auto maxps = acks_class->LevelXPValues;
+  std::string nextp = "---";
+  if (maxps.size() != level) {
+    nextp = std::to_string(maxps[level + 1]);
+  }
+  std::string exp = "Experience:" + std::to_string(xp) + "/" + nextp;
+
+  tcod::print(*characterScreen, {2, 4}, exp, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+
+  auto advancement = mClassManager->GetAdvancementStore();
+
+  auto attack_bonuses = advancement->AttackBonusLookup[acks_class->AttackProgression()];
+  int attack_bonus = attack_bonuses[level];
+  std::string ab_melee =
+      "Melee Attack:" + std::to_string(mCharacterManager->UpdateCurrentAttackValue(currentCharacterID, false));
+  std::string ab_missile =
+      "Missile Attack:" + std::to_string(mCharacterManager->UpdateCurrentAttackValue(currentCharacterID, true));
+
+  tcod::print(*characterScreen, {2, 6}, ab_melee, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+  tcod::print(*characterScreen, {2, 7}, ab_missile, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+
+  tcod::print(*characterScreen, {25, 11}, "Saves", TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+
+  for (int i = 0; i < 5; i++) {
+    std::string save_name = saveTypes[i];
+
+    std::string display_name = save_name.substr(0, 13);
+
+    tcod::print(*characterScreen, {25, 12 + i}, display_name, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+
+    int saveVal = mCharacterManager->UpdateCurrentSaveValue(currentCharacterID, save_name);
+
+    tcod::print(
+        *characterScreen, {40, 12 + i}, std::to_string(saveVal), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+  }
+
+  std::string ac = "AC:" + std::to_string(mCharacterManager->GetCurrentAC(currentCharacterID));
+  tcod::print(*characterScreen, {2, 9}, ac, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+
+  std::string enc = "Encumbrance:" + mCharacterManager->GetCurrentEncumbranceType(currentCharacterID);
+  tcod::print(*characterScreen, {2, 10}, enc, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 }
 
-void Game::RenderCharacterSheet()
-{
-	if (characterScreen == nullptr)
-	{
-        characterScreen = new tcod::Console(SAMPLE_SCREEN_WIDTH , SAMPLE_SCREEN_HEIGHT);
-	}
+void Game::RenderInventory() {
+  // to be replaced by new inventory management system
 
-	characterScreen->clear();
+  /*
+  if(inventoryScreen == nullptr)
+  {
+          inventoryScreen = new tcod::Console(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+  }
 
-	auto acks_class = mCharacterManager->getCharacterClass(currentCharacterID);
-	int level = mCharacterManager->getCharacterLevel(currentCharacterID);
+  inventoryScreen->clear();
 
-	auto ranks = acks_class->LevelTitles;
-	std::string rank = ranks[level];
-	std::string name = mCharacterManager->getCharacterName(currentCharacterID);
-	std::string title = name + "," + rank;
+  inventoryScreen->printFrame(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, false, TCOD_BKGND_SET, "Inventory");
 
-	tcod::print_frame(*characterScreen, { 0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT }, title, &TCOD_white, &TCOD_black, TCOD_BKGND_NONE, false);
+  auto inv = mCharacterManager->GetInventory(currentCharacterID);
 
-	tcod::print(*characterScreen, { 25,2 }, "Attributes", TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+  int page = 0;
 
-	std::vector<Statistic> stats = mCharacterManager->cd.statistics();
+  const int MAX_ITEMS = SAMPLE_SCREEN_HEIGHT - 3;
 
-	for(int i=0;i<stats.size();i++)
-	{
-		Statistic s = stats[i];
-		tcod::print(*characterScreen, { 25,4+i }, stats[i].name(), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-		tcod::print(*characterScreen, { 40, 4 + i }, std::to_string(mCharacterManager->getCharacterCharacteristic(currentCharacterID, i)), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-	}
+  // figure out which page the current position is on
 
-	std::string clas = "Class:" + acks_class->Name();
-	std::string lev = "Level:" + std::to_string(level);
+  if(inventoryPosition > MAX_ITEMS)
+  {
+          // we're off the first page. calculate which page we're actually on
+          page = inventoryPosition % MAX_ITEMS;
+  }
 
-	tcod::print(*characterScreen, { 2,2 }, clas, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-	tcod::print(*characterScreen, { 2,3 }, lev, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+  auto inv_iter = inv.begin();
+  std::advance(inv_iter, page* MAX_ITEMS);
 
-	int xp = mCharacterManager->getCharacterExperience(currentCharacterID);
-	auto maxps = acks_class->LevelXPValues;
-	std::string nextp = "---";
-	if(maxps.size() != level)
-	{
-		nextp = std::to_string(maxps[level + 1]);
-	}
-	std::string exp = "Experience:" + std::to_string(xp) + "/" + nextp;
+  for(int i = page * MAX_ITEMS;(i<(page+1)*MAX_ITEMS && i<inv.size());i++)
+  {
+          int itemID = *inv_iter++;
+          std::string item = mItemManager->getName(itemID);
+          int slot = mCharacterManager->GetEquipSlotForInventoryItem(currentCharacterID,i);
+          if (slot != -1)
+                  item += " (Equipped)";
+          int y_pos = i - page * MAX_ITEMS + 2;
+          TCOD_bkgnd_flag_t backg = TCOD_BKGND_NONE;
+          inventoryScreen->printEx(2, y_pos, backg, TCOD_LEFT, item.c_str());
+  }
 
-	tcod::print(*characterScreen, { 2,4 }, exp, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+  int select_y = inventoryPosition - page * MAX_ITEMS + 2;
+  for(int x = 0;x< SAMPLE_SCREEN_WIDTH;x++)
+  {
+          inventoryScreen->setCharBackground(x, select_y, TCODColor::white, TCOD_BKGND_SET);
+          inventoryScreen->setCharForeground(x, select_y, TCODColor::black);
+  }
+  */
 
-	auto advancement = mClassManager->GetAdvancementStore();
-
-	auto attack_bonuses = advancement->AttackBonusLookup[acks_class->AttackProgression()];
-	int attack_bonus = attack_bonuses[level];
-	std::string ab_melee = "Melee Attack:" + std::to_string(mCharacterManager->UpdateCurrentAttackValue(currentCharacterID, false));
-	std::string ab_missile = "Missile Attack:" + std::to_string(mCharacterManager->UpdateCurrentAttackValue(currentCharacterID, true));
-
-	tcod::print(*characterScreen, { 2,6 }, ab_melee, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-	tcod::print(*characterScreen, { 2,7 }, ab_missile, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-
-	tcod::print(*characterScreen, { 25,11 }, "Saves", TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-
-	for(int i=0;i<5;i++)
-	{
-		std::string save_name = saveTypes[i];
-
-		std::string display_name = save_name.substr(0, 13);
-
-		tcod::print(*characterScreen, { 25,12+i }, display_name, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-
-		int saveVal = mCharacterManager->UpdateCurrentSaveValue(currentCharacterID, save_name);
-
-		tcod::print(*characterScreen, { 40,12 + i }, std::to_string(saveVal), TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-	}
-
-	std::string ac = "AC:" + std::to_string(mCharacterManager->GetCurrentAC(currentCharacterID));
-	tcod::print(*characterScreen, { 2,9 }, ac, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
-
-	std::string enc = "Encumbrance:" + mCharacterManager->GetCurrentEncumbranceType(currentCharacterID);
-	tcod::print(*characterScreen, { 2,10 }, enc, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
+  gGame->mInventoryManager->RenderInventory();
 }
 
+void Game::RenderOffscreenUI(bool inventory, bool character) {
+  static int x = 0, y = 0;  // secondary screen position
 
-void Game::RenderInventory()
-{
-	// to be replaced by new inventory management system
+  TCODSystem::setFps(30);  // fps limited to 30
 
-	/*
-	if(inventoryScreen == nullptr)
-	{
-		inventoryScreen = new tcod::Console(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
-	}
+  if (character) {
+    tcod::blit(
+        g_console,
+        *characterScreen,
+        {x, y},
+        {
+            0,
+            0,
+            SAMPLE_SCREEN_WIDTH,
+            SAMPLE_SCREEN_HEIGHT,
+        },
+        1.0f,
+        0.75f);
+  }
 
-	inventoryScreen->clear();
-
-	inventoryScreen->printFrame(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, false, TCOD_BKGND_SET, "Inventory");
-
-	auto inv = mCharacterManager->GetInventory(currentCharacterID);
-
-	int page = 0;
-
-	const int MAX_ITEMS = SAMPLE_SCREEN_HEIGHT - 3;
-
-	// figure out which page the current position is on
-
-	if(inventoryPosition > MAX_ITEMS)
-	{
-		// we're off the first page. calculate which page we're actually on
-		page = inventoryPosition % MAX_ITEMS;
-	}
-
-	auto inv_iter = inv.begin();
-	std::advance(inv_iter, page* MAX_ITEMS);
-
-	for(int i = page * MAX_ITEMS;(i<(page+1)*MAX_ITEMS && i<inv.size());i++)
-	{
-		int itemID = *inv_iter++;
-		std::string item = mItemManager->getName(itemID);
-		int slot = mCharacterManager->GetEquipSlotForInventoryItem(currentCharacterID,i);
-		if (slot != -1)
-			item += " (Equipped)";
-		int y_pos = i - page * MAX_ITEMS + 2;
-		TCOD_bkgnd_flag_t backg = TCOD_BKGND_NONE;
-		inventoryScreen->printEx(2, y_pos, backg, TCOD_LEFT, item.c_str());
-	}
-
-	int select_y = inventoryPosition - page * MAX_ITEMS + 2;
-	for(int x = 0;x< SAMPLE_SCREEN_WIDTH;x++)
-	{
-		inventoryScreen->setCharBackground(x, select_y, TCODColor::white, TCOD_BKGND_SET);
-		inventoryScreen->setCharForeground(x, select_y, TCODColor::black);
-	}
-	*/
-
-	gGame->mInventoryManager->RenderInventory();
-}
-
-void Game::RenderOffscreenUI(bool inventory, bool character)
-{
-	static int x = 0, y = 0; // secondary screen position
-
-	TCODSystem::setFps(30); // fps limited to 30
-
-	if (character)
-	{
-        tcod::blit(
-                g_console,
-                *characterScreen,
-                {x, y},
-                {
-                    0,
-                    0,
-                    SAMPLE_SCREEN_WIDTH,
-                    SAMPLE_SCREEN_HEIGHT,
-                },
-                1.0f,
-                0.75f);
-	}
-
-	if (inventory)
-	{
-		// removed for new inventory system
-		/*
-        tcod::blit(
-                g_console,
-                *inventoryScreen,
-                {x, y},
-                {
-                    0,
-                    0,
-                    SAMPLE_SCREEN_WIDTH,
-                    SAMPLE_SCREEN_HEIGHT,
-                },
-                1.0f,
-                0.75f);
-				*/
-	}
-
+  if (inventory) {
+    // removed for new inventory system
+    /*
+tcod::blit(
+    g_console,
+    *inventoryScreen,
+    {x, y},
+    {
+        0,
+        0,
+        SAMPLE_SCREEN_WIDTH,
+        SAMPLE_SCREEN_HEIGHT,
+    },
+    1.0f,
+    0.75f);
+                    */
+  }
 }
 
 // return true if we're done and the menu should close
-bool Game::MenuHandler(std::string menuName, int returnCode)
-{
-    if (menuName == "Rogue, Conqueror, King")
-    {
-        // main menu
-        switch (returnCode)
-        {
-            case 0:
-                // New Game
-				CreateTestGame();
-                return true;
-                break;
+bool Game::MenuHandler(std::string menuName, int returnCode) {
+  if (menuName == "Rogue, Conqueror, King") {
+    // main menu
+    switch (returnCode) {
+      case 0:
+        // New Game
+        CreateTestGame();
+        return true;
+        break;
 
-            case 1:
-                // Quit
-                QuitGame();
-                return true;
-                break;
-        }
+      case 1:
+        // Quit
+        QuitGame();
+        return true;
+        break;
     }
+  }
 }
 
-void Game::DebugLog(std::string message)
-{
-	gLog->Log("Game", message);
-}
+void Game::DebugLog(std::string message) { gLog->Log("Game", message); }

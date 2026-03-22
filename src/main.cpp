@@ -7,14 +7,14 @@
 #include <filesystem>
 #include <iostream>
 #include <libtcod.hpp>
-
-#include <vector>
 #include <list>
 #include <queue>
-#include "Maps.h"
+#include <vector>
+
 #include "Character.h"
 #include "Class.h"
 #include "Game.h"
+#include "Maps.h"
 #include "OutputLog.h"
 
 #if defined(_MSC_VER)
@@ -23,24 +23,24 @@
 
 /// Game loop.
 void main_loop() {
-	// Rendering.
-	g_console.clear();
-	tcod::print(g_console, {0, 0}, "Hello World", TCOD_white, std::nullopt);
-	g_context->present(g_console);
+  // Rendering.
+  g_console.clear();
+  tcod::print(g_console, {0, 0}, "Hello World", TCOD_white, std::nullopt);
+  g_context->present(g_console);
 
-	// Handle input.
-	SDL_Event event;
+  // Handle input.
+  SDL_Event event;
 #ifndef __EMSCRIPTEN__
-	// Block until events exist.  This conserves resources well but isn't compatible with animations or Emscripten.
-	SDL_WaitEvent(nullptr);
+  // Block until events exist.  This conserves resources well but isn't compatible with animations or Emscripten.
+  SDL_WaitEvent(nullptr);
 #endif
-	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
-			case SDL_QUIT:
-				std::exit(EXIT_SUCCESS);
-				break;
-		}
-	}
+  while (SDL_PollEvent(&event)) {
+    switch (event.type) {
+      case SDL_QUIT:
+        std::exit(EXIT_SUCCESS);
+        break;
+    }
+  }
 }
 
 /// Main program entry point.
@@ -64,13 +64,12 @@ int main(int argc, char** argv) {
     g_context = tcod::new_context(params);
 
     gGame = new Game();
-    
 
-//#ifdef __EMSCRIPTEN__
-//    emscripten_set_main_loop(main_loop, 0, 0);
-//#else
-//    while (true) main_loop();
-//#endif
+    // #ifdef __EMSCRIPTEN__
+    //     emscripten_set_main_loop(main_loop, 0, 0);
+    // #else
+    //     while (true) main_loop();
+    // #endif
 
     gLog = new OutputLog();
     gGame->StartGame();
@@ -79,10 +78,9 @@ int main(int argc, char** argv) {
 #else
     gGame->MainLoop();
 #endif
-    
-    
-    } catch (const std::exception& exc) {
-      std::cerr << exc.what() << "\n";
-      throw;
-    }
+
+  } catch (const std::exception& exc) {
+    std::cerr << exc.what() << "\n";
+    throw;
+  }
 }

@@ -1,140 +1,116 @@
 #include "Menus.h"
 
-MenuManager* MenuManager::CreateMenuManager()
-{
-    MenuManager* mm = new MenuManager();
+MenuManager* MenuManager::CreateMenuManager() {
+  MenuManager* mm = new MenuManager();
 
-    return mm;
+  return mm;
 }
 
-int MenuManager::BuildMenu(int originManager, std::string name)
-{
-    int newID = nextMenuID++;
+int MenuManager::BuildMenu(int originManager, std::string name) {
+  int newID = nextMenuID++;
 
-    menuNames.push_back(name);
-    menuManagers.push_back((ManagerType)originManager);
+  menuNames.push_back(name);
+  menuManagers.push_back((ManagerType)originManager);
 
-    menuTexts.push_back(std::vector<std::string>());
-    menuStates.push_back(std::vector<int>());
-    menuTypes.push_back(std::vector<int>());
+  menuTexts.push_back(std::vector<std::string>());
+  menuStates.push_back(std::vector<int>());
+  menuTypes.push_back(std::vector<int>());
 
-    menuPositions.push_back(0);
+  menuPositions.push_back(0);
 
-    return newID;
+  return newID;
 }
 
-int MenuManager::AddMenuEntry(int menuID, MenuEntryTypes menuType, std::string menuText, int defaultState)
-{
-    int newID = menuTexts[menuID].size();
-    
-    menuTypes[menuID].push_back((int)menuType);
-    menuTexts[menuID].push_back(menuText);
-    menuStates[menuID].push_back(defaultState);
+int MenuManager::AddMenuEntry(int menuID, MenuEntryTypes menuType, std::string menuText, int defaultState) {
+  int newID = menuTexts[menuID].size();
 
-    return newID;
+  menuTypes[menuID].push_back((int)menuType);
+  menuTexts[menuID].push_back(menuText);
+  menuStates[menuID].push_back(defaultState);
+
+  return newID;
 }
 
-int MenuManager::GetCurrentMenu()
-{
-    return currentMenuID;
+int MenuManager::GetCurrentMenu() { return currentMenuID; }
+
+void MenuManager::OpenMenu(int menuID) { currentMenuID = menuID; }
+
+int MenuManager::ControlMoveUp() {
+  int len = menuTexts[currentMenuID].size();
+
+  int pos = menuPositions[currentMenuID] - 1;
+  if (pos < 0) {
+    pos = len - 1;
+  }
+
+  menuPositions[currentMenuID] = pos;
+
+  return pos;
 }
 
-void MenuManager::OpenMenu(int menuID)
-{
-    currentMenuID = menuID;
+int MenuManager::ControlMoveDown() {
+  int len = menuTexts[currentMenuID].size();
+
+  int pos = menuPositions[currentMenuID] + 1;
+
+  if (pos >= len) {
+    pos = 0;
+  }
+
+  menuPositions[currentMenuID] = pos;
+
+  return pos;
 }
 
-int MenuManager::ControlMoveUp()
-{
-    int len = menuTexts[currentMenuID].size();
+int MenuManager::Select() {
+  ManagerType man = (ManagerType)menuManagers[currentMenuID];
 
-    int pos = menuPositions[currentMenuID] - 1;
-    if (pos < 0)
-    {
-        pos = len - 1;
+  int pos = menuPositions[currentMenuID];
+
+  switch (man) {
+    case MANAGER_GAME:
+      if (gGame->MenuHandler(menuNames[currentMenuID], pos)) {
+        // return true means we're done, close the menu
+        currentMenuID = -1;
+      } else {
+        // return false means we're not done
+      }
+      return pos;
+      break;
+  }
+}
+
+bool MenuManager::MenuOpen() { return currentMenuID != -1; }
+
+void MenuManager::RenderCurrentMenu() {
+  if (!MenuOpen()) return;
+
+  g_console.clear();
+
+  tcod::print_frame(
+      g_console,
+      {0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT},
+      menuNames[currentMenuID],
+      &TCOD_white,
+      &TCOD_black,
+      TCOD_BKGND_SET,
+      true);
+
+  int start_ypos = 4;
+  int ypos = start_ypos;
+
+  int selected = menuPositions[currentMenuID];
+  int p = 0;
+
+  for (int i = 0; i < menuTexts[currentMenuID].size(); i++) {
+    std::string s = menuTexts[currentMenuID][i];
+    TCOD_ColorRGB backg = TCOD_black;
+    TCOD_ColorRGB foreg = TCOD_white;
+    if (i == selected) {
+      backg = TCOD_white;
+      foreg = TCOD_black;
     }
 
-    menuPositions[currentMenuID] = pos;
-
-    return pos;
-}
-
-int MenuManager::ControlMoveDown()
-{
-    int len = menuTexts[currentMenuID].size();
-
-    int pos = menuPositions[currentMenuID] + 1;
-
-    if (pos >= len) {
-        pos = 0;
-    }
-
-    menuPositions[currentMenuID] = pos;
-
-    return pos;
-}
-
-int MenuManager::Select()
-{
-    ManagerType man = (ManagerType)menuManagers[currentMenuID];
-
-    int pos = menuPositions[currentMenuID];
-
-    switch(man)
-    {
-            case MANAGER_GAME:
-                if (gGame->MenuHandler(menuNames[currentMenuID], pos))
-                {
-                    // return true means we're done, close the menu
-                    currentMenuID = -1;
-                } else
-                {
-                    // return false means we're not done
-                }
-            return pos;
-            break;
-    }
-}
-
-bool MenuManager::MenuOpen()
-{
-    return currentMenuID != -1;
-}
-
-void MenuManager::RenderCurrentMenu()
-{
-    if (!MenuOpen()) return;
-
-    g_console.clear();
-
-    tcod::print_frame(
-        g_console,
-        {
-            0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT
-        },
-        menuNames[currentMenuID],
-        &TCOD_white,
-        &TCOD_black,
-        TCOD_BKGND_SET,
-        true);
-
-    int start_ypos = 4;
-    int ypos = start_ypos;
-
-    int selected = menuPositions[currentMenuID];
-    int p = 0;
-
-    for (int i = 0; i < menuTexts[currentMenuID].size(); i++)
-    {
-        std::string s = menuTexts[currentMenuID][i];
-        TCOD_ColorRGB backg = TCOD_black;
-        TCOD_ColorRGB foreg = TCOD_white;
-        if (i == selected)
-        {
-            backg = TCOD_white;
-            foreg = TCOD_black;
-        }
-
-        tcod::print(g_console, {8, ypos+i}, s, foreg, backg, TCOD_LEFT, TCOD_BKGND_SET);
-    }
+    tcod::print(g_console, {8, ypos + i}, s, foreg, backg, TCOD_LEFT, TCOD_BKGND_SET);
+  }
 }

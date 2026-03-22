@@ -1,24 +1,22 @@
 #pragma once
-#include <string>
-#include <iostream>
-#include <fstream>
 #include <ctime>
+#include <fstream>
+#include <iostream>
+#include <string>
 
-class OutputLog
-{
-	std::ofstream outputFile;
+class OutputLog {
+  std::ofstream outputFile;
 
-	std::time_t previousTime;
-	
-public:
-	OutputLog();
+  std::time_t previousTime;
 
-	OutputLog(std::string filename);
+ public:
+  OutputLog();
 
-	~OutputLog();
-	
-	void Log(std::string source, std::string message);
+  OutputLog(std::string filename);
 
+  ~OutputLog();
+
+  void Log(std::string source, std::string message);
 };
 
 extern OutputLog* gLog;

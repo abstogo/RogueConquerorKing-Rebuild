@@ -27,13 +27,13 @@
         "Proficiencies:General",
         "Spells:Arcane:RepertoirePerLevel",
         "LanguageCount"
-      ] 
+      ]
     },
     {
       "name": "Wisdom",
       "bonusTo": [
         "Saves:Spells"
-      ] 
+      ]
     },
     {
       "name": "Charisma",
@@ -41,7 +41,7 @@
         "Reaction:All",
         "MaxHenchmen",
         "Morale:Hireling"
-      ] 
+      ]
     }
   ]
 }
