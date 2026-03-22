@@ -142,11 +142,11 @@ void MortalRollStore::LoadMortalRollStore() {
     int size = jo.size();
 
     for (const auto& row : jo.array_range()) {
-      min.push_back(row[0].as_int());
-      max.push_back(row[1].as_int());
+      min.push_back(row[0].as<int>());
+      max.push_back(row[1].as<int>());
       status.push_back(row[2].as_string());
       recovery.push_back(row[3].as_string());
-      bedRest.push_back(row[4].as_int());
+      bedRest.push_back(row[4].as<int>());
       std::vector<std::string> effects;
       for (int j = 0; j < 6; j++) {
         effects.push_back(row[5 + j].as_string());

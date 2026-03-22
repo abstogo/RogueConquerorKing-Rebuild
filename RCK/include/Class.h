@@ -40,8 +40,8 @@ class LevelledAbility {
 
   const std::string& Name() const { return Name_; }
   const std::string& Type() const { return Type_; }
-  const int Level() const { return Level_; }
-  const int Value() const { return Value_; }
+  int Level() const { return Level_; }
+  int Value() const { return Value_; }
 };
 JSONCONS_ALL_CTOR_GETTER_TRAITS(LevelledAbility, Name, Level, Type, Value)
 
@@ -83,8 +83,8 @@ class ACKSClass {
         AttackProgression_(AttackProgression),
         SaveProgression_(SaveProgression),
         SpellProgression_(SpellProgression),
-        HitDie_(HitDie),
         PrimeRequisites_(PrimeRequisites),
+        HitDie_(HitDie),
         ArmourProficiencies_(ArmourProficiencies),
         WeaponProficiencies_(WeaponProficiencies),
         FightingStyles_(FightingStyles),
@@ -97,7 +97,7 @@ class ACKSClass {
   const std::string SaveProgression() const { return SaveProgression_; }
   const std::string SpellProgression() const { return SpellProgression_; }
 
-  const int HitDie() const { return HitDie_; }
+  int HitDie() const { return HitDie_; }
 
   const std::vector<std::string> PrimeRequisites() const { return PrimeRequisites_; }
 
