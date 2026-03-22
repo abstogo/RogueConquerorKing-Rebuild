@@ -27,7 +27,6 @@ target_include_directories(
   ${PROJECT_NAME}
   PRIVATE
   ${PROJECT_SOURCE_DIR}/RCK/include
-  ${PROJECT_SOURCE_DIR}/externals/jsoncons/include
 )
 
 # Ensure the C++17 standard is available.
@@ -56,11 +55,13 @@ if (EMSCRIPTEN)
     )
 endif()
 
+find_package(jsoncons CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(libtcod CONFIG REQUIRED)
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE
+        jsoncons
         SDL3::SDL3
         libtcod::libtcod
 )
