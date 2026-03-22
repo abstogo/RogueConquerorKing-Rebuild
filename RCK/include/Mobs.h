@@ -1,6 +1,7 @@
 #pragma once
 #include <fstream>
 #include <jsoncons/json.hpp>
+#include <jsoncons/json_type_traits.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
 
 #include "ItemTemplate.h"

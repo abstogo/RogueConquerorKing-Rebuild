@@ -1,6 +1,7 @@
 #pragma once
 
 #include <jsoncons/json.hpp>
+#include <jsoncons/json_type_traits.hpp>
 
 #include "Class.h"
 #include "OutputLog.h"
