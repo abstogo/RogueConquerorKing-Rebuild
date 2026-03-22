@@ -201,8 +201,8 @@ class ItemManager {
 
  public:
   ItemManager(
-      TemplateSet& _items,
-      DecorationSet& _decorations,
+      const TemplateSet& _items,
+      const DecorationSet& _decorations,
       std::map<std::string, std::vector<int>> _ranges,
       std::vector<int> _rangePenalties)
       : itemTemplates(_items), decorations(_decorations), rangeDictionary(_ranges), rangePenalties(_rangePenalties) {

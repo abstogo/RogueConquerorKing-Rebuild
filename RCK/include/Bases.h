@@ -163,7 +163,7 @@ class BaseManager {
   int getVisitingInventoryCount(int partyID);
 
  public:
-  BaseManager(BaseInfoSet& _bis) : baseInfoSet(_bis) {}
+  BaseManager(const BaseInfoSet& _bis) : baseInfoSet(_bis) {}
   ~BaseManager() {}
 
   // Manager Factory

@@ -160,7 +160,7 @@ class ClassManager {
   AdvancementStore* advancementStore;
 
  public:
-  ClassManager(ClassSet& _classes) : classes(_classes) {}
+  ClassManager(const ClassSet& _classes) : classes(_classes) {}
 
   static ClassManager* LoadClasses();
 

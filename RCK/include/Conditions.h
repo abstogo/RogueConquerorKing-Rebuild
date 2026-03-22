@@ -245,7 +245,7 @@ class ConditionManager {
   ConditionData cd;
 
  public:
-  ConditionManager(ConditionData& rr) : cd(rr) {}
+  ConditionManager(const ConditionData& rr) : cd(rr) {}
 
   static ConditionManager* LoadConditions();
 
