@@ -64,21 +64,21 @@ class Condition {
         ArmorClassBonus_(ArmorClassBonus),
         SurpriseBonus_(SurpriseBonus) {}
 
-  const std::string Name() { return Name_; }
-  const std::string CanTakeActions() { return CanTakeActions_; }
-  const std::string CanFight() { return CanFight_; }
-  const std::string CanCastSpells() { return CanCastSpells_; }
-  const std::string CanBeBackstabbed() { return CanBeBackstabbed_; }
-  const std::string Recovery() { return Recovery_; }
+  std::string Name() const { return Name_; }
+  std::string CanTakeActions() const { return CanTakeActions_; }
+  std::string CanFight() const { return CanFight_; }
+  std::string CanCastSpells() const { return CanCastSpells_; }
+  std::string CanBeBackstabbed() const { return CanBeBackstabbed_; }
+  std::string Recovery() const { return Recovery_; }
 
-  const std::vector<std::string> Includes() { return Includes_; }
+  std::vector<std::string> Includes() const { return Includes_; }
 
-  const double MoveRate() { return MoveRate_; }
-  const int MoveLimit() { return MoveLimit_; }
-  const int ToHitMeBonus() { return ToHitMeBonus_; }
-  const int ToHitOthersBonus() { return ToHitOthersBonus_; }
-  const int ArmorClassBonus() { return ArmorClassBonus_; }
-  const int SurpriseBonus() { return SurpriseBonus_; }
+  double MoveRate() const { return MoveRate_; }
+  int MoveLimit() const { return MoveLimit_; }
+  int ToHitMeBonus() const { return ToHitMeBonus_; }
+  int ToHitOthersBonus() const { return ToHitOthersBonus_; }
+  int ArmorClassBonus() const { return ArmorClassBonus_; }
+  int SurpriseBonus() const { return SurpriseBonus_; }
 };
 
 class ConditionData {
@@ -115,8 +115,8 @@ class SpecialPenalty {
  public:
   SpecialPenalty(const std::string Name, const int Value) : Name_(Name), Value_(Value) {}
 
-  const std::string Name() { return Name_; }
-  const int Value() { return Value_; }
+  std::string Name() const { return Name_; }
+  int Value() const { return Value_; }
 };
 
 JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(SpecialPenalty, Name, Value)
@@ -142,15 +142,15 @@ class MortalEffect {
         DoubleTo_(DoubleTo),
         SpecialPenalties_(SpecialPenalties) {}
 
-  const std::string Code() { return Code_; }
+  std::string Code() const { return Code_; }
 
-  const std::string PlayerText() { return PlayerText_; }
+  std::string PlayerText() const { return PlayerText_; }
 
-  const std::string MonsterText() { return MonsterText_; }
+  std::string MonsterText() const { return MonsterText_; }
 
-  const std::string DoubleTo() { return DoubleTo_; }
+  std::string DoubleTo() const { return DoubleTo_; }
 
-  const std::vector<SpecialPenalty> SpecialPenalties() { return SpecialPenalties_; }
+  std::vector<SpecialPenalty> SpecialPenalties() const { return SpecialPenalties_; }
 };
 
 JSONCONS_ALL_GETTER_CTOR_TRAITS_DECL(MortalEffect, Code, PlayerText, MonsterText, DoubleTo, SpecialPenalties)
