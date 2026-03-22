@@ -1,9 +1,9 @@
 #pragma once
 #include <fstream>
-#include <set>
 #include <jsoncons/json.hpp>
 #include <jsoncons/json_type_traits.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
+#include <set>
 
 #include "Class.h"
 #include "Conditions.h"
