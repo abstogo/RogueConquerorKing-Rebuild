@@ -281,7 +281,7 @@ class MobManager {
   int nextMonsterIndex = 1;  // starting at 1 as maps init to 0
 
  public:
-  MobManager(CreatureSet& templates) : creatureTemplateSet(templates) {
+  MobManager(const CreatureSet& templates) : creatureTemplateSet(templates) {
     // fill in the lookup tables
     // we skip -1, as thats MOB_BEHAVIOUR_UNSET
     for (int i = 0; i < MOB_BEHAVIOUR_MAX; i++) {

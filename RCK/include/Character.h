@@ -230,7 +230,7 @@ class CharacterManager {
   int GetEncumbranceClass(int characterID);
 
  public:
-  CharacterManager(CharacteristicData& _cd) : cd(_cd) {
+  CharacterManager(const CharacteristicData& _cd) : cd(_cd) {
     for (int i = 0; i < CHAR_BEHAVIOUR_MAX; i++) {
       behaviourLookup[CharBehaviourNames[i]] = i;
     }

@@ -118,7 +118,7 @@ void MapManager::GeneratePrefabs() {
   }
 }
 
-MapManager::MapManager(TerrainTypeSet& tts) : terrainTypes(tts) {
+MapManager::MapManager(const TerrainTypeSet& tts) : terrainTypes(tts) {
   mapStore.push_back(NULL);
 
   // feed terrain types into dictionary

@@ -205,7 +205,7 @@ class MortalWoundManager {
   MortalRollStore mortalstore;
 
  public:
-  MortalWoundManager(MortalWoundData& rr) : mwd(rr) {}
+  MortalWoundManager(const MortalWoundData& rr) : mwd(rr) {}
 
   static MortalWoundManager* LoadMortalWoundData();
 

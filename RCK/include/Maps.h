@@ -245,7 +245,7 @@ class MapManager : public ITCODPathCallback {
   void GeneratePrefabs();
 
  public:
-  MapManager(TerrainTypeSet& tts);
+  MapManager(const TerrainTypeSet& tts);
   ~MapManager();
 
   Map* getMap(int index);
