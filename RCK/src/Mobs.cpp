@@ -118,7 +118,8 @@ bool MobManager::TurnHandler(int entityID, double time) {
           int* mapID_ptr = &(gGame->GetCurrentMap());
           int mapID = gGame->GetCurrentMap();
           Map* map = gGame->mMapManager->getMap(mapID);
-          paths[entityID].reset(new TCODPath(map->width, map->height, gGame->mMapManager, (void*)mapID_ptr, 1.0f));
+          paths[entityID].reset(
+              new TCODPath(map->width, map->height, gGame->mMapManager.get(), (void*)mapID_ptr, 1.0f));
           paths[entityID]->compute(ox, oy, dx, dy);
           //}
 
@@ -175,7 +176,7 @@ bool MobManager::TurnHandler(int entityID, double time) {
         int* mapID_ptr = &(gGame->GetCurrentMap());
         int mapID = gGame->GetCurrentMap();
         Map* map = gGame->mMapManager->getMap(mapID);
-        paths[entityID].reset(new TCODPath(map->width, map->height, gGame->mMapManager, (void*)mapID_ptr, 1.0f));
+        paths[entityID].reset(new TCODPath(map->width, map->height, gGame->mMapManager.get(), (void*)mapID_ptr, 1.0f));
         paths[entityID]->compute(ox, oy, dx, dy);
         //}
 
@@ -263,7 +264,8 @@ bool MobManager::TurnHandler(int entityID, double time) {
           }
 
           int* mapID_ptr = &(gGame->GetCurrentMap());
-          paths[entityID].reset(new TCODPath(map->width, map->height, gGame->mMapManager, (void*)mapID_ptr, 1.0f));
+          paths[entityID].reset(
+              new TCODPath(map->width, map->height, gGame->mMapManager.get(), (void*)mapID_ptr, 1.0f));
           paths[entityID]->compute(ox, oy, dx, dy);
 
           if (paths[entityID]->isEmpty() || unconscious) {
