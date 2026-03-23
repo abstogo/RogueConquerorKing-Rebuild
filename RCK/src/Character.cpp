@@ -1206,7 +1206,7 @@ void CharacterManager::SpawnOnMap(int entityID, int mapID, int spawn_x, int spaw
 
         if (!gGame->mMapManager->isOutOfBounds(mapID, new_x, new_y)) {
           if (currentMap->map->isWalkable(new_x, new_y)) {
-            if (!currentMap->getCharacterAt(new_x, new_y) && !currentMap->getMobAt(new_x, new_y)) {
+            if (currentMap->getCharacterAt(new_x, new_y) == -1 && currentMap->getMobAt(new_x, new_y) == -1) {
               // square is clear, put it there
               double moveTime = MoveTo(entityID, new_x, new_y, 0);
               gGame->mTimeManager->SetEntityTime(entityID, MANAGER_CHARACTER, moveTime);
@@ -1232,7 +1232,7 @@ double CharacterManager::MoveTo(int entityID, int new_x, int new_y, int currentT
   if (!gGame->mMapManager->isOutOfBounds(mapID, new_x, new_y)) {
     if (m->map->isWalkable(new_x, new_y)) {
       if (new_x >= 0 && new_y >= 0) {
-        int baseCharacter = 0;
+        int baseCharacter = -1;
         if ((gGame->mCharacterManager->GetPlayerX(gGame->GetSelectedCharacterID()) == new_x) &&
             (gGame->mCharacterManager->GetPlayerY(gGame->GetSelectedCharacterID()) == new_y)) {
           baseCharacter = gGame->GetSelectedCharacterID();
@@ -1240,11 +1240,11 @@ double CharacterManager::MoveTo(int entityID, int new_x, int new_y, int currentT
           baseCharacter = m->getCharacterAt(new_x, new_y);
         }
 
-        if (baseCharacter) {
+        if (baseCharacter != -1) {
           // there's another character there. In future check for party membership
         } else {
           int mobId = m->getMobAt(new_x, new_y);
-          if (mobId) {
+          if (mobId != -1) {
             // there's a monster there. Check for MURDERIZATION!
             Creature& c = gGame->mMobManager->GetMonster(mobId);
 

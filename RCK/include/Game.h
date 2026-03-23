@@ -1,5 +1,6 @@
 #pragma once
 #include <libtcod.hpp>
+#include <memory>
 
 #include "Bases.h"
 #include "Character.h"
@@ -226,21 +227,21 @@ class Game {
   bool MenuHandler(std::string menuName, int returnCode);
 
   // publicly accessible managers
-  CharacterManager* mCharacterManager;
-  ClassManager* mClassManager;
-  MapManager* mMapManager;
-  TimeManager* mTimeManager;
-  ItemManager* mItemManager;
-  MobManager* mMobManager;
-  ConditionManager* mConditionManager;
-  MortalWoundManager* mMortalManager;
-  PartyManager* mPartyManager;
-  BaseManager* mBaseManager;
-  MenuManager* mMenuManager;
-  InventoryManager* mInventoryManager;
+  std::unique_ptr<CharacterManager> mCharacterManager;
+  std::unique_ptr<ClassManager> mClassManager;
+  std::unique_ptr<MapManager> mMapManager;
+  std::unique_ptr<TimeManager> mTimeManager;
+  std::unique_ptr<ItemManager> mItemManager;
+  std::unique_ptr<MobManager> mMobManager;
+  std::unique_ptr<ConditionManager> mConditionManager;
+  std::unique_ptr<MortalWoundManager> mMortalManager;
+  std::unique_ptr<PartyManager> mPartyManager;
+  std::unique_ptr<BaseManager> mBaseManager;
+  std::unique_ptr<MenuManager> mMenuManager;
+  std::unique_ptr<InventoryManager> mInventoryManager;
 
-  tcod::Console* characterScreen = nullptr;
-  tcod::Console* inventoryScreen = nullptr;
+  std::unique_ptr<tcod::Console> characterScreen;
+  std::unique_ptr<tcod::Console> inventoryScreen;
 
   TCODRandom* randomiser = TCODRandom::getInstance();
 };

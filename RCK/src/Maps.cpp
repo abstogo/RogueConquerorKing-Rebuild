@@ -24,7 +24,7 @@ void Map::setCharacter(int x, int y, int characterID) {
 }
 
 int Map::getCharacterAt(int x, int y) {
-  int found = 0;
+  int found = -1;
 
   auto g = std::find_if(characters.begin(), characters.end(), [&](int charID) {
     return ((gGame->mCharacterManager->GetPlayerX(charID) == x) && (gGame->mCharacterManager->GetPlayerY(charID) == y));
@@ -38,7 +38,7 @@ int Map::getCharacterAt(int x, int y) {
 }
 
 int Map::getMobAt(int x, int y) {
-  int found = 0;
+  int found = -1;
 
   auto g = std::find_if(mobs.begin(), mobs.end(), [&](int mobID) {
     return ((gGame->mMobManager->GetMobX(mobID) == x) && (gGame->mMobManager->GetMobY(mobID) == y));
@@ -55,20 +55,18 @@ void Map::getManagedEntityAt(int x, int y, int& manager, int& entityID) {
   manager = MANAGER_MAX;
 
   int c = getCharacterAt(x, y);
-  if (c != 0) {
+  if (c != -1) {
     manager = MANAGER_CHARACTER;
     entityID = c;
     return;
   }
 
   int m = getMobAt(x, y);
-  if (m != 0) {
+  if (m != -1) {
     manager = MANAGER_MOB;
-    entityID = manager;
+    entityID = m;
     return;
   }
-
-  c = 0;
 }
 
 int Map::removeCharacter(int characterID) {

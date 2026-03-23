@@ -26,7 +26,7 @@ void Game::StartGame() {
 
   DebugLog("Starting Game");
 
-  mMenuManager = MenuManager::CreateMenuManager();
+  mMenuManager.reset(MenuManager::CreateMenuManager());
 
   // DataLoad(); // delayed until after new game is selected so we can account for game options
 
@@ -41,18 +41,18 @@ void Game::DataLoad() {
   // The core data files, stored in data/RCK/scripts are loaded here.
   // Each primary manager is spawned from one or more core data files.
 
-  mInventoryManager = InventoryManager::CreateInventoryManager();
-  mCharacterManager = CharacterManager::LoadCharacteristics();
-  mClassManager = ClassManager::LoadClasses();
-  mMapManager = MapManager::LoadMaps();
-  mTimeManager = new TimeManager();
+  mInventoryManager.reset(InventoryManager::CreateInventoryManager());
+  mCharacterManager.reset(CharacterManager::LoadCharacteristics());
+  mClassManager.reset(ClassManager::LoadClasses());
+  mMapManager.reset(MapManager::LoadMaps());
+  mTimeManager = std::make_unique<TimeManager>();
   gLog->Log("Time Manager", "Started");
-  mItemManager = ItemManager::LoadItemTemplates();
-  mMobManager = MobManager::LoadMobData();
-  mConditionManager = ConditionManager::LoadConditions();
-  mMortalManager = MortalWoundManager::LoadMortalWoundData();
-  mPartyManager = PartyManager::LoadPartyData();
-  mBaseManager = BaseManager::LoadBaseData();
+  mItemManager.reset(ItemManager::LoadItemTemplates());
+  mMobManager.reset(MobManager::LoadMobData());
+  mConditionManager.reset(ConditionManager::LoadConditions());
+  mMortalManager.reset(MortalWoundManager::LoadMortalWoundData());
+  mPartyManager.reset(PartyManager::LoadPartyData());
+  mBaseManager.reset(BaseManager::LoadBaseData());
 
   DebugLog("Game Managers Created");
   DebugLog("Loading Secondary Data Files");
@@ -576,12 +576,12 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key) {
             }
 
             int mobID = currentMap->getMobAt(targetCursorX, targetCursorY);
-            if (mobID != 0) {
+            if (mobID != -1) {
               gGame->mMobManager->DumpMob(mobID);
             }
 
             int charID = currentMap->getCharacterAt(targetCursorX, targetCursorY);
-            if (charID != 0) {
+            if (charID != -1) {
               gGame->mCharacterManager->DumpCharacter(charID);
             }
           }
@@ -692,7 +692,7 @@ void Game::MoveCharacter(int new_x, int new_y) {
     if (currentMapID != -1) {
       if (currentMap->map->isWalkable(new_x, new_y)) {
         int character = currentMap->getCharacterAt(new_x, new_y);
-        if (currentMap->getCharacterAt(new_x, new_y)) {
+        if (character != -1) {
           // there's a character there. Check if we want to attack them
           // if (c.IsHostile())
           //{
@@ -782,7 +782,7 @@ void Game::MoveCharacter(int new_x, int new_y) {
               }
             }
           }
-        } else if (currentMap->getMobAt(new_x, new_y)) {
+        } else if (currentMap->getMobAt(new_x, new_y) != -1) {
           // there's a monster there
           int c_id = currentMap->getMobAt(new_x, new_y);
           Creature& c = gGame->mMobManager->GetMonster(c_id);
@@ -1122,7 +1122,8 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
             int x = mCharacterManager->GetPlayerX(currentCharacterID);
             int y = mCharacterManager->GetPlayerY(currentCharacterID);
             std::vector<int> monstersInRange = mMobManager->GetAllMonstersInRange(currentMapID, x, y, range, true);
-            std::remove(monstersInRange.begin(), monstersInRange.end(), defenderID);
+            monstersInRange.erase(
+                std::remove(monstersInRange.begin(), monstersInRange.end(), defenderID), monstersInRange.end());
 
             // What happens next depends on the number of available targets.
             // If there are none, we are done with the attack sequence.
@@ -1147,7 +1148,8 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
             UpdateLookText(new_x, new_y);
 
             std::vector<int> monstersInRange = mMobManager->GetAllMonstersInRange(currentMapID, new_x, new_y, 1, true);
-            std::remove(monstersInRange.begin(), monstersInRange.end(), defenderID);
+            monstersInRange.erase(
+                std::remove(monstersInRange.begin(), monstersInRange.end(), defenderID), monstersInRange.end());
 
             // What happens next depends on the number of available targets.
             // If there are none, we are done with the attack sequence.
@@ -1564,7 +1566,7 @@ void Game::UpdateLookText(int x, int y) {
     }
 
     int mobID = currentMap->getMobAt(x, y);
-    if (mobID != 0) {
+    if (mobID != -1) {
       Creature& c = mMobManager->GetMonster(mobID);
       if (c.HasCondition("Unconscious")) {
         playLogString += "There is an unconscious " + c.GetName() + ".";
@@ -1574,7 +1576,7 @@ void Game::UpdateLookText(int x, int y) {
     }
 
     int charID = currentMap->getCharacterAt(x, y);
-    if (charID != 0 && charID != currentCharacterID) {
+    if (charID != -1 && charID != currentCharacterID) {
       if (mCharacterManager->getCharacterHasCondition(charID, "Unconscious")) {
         playLogString += mCharacterManager->getCharacterName(charID) + "lies here, unconscious.";
       } else {
@@ -1633,7 +1635,7 @@ void Game::ClearLookText() { tcod::print_rect(g_console, {0, 24, 50, 5}, " ", st
 
 void Game::RenderCharacterSheet() {
   if (characterScreen == nullptr) {
-    characterScreen = new tcod::Console(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+    characterScreen = std::make_unique<tcod::Console>(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
   }
 
   characterScreen->clear();
@@ -1728,7 +1730,7 @@ void Game::RenderInventory() {
   /*
   if(inventoryScreen == nullptr)
   {
-          inventoryScreen = new tcod::Console(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+          inventoryScreen = std::make_unique<tcod::Console>(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
   }
 
   inventoryScreen->clear();

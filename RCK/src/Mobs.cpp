@@ -95,7 +95,7 @@ bool MobManager::TurnHandler(int entityID, double time) {
         // do we have a target already selected? If not, pick the player
         if (targetID[entityID] == -1 && targetManager[entityID] == -1) {
           targetManager[entityID] = MANAGER_CHARACTER;
-          targetID[entityID] == gGame->GetSelectedCharacterID();
+          targetID[entityID] = gGame->GetSelectedCharacterID();
         }
 
         int ox = GetMobX(entityID);
@@ -118,14 +118,13 @@ bool MobManager::TurnHandler(int entityID, double time) {
           int* mapID_ptr = &(gGame->GetCurrentMap());
           int mapID = gGame->GetCurrentMap();
           Map* map = gGame->mMapManager->getMap(mapID);
-          paths[entityID] = new TCODPath(map->width, map->height, gGame->mMapManager, (void*)mapID_ptr, 1.0f);
+          paths[entityID].reset(new TCODPath(map->width, map->height, gGame->mMapManager, (void*)mapID_ptr, 1.0f));
           paths[entityID]->compute(ox, oy, dx, dy);
           //}
 
           if (paths[entityID]->isEmpty()) {
             // we've reached our destination, so now we need a different behaviour
-            delete paths[entityID];
-            paths[entityID] = NULL;
+            paths[entityID].reset();
             timeToMove = 1.0;
             pickNew = true;
           } else {
@@ -136,8 +135,7 @@ bool MobManager::TurnHandler(int entityID, double time) {
               timeToMove = MoveTo(entityID, tx, ty, time);
             } else {
               // we can't find a route, so pick another behaviour
-              delete paths[entityID];
-              paths[entityID] = NULL;
+              paths[entityID].reset();
               timeToMove = 3.0;
               pickNew = true;
             }
@@ -156,7 +154,7 @@ bool MobManager::TurnHandler(int entityID, double time) {
         // do we have a target already selected? If not, pick the current character
         if (targetID[entityID] == -1 && targetManager[entityID] == -1) {
           targetManager[entityID] = MANAGER_CHARACTER;
-          targetID[entityID] == gGame->GetSelectedCharacterID();
+          targetID[entityID] = gGame->GetSelectedCharacterID();
         }
 
         int ox = GetMobX(entityID);
@@ -177,14 +175,13 @@ bool MobManager::TurnHandler(int entityID, double time) {
         int* mapID_ptr = &(gGame->GetCurrentMap());
         int mapID = gGame->GetCurrentMap();
         Map* map = gGame->mMapManager->getMap(mapID);
-        paths[entityID] = new TCODPath(map->width, map->height, gGame->mMapManager, (void*)mapID_ptr, 1.0f);
+        paths[entityID].reset(new TCODPath(map->width, map->height, gGame->mMapManager, (void*)mapID_ptr, 1.0f));
         paths[entityID]->compute(ox, oy, dx, dy);
         //}
 
         if (paths[entityID]->isEmpty()) {
           // we've reached our destination, so now we need a different behaviour
-          delete paths[entityID];
-          paths[entityID] = NULL;
+          paths[entityID].reset();
           timeToMove = 1.0;
           pickNew = true;
         } else {
@@ -195,8 +192,7 @@ bool MobManager::TurnHandler(int entityID, double time) {
             timeToMove = MoveTo(entityID, tx, ty, time);
           } else {
             // we can't find a route, so pick another behaviour
-            delete paths[entityID];
-            paths[entityID] = NULL;
+            paths[entityID].reset();
             timeToMove = 3.0;
             pickNew = true;
           }
@@ -266,13 +262,13 @@ bool MobManager::TurnHandler(int entityID, double time) {
             // do nothing. We should normally have a different element for seeking an item?
           }
 
-          paths[entityID] = new TCODPath(map->width, map->height, gGame->mMapManager, (void*)&mapID, 1.0f);
+          int* mapID_ptr = &(gGame->GetCurrentMap());
+          paths[entityID].reset(new TCODPath(map->width, map->height, gGame->mMapManager, (void*)mapID_ptr, 1.0f));
           paths[entityID]->compute(ox, oy, dx, dy);
 
           if (paths[entityID]->isEmpty() || unconscious) {
             // we've reached our destination, so now we need a different behaviour
-            delete paths[entityID];
-            paths[entityID] = NULL;
+            paths[entityID].reset();
             timeToMove = 1.0;
             pickNew = true;
             targetID[entityID] = -1;
@@ -285,8 +281,7 @@ bool MobManager::TurnHandler(int entityID, double time) {
               timeToMove = MoveTo(entityID, tx, ty, time);
             } else {
               // we can't find a route, so pick another behaviour
-              delete paths[entityID];
-              paths[entityID] = NULL;
+              paths[entityID].reset();
               targetID[entityID] = -1;
               targetManager[entityID] = -1;
               timeToMove = 3.0;
@@ -350,14 +345,14 @@ double MobManager::MoveTo(int entityID, int new_x, int new_y, int currentTime) {
   if (!gGame->mMapManager->isOutOfBounds(mapID, new_x, new_y)) {
     if (m->map->isWalkable(new_x, new_y)) {
       if (new_x >= 0 && new_y >= 0) {
-        int baseCharacter = 0;
+        int baseCharacter = -1;
         if ((gGame->mCharacterManager->GetPlayerX(gGame->GetSelectedCharacterID()) == new_x) &&
             (gGame->mCharacterManager->GetPlayerY(gGame->GetSelectedCharacterID()) == new_y)) {
           baseCharacter = gGame->GetSelectedCharacterID();
         } else {
           baseCharacter = m->getCharacterAt(new_x, new_y);
         }
-        if (baseCharacter) {
+        if (baseCharacter != -1) {
           // there's a character there. Check if we want to attack them
           if (c.IsHostile()) {
             // close-quarters attack!
@@ -365,7 +360,7 @@ double MobManager::MoveTo(int entityID, int new_x, int new_y, int currentTime) {
           } else {
             // we don't want to attack, so we just don't move
           }
-        } else if (m->getMobAt(new_x, new_y)) {
+        } else if (m->getMobAt(new_x, new_y) != -1) {
           // there's a monster there
         } else {
           // there isn't another creature there, so move
@@ -394,7 +389,7 @@ void MobManager::EmptyCreature(Creature c) {
   mobXPos.push_back(-1);
   mobYPos.push_back(-1);
 
-  paths.push_back(NULL);
+  paths.push_back(nullptr);
 }
 
 void MobManager::SpawnOnMap(int entityID, int mapID, int spawn_x, int spawn_y) {
@@ -420,7 +415,7 @@ void MobManager::SpawnOnMap(int entityID, int mapID, int spawn_x, int spawn_y) {
 
         if (!gGame->mMapManager->isOutOfBounds(mapID, new_x, new_y)) {
           if (currentMap->map->isWalkable(new_x, new_y)) {
-            if (!currentMap->getCharacterAt(new_x, new_y) && !currentMap->getMobAt(new_x, new_y)) {
+            if (currentMap->getCharacterAt(new_x, new_y) == -1 && currentMap->getMobAt(new_x, new_y) == -1) {
               // square is clear, put it there
               double moveTime = MoveTo(entityID, new_x, new_y, 0);
               gGame->mTimeManager->SetEntityTime(entityID, MANAGER_MOB, moveTime);
@@ -590,7 +585,7 @@ std::vector<int> MobManager::GetAllMonstersInRange(
     int monsterX = GetMobX(monsterID);
     int monsterY = GetMobY(monsterID);
 
-    int distanceSquared = pow(monsterX - centerX, 2) + pow(monsterX - centerX, 2);
+    int distanceSquared = pow(monsterX - centerX, 2) + pow(monsterY - centerY, 2);
     if (distanceSquared <= rangeSquared) {
       output.push_back(monsterID);
     }

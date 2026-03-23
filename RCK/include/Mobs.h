@@ -3,6 +3,7 @@
 #include <jsoncons/json.hpp>
 #include <jsoncons/json_type_traits.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
+#include <memory>
 
 #include "ItemTemplate.h"
 #include "OutputLog.h"
@@ -271,7 +272,7 @@ class MobManager {
   std::vector<int> targetID;
   std::vector<int> targetManager;
 
-  std::vector<TCODPath*> paths;
+  std::vector<std::unique_ptr<TCODPath>> paths;
 
   std::vector<int> mobXPos;
   std::vector<int> mobYPos;
