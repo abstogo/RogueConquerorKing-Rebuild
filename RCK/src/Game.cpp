@@ -1405,6 +1405,8 @@ void Game::RenderMap() {
     recomputeFov = false;
     // currentMap->map->computeFov(player_x, player_y, 0, light_walls, FOV_PERMISSIVE_1);
     currentMap->map->computeFov(player_x, player_y, 0, light_walls, FOV_BASIC);
+    // Render uses light_walls=false; AI uses light_walls=true. Invalidate so next AI query recomputes correctly.
+    currentMap->invalidateFovCache();
   }
 
   // why did I remove the torch variation effect?

@@ -164,7 +164,10 @@ bool MapManager::isInFOV(int sourceManager, int sourceID, int targetManager, int
   }
 
   Map* m = getMap(gGame->GetCurrentMap());
-  m->map->computeFov(baseX, baseY, range, true, FOV_BASIC);
+  if (!m->isFovCached(baseX, baseY, range)) {
+    m->map->computeFov(baseX, baseY, range, true, FOV_BASIC);
+    m->setFovCache(baseX, baseY, range);
+  }
 
   int targetX, targetY;
   switch (targetManager) {
@@ -201,7 +204,10 @@ std::vector<int> MapManager::filterByFOV(
   }
 
   Map* m = getMap(gGame->GetCurrentMap());
-  m->map->computeFov(baseX, baseY, range, true, FOV_BASIC);
+  if (!m->isFovCached(baseX, baseY, range)) {
+    m->map->computeFov(baseX, baseY, range, true, FOV_BASIC);
+    m->setFovCache(baseX, baseY, range);
+  }
 
   gGame->RecalculateFOV();  // this makes the player fix the FOV next time we render
 

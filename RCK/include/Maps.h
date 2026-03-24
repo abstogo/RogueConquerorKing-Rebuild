@@ -221,6 +221,23 @@ struct Map {
 
   void getManagedEntityAt(int x, int y, int& manager, int& entityID);
 
+  // FOV cache — tracks parameters of the last computeFov call on this map.
+  // Avoids redundant recomputation when the same source queries multiple targets.
+  // Invalidated by the render path (which uses different light_walls settings).
+  struct {
+    int x = -1, y = -1, range = -1;
+  } fovCache;
+
+  bool isFovCached(int x, int y, int range) const {
+    return fovCache.x == x && fovCache.y == y && fovCache.range == range;
+  }
+  void setFovCache(int x, int y, int range) {
+    fovCache.x = x;
+    fovCache.y = y;
+    fovCache.range = range;
+  }
+  void invalidateFovCache() { fovCache.x = -1; }
+
   int getContent(int x, int y) { return (content[y * width + x]); }
 
   void setContent(int x, int y, int c) { content[y * width + x] = c; }
