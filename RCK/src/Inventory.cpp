@@ -1,5 +1,7 @@
 #include "Inventory.h"
 
+#include <cassert>
+
 InventoryManager* InventoryManager::CreateInventoryManager() {
   InventoryManager* im = new InventoryManager();
 
@@ -19,6 +21,7 @@ int InventoryManager::RegisterInventory(int ownerManager, int ownerEntity) {
 }
 
 int InventoryManager::AddItemToInventory(int inventoryID, int itemID, int count) {
+  assert(inventoryID >= 0 && inventoryID < (int)itemEntries.size());
   int output = -1;
 
   auto vec = itemEntries[inventoryID];
@@ -38,6 +41,7 @@ int InventoryManager::AddItemToInventory(int inventoryID, int itemID, int count)
 }
 
 std::vector<std::pair<int, int>> InventoryManager::RemoveItemFromInventory(int inventoryID, int itemID, int count) {
+  assert(inventoryID >= 0 && inventoryID < (int)itemEntries.size());
   std::vector<std::pair<int, int>> removedItems;
 
   auto vec = itemEntries[inventoryID];
@@ -61,6 +65,8 @@ std::vector<std::pair<int, int>> InventoryManager::RemoveItemFromInventory(int i
 }
 
 void InventoryManager::TransferInventory(int sourceinventoryID, int destinationInventoryID) {
+  assert(sourceinventoryID >= 0 && sourceinventoryID < (int)itemEntries.size());
+  assert(destinationInventoryID >= 0 && destinationInventoryID < (int)itemEntries.size());
   // transfer all items from source to destination
   for (int i = 0; i < itemEntries[sourceinventoryID].size(); i++) {
     AddItemToInventory(
@@ -73,6 +79,7 @@ void InventoryManager::TransferInventory(int sourceinventoryID, int destinationI
 }
 
 int InventoryManager::GetItemCount(int inventoryID, int itemID) {
+  assert(inventoryID >= 0 && inventoryID < (int)itemEntries.size());
   auto vec = itemEntries[inventoryID];
   auto loc = std::find_if(vec.begin(), vec.end(), [itemID](const std::pair<int, int>& p) { return p.first == itemID; });
 
@@ -85,9 +92,15 @@ int InventoryManager::GetItemCount(int inventoryID, int itemID) {
   }
 }
 
-int InventoryManager::GetInventorySize(int inventoryID) { return itemEntries[inventoryID].size(); }
+int InventoryManager::GetInventorySize(int inventoryID) {
+  assert(inventoryID >= 0 && inventoryID < (int)itemEntries.size());
+  return itemEntries[inventoryID].size();
+}
 
-std::vector<std::pair<int, int>>& InventoryManager::GetInventory(int inventoryID) { return itemEntries[inventoryID]; }
+std::vector<std::pair<int, int>>& InventoryManager::GetInventory(int inventoryID) {
+  assert(inventoryID >= 0 && inventoryID < (int)itemEntries.size());
+  return itemEntries[inventoryID];
+}
 
 void InventoryManager::OpenInventoryMenu(int sourceID, int destinationID, std::string title) {
   // if there is no destination, we pressed the inventory key,

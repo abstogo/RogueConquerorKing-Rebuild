@@ -1,5 +1,6 @@
 #include "GameTime.h"
 
+#include <cassert>
 #include <ctime>
 #include <vector>
 
@@ -23,6 +24,8 @@ bool TimeManager::AdvanceTimeBy(long double time) {
   // we cannot modify a collection that is currently being iterated. To correct for this, we need to handle this as a
   // DOD type table transformation. To achieve this we copy the list, and further calls to SetEntityTime (from
   // TurnHandlers) effectively generate a new table.
+
+  assert(times.size() == entities.size() && entities.size() == managers.size());
 
   std::list<long double> old_times;
   std::list<int> old_entities, old_managers;

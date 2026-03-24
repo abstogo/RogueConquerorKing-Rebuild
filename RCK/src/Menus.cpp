@@ -1,5 +1,7 @@
 #include "Menus.h"
 
+#include <cassert>
+
 MenuManager* MenuManager::CreateMenuManager() {
   MenuManager* mm = new MenuManager();
 
@@ -22,6 +24,7 @@ int MenuManager::BuildMenu(int originManager, std::string name) {
 }
 
 int MenuManager::AddMenuEntry(int menuID, MenuEntryTypes menuType, std::string menuText, int defaultState) {
+  assert(menuID >= 0 && menuID < (int)menuTexts.size());
   int newID = menuTexts[menuID].size();
 
   menuTypes[menuID].push_back((int)menuType);
@@ -36,6 +39,7 @@ int MenuManager::GetCurrentMenu() { return currentMenuID; }
 void MenuManager::OpenMenu(int menuID) { currentMenuID = menuID; }
 
 int MenuManager::ControlMoveUp() {
+  assert(currentMenuID >= 0 && currentMenuID < (int)menuTexts.size());
   int len = menuTexts[currentMenuID].size();
 
   int pos = menuPositions[currentMenuID] - 1;
@@ -49,6 +53,7 @@ int MenuManager::ControlMoveUp() {
 }
 
 int MenuManager::ControlMoveDown() {
+  assert(currentMenuID >= 0 && currentMenuID < (int)menuTexts.size());
   int len = menuTexts[currentMenuID].size();
 
   int pos = menuPositions[currentMenuID] + 1;
@@ -63,6 +68,7 @@ int MenuManager::ControlMoveDown() {
 }
 
 int MenuManager::Select() {
+  assert(currentMenuID >= 0 && currentMenuID < (int)menuTexts.size());
   ManagerType man = (ManagerType)menuManagers[currentMenuID];
 
   int pos = menuPositions[currentMenuID];
