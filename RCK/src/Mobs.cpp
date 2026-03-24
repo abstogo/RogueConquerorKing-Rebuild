@@ -75,9 +75,9 @@ bool MobManager::TurnHandler(int entityID, double time) {
         int moveX, moveY, move_value;
         int mapID = gGame->GetCurrentMap();
         if (gGame->mMapManager->getMap(mapID)->outdoor) {
-          move_value = gGame->randomiser->getInt(0, 5);
+          move_value = gGame->randomiser->getInt(0, HEX_DIRECTION_MAX);
         } else {
-          move_value = gGame->randomiser->getInt(0, 7);
+          move_value = gGame->randomiser->getInt(0, ORTHO_DIRECTION_MAX);
         }
         gGame->mMapManager->shift(
             gGame->GetCurrentMap(), moveX, moveY, GetMobX(entityID), GetMobY(entityID), move_value);

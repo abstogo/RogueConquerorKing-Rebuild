@@ -133,9 +133,9 @@ bool CharacterManager::TurnHandler(int entityID, double time) {
         int moveX, moveY, move_value;
         int mapID = gGame->GetCurrentMap();
         if (gGame->mMapManager->getMap(mapID)->outdoor) {
-          move_value = gGame->randomiser->getInt(0, 5);
+          move_value = gGame->randomiser->getInt(0, HEX_DIRECTION_MAX);
         } else {
-          move_value = gGame->randomiser->getInt(0, 7);
+          move_value = gGame->randomiser->getInt(0, ORTHO_DIRECTION_MAX);
         }
         gGame->mMapManager->shift(
             gGame->GetCurrentMap(), moveX, moveY, GetPlayerX(entityID), GetPlayerY(entityID), move_value);
@@ -179,7 +179,7 @@ bool CharacterManager::TimeHandler(int rounds, int turns, int hours, int days, i
       std::string recoveryType = gGame->mConditionManager->GetRecovery(pcConditions[c][d].first);
       // special conditions do not degrade over time
       if (recoveryType != "Special") {
-        if (pcConditions[c][d].second != -255) {
+        if (pcConditions[c][d].second != CONDITION_PERMANENT) {
           pcConditions[c][d].second -= rounds * 10.0L;
           if (pcConditions[c][d].second < 0) {
             expired.push_back(d);

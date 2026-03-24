@@ -15,6 +15,9 @@
 //
 // Conditions now also includes Mortal Wound and Tampering With Mortality results, as part of the refactor of Tags.
 
+// Sentinel value stored in the condition timer to indicate a permanent (non-expiring) condition
+constexpr int CONDITION_PERMANENT = -255;
+
 class ACKSClass;
 
 class Condition {

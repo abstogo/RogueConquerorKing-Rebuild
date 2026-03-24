@@ -1,5 +1,8 @@
 #include "Conditions.h"
 
+// Conditions data files use string booleans ("yes"/"Yes"/"true"/"True")
+static bool parseBool(const std::string& s) { return s == "yes" || s == "Yes" || s == "true" || s == "True"; }
+
 ConditionManager* ConditionManager::LoadConditions() {
   gLog->Log("Condition Loader", "Started");
 
@@ -17,17 +20,10 @@ ConditionManager* ConditionManager::LoadConditions() {
   for (Condition c : cm->cd.Conditions_NC()) {
     cm->Names.push_back(c.Name());
     // translate to bool
-    cm->CanTakeActions.push_back(
-        c.CanTakeActions() == "yes" || c.CanTakeActions() == "Yes" || c.CanTakeActions() == "true" ||
-        c.CanTakeActions() == "True");
-    cm->CanAttack.push_back(
-        c.CanFight() == "yes" || c.CanFight() == "Yes" || c.CanFight() == "true" || c.CanFight() == "True");
-    cm->CanCastSpells.push_back(
-        c.CanCastSpells() == "yes" || c.CanCastSpells() == "Yes" || c.CanCastSpells() == "true" ||
-        c.CanCastSpells() == "True");
-    cm->CanBeBackstabbed.push_back(
-        c.CanBeBackstabbed() == "yes" || c.CanBeBackstabbed() == "Yes" || c.CanBeBackstabbed() == "true" ||
-        c.CanBeBackstabbed() == "True");
+    cm->CanTakeActions.push_back(parseBool(c.CanTakeActions()));
+    cm->CanAttack.push_back(parseBool(c.CanFight()));
+    cm->CanCastSpells.push_back(parseBool(c.CanCastSpells()));
+    cm->CanBeBackstabbed.push_back(parseBool(c.CanBeBackstabbed()));
 
     cm->MoveRate.push_back(c.MoveRate());
 

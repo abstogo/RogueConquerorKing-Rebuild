@@ -142,9 +142,6 @@ void Game::CreateTestGame() {
 
   mMapManager->connectMaps(outdoorMapID, indoorMapID, 3, 3, 8, 15);
 
-  // recomputeFov = true;
-  // light_walls = true;
-
   // add a sword to test character
   int testItem = mItemManager->GenerateItemFromTemplate("Sword");
   int inventoryID = mCharacterManager->AddInventoryItem(currentCharacterID, testItem);
@@ -298,34 +295,9 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key) {
     }
   }
 
-  // "a"/"A" is the "ability" button and opens the Character Ability window to use class abilities and proficiencies
-  // (where they have discrete activations rather than implicit bonuses etc)
-  if (key->c == 'a') {
-    /*
-    if (mode != GM_ABILITY)
-    {
-            mode = GM_ABILITY;
-    }
-    else
-    {
-            mode = GM_MAIN;
-    }
-    */
-  }
+  // "a"/"A" is the "ability" button — TODO: implement GM_ABILITY mode for class abilities and proficiencies
 
-  // "s"/"S" is the "spell" button and opens the Spells window to allow for casting spells
-  if (key->c == 's') {
-    /*
-    if (mode != GM_SPELL)
-    {
-            mode = GM_SPELL;
-    }
-    else
-    {
-            mode = GM_MAIN;
-    }
-    */
-  }
+  // "s"/"S" is the "spell" button — TODO: implement GM_SPELL mode for spellcasting
 
   // "d"/"D" is the "domain" button and opens the Domain window to control camps/settlements/domains.
   // Note this only intended on the Region map currently (and automatically triggers if you enter a settlement)
@@ -366,8 +338,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key) {
 
         // "." is the traditional "do nothing" button. In our case, it advances time by 1 hour and returns true.
         if (key->c == '.' && !key->shift) {
-          double time = 3600.0;
-          mTimeManager->AdvanceTimeBy(time);
+          mTimeManager->AdvanceTimeBy(TimeManager::GetTimePeriodInSeconds(TIME_HOUR));
         }
 
         if (HandleHexKeyboard(key)) {
@@ -695,16 +666,7 @@ void Game::MoveCharacter(int new_x, int new_y) {
       if (currentMap->map->isWalkable(new_x, new_y)) {
         int character = currentMap->getCharacterAt(new_x, new_y);
         if (character != -1) {
-          // there's a character there. Check if we want to attack them
-          // if (c.IsHostile())
-          //{
-          // close-quarters attack!
-          //}
-          // else
-          //{
-          // we don't want to attack, so we just don't move
-          //}
-          //
+          // TODO: if c.IsHostile(), initiate close-quarters attack instead of treating as a blocker
 
           // if we're not attacking, check if the character is blocking the way
           if (mCharacterManager->getCharacterHasCondition(character, "Unconscious")) {
@@ -1092,7 +1054,7 @@ bool Game::ResolveAttacks(int attackerManager, int attackerID, int defenderManag
           int ty = mMobManager->GetMobY(defenderID);
 
           float dist = sqrt(pow(x - tx, 2) + pow(y - ty, 2)) *
-                       5;  // each square or hex is 5ft or 5yd (which are treated the same by ACKS rules indoor/outdoor)
+                       BASE_SCALE;  // each square or hex is 5ft or 5yd (treated the same by ACKS rules indoor/outdoor)
           int rangePenalty = mItemManager->getRangePenalty(weaponID, dist);
           attackerAttackBonus += rangePenalty;
         }
@@ -1731,58 +1693,7 @@ void Game::RenderCharacterSheet() {
   tcod::print(*characterScreen, {2, 10}, enc, TCOD_white, TCOD_black, TCOD_LEFT, TCOD_BKGND_NONE);
 }
 
-void Game::RenderInventory() {
-  // to be replaced by new inventory management system
-
-  /*
-  if(inventoryScreen == nullptr)
-  {
-          inventoryScreen = std::make_unique<tcod::Console>(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
-  }
-
-  inventoryScreen->clear();
-
-  inventoryScreen->printFrame(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT, false, TCOD_BKGND_SET, "Inventory");
-
-  auto inv = mCharacterManager->GetInventory(currentCharacterID);
-
-  int page = 0;
-
-  const int MAX_ITEMS = SAMPLE_SCREEN_HEIGHT - 3;
-
-  // figure out which page the current position is on
-
-  if(inventoryPosition > MAX_ITEMS)
-  {
-          // we're off the first page. calculate which page we're actually on
-          page = inventoryPosition % MAX_ITEMS;
-  }
-
-  auto inv_iter = inv.begin();
-  std::advance(inv_iter, page* MAX_ITEMS);
-
-  for(int i = page * MAX_ITEMS;(i<(page+1)*MAX_ITEMS && i<inv.size());i++)
-  {
-          int itemID = *inv_iter++;
-          std::string item = mItemManager->getName(itemID);
-          int slot = mCharacterManager->GetEquipSlotForInventoryItem(currentCharacterID,i);
-          if (slot != -1)
-                  item += " (Equipped)";
-          int y_pos = i - page * MAX_ITEMS + 2;
-          TCOD_bkgnd_flag_t backg = TCOD_BKGND_NONE;
-          inventoryScreen->printEx(2, y_pos, backg, TCOD_LEFT, item.c_str());
-  }
-
-  int select_y = inventoryPosition - page * MAX_ITEMS + 2;
-  for(int x = 0;x< SAMPLE_SCREEN_WIDTH;x++)
-  {
-          inventoryScreen->setCharBackground(x, select_y, TCODColor::white, TCOD_BKGND_SET);
-          inventoryScreen->setCharForeground(x, select_y, TCODColor::black);
-  }
-  */
-
-  gGame->mInventoryManager->RenderInventory();
-}
+void Game::RenderInventory() { gGame->mInventoryManager->RenderInventory(); }
 
 void Game::RenderOffscreenUI(bool inventory, bool character) {
   static int x = 0, y = 0;  // secondary screen position

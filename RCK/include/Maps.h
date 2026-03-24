@@ -21,6 +21,10 @@
 #define SAMPLE_SCREEN_WIDTH 46
 #define SAMPLE_SCREEN_HEIGHT 20
 
+// direction count limits for randomiser (inclusive upper bound)
+#define HEX_DIRECTION_MAX 5  // 0..5 = 6 hex directions
+#define ORTHO_DIRECTION_MAX 7  // 0..7 = 8 orthogonal directions
+
 #define OUTDOOR_MAP_WIDTH (SAMPLE_SCREEN_WIDTH / 2)
 #define OUTDOOR_MAP_HEIGHT (SAMPLE_SCREEN_HEIGHT / 2)
 
