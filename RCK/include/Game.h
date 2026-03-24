@@ -107,6 +107,7 @@ class Game {
   const float SAMPLE_SCREEN_Y = 2;
 
   bool recomputeFov;  // the player moved. must recompute fov
+  bool characterSheetNeedsUpdate = true;  // recompute character sheet stats on next render
 
   bool light_walls;
 

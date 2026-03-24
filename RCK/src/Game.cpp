@@ -292,6 +292,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key) {
   if (key->c == 'c') {
     if (mode != GM_CHARACTER) {
       mode = GM_CHARACTER;
+      characterSheetNeedsUpdate = true;
     } else {
       mode = GM_MAIN;
     }
@@ -432,6 +433,7 @@ bool Game::MainGameHandleKeyboard(TCOD_key_t* key) {
 
             DebugLog("Switching to character " + std::to_string(shiftCharacterID));
             currentCharacterID = shiftCharacterID;
+            if (mode == GM_CHARACTER) characterSheetNeedsUpdate = true;
             player_x = mCharacterManager->GetPlayerX(currentCharacterID);
             player_y = mCharacterManager->GetPlayerY(currentCharacterID);
 
@@ -1639,6 +1641,9 @@ void Game::RenderCharacterSheet() {
   if (characterScreen == nullptr) {
     characterScreen = std::make_unique<tcod::Console>(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
   }
+
+  if (!characterSheetNeedsUpdate) return;
+  characterSheetNeedsUpdate = false;
 
   characterScreen->clear();
 
