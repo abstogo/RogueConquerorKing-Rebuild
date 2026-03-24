@@ -1,5 +1,6 @@
 #include "Mobs.h"
 
+#include <cassert>
 #include <cmath>
 #include <locale>
 #include <string>
@@ -392,6 +393,24 @@ void MobManager::EmptyCreature(Creature c) {
   mobYPos.push_back(-1);
 
   paths.push_back(nullptr);
+
+  assert(Monsters_.size() == mapIDs.size());
+  assert(mapIDs.size() == targetID.size());
+  assert(targetID.size() == targetManager.size());
+  assert(targetManager.size() == paths.size());
+  assert(paths.size() == mobXPos.size());
+  assert(mobXPos.size() == mobYPos.size());
+  assert(mobYPos.size() == currentBehaviour.size());
+}
+
+void MobManager::AssertCoherence() const {
+  assert(Monsters_.size() == mapIDs.size());
+  assert(mapIDs.size() == targetID.size());
+  assert(targetID.size() == targetManager.size());
+  assert(targetManager.size() == paths.size());
+  assert(paths.size() == mobXPos.size());
+  assert(mobXPos.size() == mobYPos.size());
+  assert(mobYPos.size() == currentBehaviour.size());
 }
 
 void MobManager::SpawnOnMap(int entityID, int mapID, int spawn_x, int spawn_y) {

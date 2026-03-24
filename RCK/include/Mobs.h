@@ -293,6 +293,7 @@ class MobManager {
   }
 
   void EmptyCreature(Creature c);
+  void AssertCoherence() const;
 
   CreatureSet& CreatureTemplates() { return creatureTemplateSet; }
 

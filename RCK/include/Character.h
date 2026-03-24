@@ -218,6 +218,8 @@ class CharacterManager {
   std::vector<std::vector<std::pair<int, int>>> pcConditions;
   std::vector<std::vector<MortalEffect*>> pcMortalWounds;
 
+  void AssertCoherence() const;
+
   int EquipWeapon(int characterID, int itemID);
   int EquipShield(int characterID, int itemID);
   int EquipArmour(int characterID, int itemID);

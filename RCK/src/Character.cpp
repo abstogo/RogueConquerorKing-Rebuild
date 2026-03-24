@@ -1,5 +1,6 @@
 #include "Character.h"
 
+#include <cassert>
 #include <cmath>
 
 #include "Class.h"
@@ -225,6 +226,15 @@ const ACKSClass* CharacterManager::getCharacterClass(int id) {
 }
 
 void CharacterManager::BaseGenerate() {
+  // fields overridden immediately by generators — defaults only
+  pcCharacteristics.push_back({});
+  pcClass.push_back(-1);
+  pcName.push_back("");
+  pcLevel.push_back(0);
+  pcTotalHitPoints.push_back(1);
+  pcCurrentHitPoints.push_back(1);
+  pcInventoryID.push_back(-1);
+
   // 0 xp
   pcExperience.push_back(0);
 
@@ -268,6 +278,56 @@ void CharacterManager::BaseGenerate() {
 
   std::vector<MortalEffect*> meff;
   pcMortalWounds.push_back(meff);
+
+  assert(pcCharacteristics.size() == pcClass.size());
+  assert(pcClass.size() == pcName.size());
+  assert(pcName.size() == pcLevel.size());
+  assert(pcLevel.size() == pcTotalHitPoints.size());
+  assert(pcTotalHitPoints.size() == pcCurrentHitPoints.size());
+  assert(pcCurrentHitPoints.size() == pcInventoryID.size());
+  assert(pcInventoryID.size() == pcExperience.size());
+  assert(pcExperience.size() == pcCurrentArmourClass.size());
+  assert(pcCurrentArmourClass.size() == pcConditions.size());
+  assert(pcConditions.size() == pcCapabilityFlags.size());
+  assert(pcCapabilityFlags.size() == pcEquipped.size());
+  assert(pcEquipped.size() == pcCollectedTags.size());
+  assert(pcCollectedTags.size() == pcWeaponProficiencies.size());
+  assert(pcWeaponProficiencies.size() == pcArmourProficiencies.size());
+  assert(pcArmourProficiencies.size() == pcFightingStyles.size());
+  assert(pcFightingStyles.size() == pcMapID.size());
+  assert(pcMapID.size() == pcXPos.size());
+  assert(pcXPos.size() == pcYPos.size());
+  assert(pcYPos.size() == pcCurrentBehaviour.size());
+  assert(pcCurrentBehaviour.size() == pcDomainAction.size());
+  assert(pcDomainAction.size() == pcTravelModes.size());
+  assert(pcTravelModes.size() == pcRemainingCleaves.size());
+  assert(pcRemainingCleaves.size() == pcMortalWounds.size());
+}
+
+void CharacterManager::AssertCoherence() const {
+  assert(pcCharacteristics.size() == pcClass.size());
+  assert(pcClass.size() == pcName.size());
+  assert(pcName.size() == pcLevel.size());
+  assert(pcLevel.size() == pcTotalHitPoints.size());
+  assert(pcTotalHitPoints.size() == pcCurrentHitPoints.size());
+  assert(pcCurrentHitPoints.size() == pcInventoryID.size());
+  assert(pcInventoryID.size() == pcExperience.size());
+  assert(pcExperience.size() == pcCurrentArmourClass.size());
+  assert(pcCurrentArmourClass.size() == pcConditions.size());
+  assert(pcConditions.size() == pcCapabilityFlags.size());
+  assert(pcCapabilityFlags.size() == pcEquipped.size());
+  assert(pcEquipped.size() == pcCollectedTags.size());
+  assert(pcCollectedTags.size() == pcWeaponProficiencies.size());
+  assert(pcWeaponProficiencies.size() == pcArmourProficiencies.size());
+  assert(pcArmourProficiencies.size() == pcFightingStyles.size());
+  assert(pcFightingStyles.size() == pcMapID.size());
+  assert(pcMapID.size() == pcXPos.size());
+  assert(pcXPos.size() == pcYPos.size());
+  assert(pcYPos.size() == pcCurrentBehaviour.size());
+  assert(pcCurrentBehaviour.size() == pcDomainAction.size());
+  assert(pcDomainAction.size() == pcTravelModes.size());
+  assert(pcTravelModes.size() == pcRemainingCleaves.size());
+  assert(pcRemainingCleaves.size() == pcMortalWounds.size());
 }
 
 int CharacterManager::GenerateNormalMan(std::string name) {
@@ -275,35 +335,30 @@ int CharacterManager::GenerateNormalMan(std::string name) {
 
   DebugLog("Generating a Normal Man as #" + std::to_string(output));
 
-  // we need to add something to every vector, to make sure we line up
+  // BaseGenerate allocates a slot in every vector; we then override the fields specific to this character type
+  BaseGenerate();
 
   // Standard test character has a 9 in everything, allowing them to play most standard classes
   std::vector<int> characs = std::vector<int>();
   for (int i = 0; i < 6; i++) characs.push_back(9);
-  pcCharacteristics.push_back(characs);
+  pcCharacteristics[output] = characs;
 
   // class is basically Fighter except level 0
   int characterClass = gGame->mClassManager->GetClassIndex("Fighter");
   const ACKSClass& acksClass = gGame->mClassManager->Classes().Classes()[characterClass];
-  pcClass.push_back(characterClass);
+  pcClass[output] = characterClass;
 
-  pcName.push_back(name);
+  pcName[output] = name;
 
-  // NM is d4
+  // NM is d4, level 0
   int hitDie = 4;
-
-  // max hit die at first level
-  pcTotalHitPoints.push_back(hitDie);
-  pcCurrentHitPoints.push_back(hitDie);
-
-  // level 0
-  pcLevel.push_back(0);
+  pcTotalHitPoints[output] = hitDie;
+  pcCurrentHitPoints[output] = hitDie;
+  pcLevel[output] = 0;
 
   // Inventory
-  BaseGenerate();
-
   int inv = gGame->mInventoryManager->RegisterInventory(MANAGER_CHARACTER, output);
-  pcInventoryID.push_back(inv);
+  pcInventoryID[output] = inv;
 
   // and build the caches
   UpdateProficiencyCache(output);
@@ -323,35 +378,30 @@ int CharacterManager::GenerateTestCharacter(std::string name, const std::string 
 
   DebugLog("Generating a " + _class + "as #" + std::to_string(output));
 
-  // we need to add something to every vector, to make sure we line up
+  // BaseGenerate allocates a slot in every vector; we then override the fields specific to this character type
+  BaseGenerate();
 
   // Standard test character has a 9 in everything, allowing them to play most standard classes
   std::vector<int> characs = std::vector<int>();
   for (int i = 0; i < 6; i++) characs.push_back(9);
-  pcCharacteristics.push_back(characs);
+  pcCharacteristics[output] = characs;
 
   // class
   int characterClass = gGame->mClassManager->GetClassIndex(_class);
   const ACKSClass& acksClass = gGame->mClassManager->Classes().Classes()[characterClass];
-  pcClass.push_back(characterClass);
+  pcClass[output] = characterClass;
 
-  pcName.push_back(name);
+  pcName[output] = name;
+  pcLevel[output] = 1;
 
-  // level 1
-  pcLevel.push_back(1);
-
-  // get hit points from class
+  // get hit points from class, max at first level
   int hitDie = acksClass.HitDie();
-
-  // max hit die at first level
-  pcTotalHitPoints.push_back(hitDie);
-  pcCurrentHitPoints.push_back(hitDie);
-
-  BaseGenerate();
+  pcTotalHitPoints[output] = hitDie;
+  pcCurrentHitPoints[output] = hitDie;
 
   // Inventory
   int inv = gGame->mInventoryManager->RegisterInventory(MANAGER_CHARACTER, output);
-  pcInventoryID.push_back(inv);
+  pcInventoryID[output] = inv;
 
   // and build the caches
   UpdateProficiencyCache(output);
