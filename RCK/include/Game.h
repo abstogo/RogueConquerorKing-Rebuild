@@ -111,7 +111,8 @@ class Game {
 
   bool light_walls;
 
-  std::string playLogString;
+  std::string playLogString;  // event messages (combat, behaviour, etc.)
+  std::string lookString;  // positional context, replaced on each move
 
   int inventoryPosition = 0;
   int abilityPosition = 0;

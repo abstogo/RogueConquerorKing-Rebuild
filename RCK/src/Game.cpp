@@ -1561,30 +1561,30 @@ void Game::RenderUI(int selectedCharacterID) {
 }
 
 void Game::UpdateLookText(int x, int y) {
-  playLogString = "";
+  lookString = "";
 
   if (currentMapID != -1) {
     auto items = mMapManager->getMap(currentMapID)->getItems(x, y);
     if (items->size() > 0) {
-      playLogString += mMapManager->ItemDesc(currentMapID, x, y);
+      lookString += mMapManager->ItemDesc(currentMapID, x, y);
     }
 
     int mobID = currentMap->getMobAt(x, y);
     if (mobID != -1) {
       Creature& c = mMobManager->GetMonster(mobID);
       if (c.HasCondition("Unconscious")) {
-        playLogString += "There is an unconscious " + c.GetName() + ".";
+        lookString += "There is an unconscious " + c.GetName() + ".";
       } else {
-        playLogString += "There is a " + c.GetName() + ".";
+        lookString += "There is a " + c.GetName() + ".";
       }
     }
 
     int charID = currentMap->getCharacterAt(x, y);
     if (charID != -1 && charID != currentCharacterID) {
       if (mCharacterManager->getCharacterHasCondition(charID, "Unconscious")) {
-        playLogString += mCharacterManager->getCharacterName(charID) + "lies here, unconscious.";
+        lookString += mCharacterManager->getCharacterName(charID) + "lies here, unconscious.";
       } else {
-        playLogString += mCharacterManager->getCharacterName(charID) + " is here.";
+        lookString += mCharacterManager->getCharacterName(charID) + " is here.";
       }
     }
   } else {
@@ -1592,15 +1592,15 @@ void Game::UpdateLookText(int x, int y) {
     if (currentBaseID != -1) {
       if (mBaseManager->GetBaseOwner(currentBaseID) == currentPartyID) {
         // this is our base!
-        playLogString += "Our " + mBaseManager->GetBaseType(currentBaseID) + " is here.";
+        lookString += "Our " + mBaseManager->GetBaseType(currentBaseID) + " is here.";
       } else {
         // this is someone else's base!
-        playLogString += "A " + mBaseManager->GetBaseType(currentBaseID) + " is here.";
+        lookString += "A " + mBaseManager->GetBaseType(currentBaseID) + " is here.";
       }
     }
   }
 
-  DebugLog("Action Log changed to:" + playLogString);
+  DebugLog("Action Log changed to:" + lookString);
 }
 
 void Game::AddActionLogText(std::string term, bool clear) {
@@ -1618,7 +1618,7 @@ void Game::AddActionLogText(std::string term, bool clear) {
 
 void Game::RenderActionLog() {
   const int BOX_HEIGHT = 5;
-  std::string logText = playLogString;
+  std::string logText = lookString + playLogString;
   int size = tcod::get_height_rect(SAMPLE_SCREEN_WIDTH, logText);
 
   // now truncate our text line by line until it fits.
