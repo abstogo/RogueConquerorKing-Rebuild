@@ -49,22 +49,9 @@ bool TimeManager::AdvanceTimeBy(long double time) {
 
     if (time_elapsed > time) break;
 
-    switch (*manager_iter) {
-      case MANAGER_CHARACTER: {
-        result = gGame->mCharacterManager->TurnHandler(*ent_iter, time_elapsed);
-      } break;
-      case MANAGER_MOB: {
-        result = gGame->mMobManager->TurnHandler(*ent_iter, time_elapsed);
-      } break;
-      case MANAGER_MAP: {
-        result = gGame->mMapManager->TurnHandler(*ent_iter, time_elapsed);
-      } break;
-      case MANAGER_ITEM: {
-        // gGame->mItemManager->TurnHandler(*ent_iter, *time_iter);
-      } break;
-      case MANAGER_BASE: {
-        result = gGame->mBaseManager->TurnHandler(*ent_iter, time_elapsed);
-      }
+    auto it = turnHandlers_.find(*manager_iter);
+    if (it != turnHandlers_.end()) {
+      result = it->second(*ent_iter, (double)time_elapsed);
     }
 
     if (result) break;
@@ -91,12 +78,9 @@ bool TimeManager::AdvanceTimeBy(long double time) {
   // TODO: This doesn't really work as we can have multiple entities with sub-round times, meaning all of them will be
   // lost until we have a gap of more than 10s. Need to pass TimeHandler raw times.
   if (roundsPassed > 0) {
-    gGame->mCharacterManager->TimeHandler(
-        roundsPassed, turnsPassed, hoursPassed, daysPassed, weeksPassed, monthsPassed);
-    gGame->mMapManager->TimeHandler(roundsPassed, turnsPassed, hoursPassed, daysPassed, weeksPassed, monthsPassed);
-    gGame->mMobManager->TimeHandler(roundsPassed, turnsPassed, hoursPassed, daysPassed, weeksPassed, monthsPassed);
-    gGame->mPartyManager->TimeHandler(roundsPassed, turnsPassed, hoursPassed, daysPassed, weeksPassed, monthsPassed);
-    gGame->mBaseManager->TimeHandler(roundsPassed, turnsPassed, hoursPassed, daysPassed, weeksPassed, monthsPassed);
+    for (auto& [id, handler] : timeHandlers_) {
+      handler(roundsPassed, turnsPassed, hoursPassed, daysPassed, weeksPassed, monthsPassed);
+    }
   }
 
   // advance by intervals.
@@ -141,6 +125,14 @@ GameDateTime TimeManager::GetCalendarTime() {
   out.seconds = (int)(fabs(ctime));
 
   return out;
+}
+
+void TimeManager::RegisterTurnHandler(int managerID, std::function<bool(int, double)> handler) {
+  turnHandlers_[managerID] = std::move(handler);
+}
+
+void TimeManager::RegisterTimeHandler(int managerID, std::function<bool(int, int, int, int, int, int)> handler) {
+  timeHandlers_[managerID] = std::move(handler);
 }
 
 void TimeManager::RegisterNewEntity(int entityID, int manager) {

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <functional>
 #include <list>
+#include <unordered_map>
 
 #include "OutputLog.h"
 /**
@@ -62,6 +64,11 @@ class TimeManager {
 
   void EmplaceEntity(int entityID, int manager, long double time);
 
+  // Registered per-entity turn handlers: managerID → TurnHandler(entityID, time) → interrupted?
+  std::unordered_map<int, std::function<bool(int, double)>> turnHandlers_;
+  // Registered periodic time handlers: managerID → TimeHandler(rounds,...,months) → result
+  std::unordered_map<int, std::function<bool(int, int, int, int, int, int)>> timeHandlers_;
+
   // In addition to the turn handling time management, we also need to handle larger-scale timing events.
   // This is done primarily by the Managers. We count the standing time and inform all the Managers when important time
   // periods pass: Rounds, Turns, Hours, Days, Weeks and Months.
@@ -75,6 +82,10 @@ class TimeManager {
 
   bool AdvanceTime();  // advance to the next time element and run its round function
   bool AdvanceTimeBy(long double time);
+
+  // Register dispatch callbacks — called from Game::DataLoad() after all managers are created
+  void RegisterTurnHandler(int managerID, std::function<bool(int, double)> handler);
+  void RegisterTimeHandler(int managerID, std::function<bool(int, int, int, int, int, int)> handler);
 
   void RegisterNewEntity(int entityID, int manager);
   void DeregisterEntities();

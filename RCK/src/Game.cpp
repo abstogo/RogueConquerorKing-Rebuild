@@ -70,6 +70,31 @@ void Game::DataLoad() {
 
   mCharacterManager->Initialise();
 
+  // Register per-entity turn dispatch callbacks with TimeManager (one per manager type that has entities)
+  mTimeManager->RegisterTurnHandler(
+      MANAGER_CHARACTER, [this](int id, double t) { return mCharacterManager->TurnHandler(id, t); });
+  mTimeManager->RegisterTurnHandler(MANAGER_MOB, [this](int id, double t) { return mMobManager->TurnHandler(id, t); });
+  mTimeManager->RegisterTurnHandler(MANAGER_MAP, [this](int id, double t) { return mMapManager->TurnHandler(id, t); });
+  mTimeManager->RegisterTurnHandler(
+      MANAGER_BASE, [this](int id, double t) { return mBaseManager->TurnHandler(id, t); });
+
+  // Register periodic time handlers (called each round that elapses)
+  mTimeManager->RegisterTimeHandler(MANAGER_CHARACTER, [this](int r, int t, int h, int d, int w, int mo) {
+    return mCharacterManager->TimeHandler(r, t, h, d, w, mo);
+  });
+  mTimeManager->RegisterTimeHandler(MANAGER_MAP, [this](int r, int t, int h, int d, int w, int mo) {
+    return mMapManager->TimeHandler(r, t, h, d, w, mo);
+  });
+  mTimeManager->RegisterTimeHandler(MANAGER_MOB, [this](int r, int t, int h, int d, int w, int mo) {
+    return mMobManager->TimeHandler(r, t, h, d, w, mo);
+  });
+  mTimeManager->RegisterTimeHandler(MANAGER_PARTY, [this](int r, int t, int h, int d, int w, int mo) {
+    return mPartyManager->TimeHandler(r, t, h, d, w, mo);
+  });
+  mTimeManager->RegisterTimeHandler(MANAGER_BASE, [this](int r, int t, int h, int d, int w, int mo) {
+    return mBaseManager->TimeHandler(r, t, h, d, w, mo);
+  });
+
   DebugLog("Game Managers Initialized");
 }
 
